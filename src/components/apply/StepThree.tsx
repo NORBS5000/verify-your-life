@@ -42,9 +42,22 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep }: Step
               className="cursor-pointer"
             />
             {formData.assetPictures.length > 0 && (
-              <p className="text-sm text-muted-foreground mt-2">
-                {formData.assetPictures.length} file(s) selected
-              </p>
+              <div className="mt-3">
+                <p className="text-sm text-muted-foreground mb-2">
+                  {formData.assetPictures.length} file(s) selected
+                </p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                  {formData.assetPictures.map((file, index) => (
+                    <div key={index} className="aspect-square rounded-lg overflow-hidden border border-border">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`Asset ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </div>
