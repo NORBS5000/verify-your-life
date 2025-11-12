@@ -75,30 +75,37 @@ const Apply = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-3 sm:p-4 md:p-8">
-      <div className="mx-auto max-w-3xl">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20 p-3 sm:p-4 md:p-8">
+      <div className="mx-auto max-w-3xl animate-fade-in">
         {/* Header */}
-        <div className="text-center space-y-2 mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
-            <Activity className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary">HealthNow PayLater</h1>
+        <div className="text-center space-y-3 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
+              <Activity className="relative h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold bg-gradient-to-r from-primary via-primary to-purple-600 bg-clip-text text-transparent">
+              HealthNow PayLater
+            </h1>
           </div>
-          <p className="text-muted-foreground text-base sm:text-lg">Credit Application Form</p>
+          <p className="text-muted-foreground text-base sm:text-lg font-medium">Credit Application Form</p>
         </div>
 
         {/* Progress Indicator */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex items-center justify-between mb-2">
+        <div className="mb-6 sm:mb-8 bg-card/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 shadow-elegant">
+          <div className="flex items-center justify-between mb-3">
             {[1, 2, 3, 4, 5].map((step) => (
               <div
                 key={step}
-                className={`flex-1 h-1.5 sm:h-2 mx-0.5 sm:mx-1 rounded-full transition-colors ${
-                  step <= currentStep ? "bg-primary" : "bg-muted"
+                className={`flex-1 h-2 mx-0.5 sm:mx-1 rounded-full transition-all duration-500 ${
+                  step <= currentStep 
+                    ? "bg-gradient-to-r from-primary to-purple-600 shadow-glow" 
+                    : "bg-muted"
                 }`}
               />
             ))}
           </div>
-          <p className="text-center text-xs sm:text-sm text-muted-foreground">
+          <p className="text-center text-xs sm:text-sm font-medium text-muted-foreground">
             Step {currentStep} of 5
           </p>
         </div>

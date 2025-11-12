@@ -27,8 +27,9 @@ export const CircularProgress = ({
   const offset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className={cn("relative inline-flex items-center justify-center", className)} style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="transform -rotate-90">
+    <div className={cn("relative inline-flex items-center justify-center group", className)} style={{ width: size, height: size }}>
+      <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <svg width={size} height={size} className="transform -rotate-90 relative">
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -47,7 +48,8 @@ export const CircularProgress = ({
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          style={{ transition: "stroke-dashoffset 0.5s ease" }}
+          style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }}
+          className="drop-shadow-lg"
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
