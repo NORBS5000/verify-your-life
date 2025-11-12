@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { GradientCircularProgress } from "@/components/GradientCircularProgress";
+import { ScoreMetric } from "@/components/ScoreMetric";
 
 interface StepOneProps {
   formData: FormData;
@@ -25,23 +25,13 @@ export const StepOne = ({ formData, updateFormData, nextStep }: StepOneProps) =>
 
   return (
     <Card className="p-6 md:p-8">
-      <div className="flex flex-col items-center mb-6">
-        <GradientCircularProgress
+      <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+        <ScoreMetric
+          label="Composite Score"
           value={685}
-          max={850}
-          size={140}
-          strokeWidth={12}
-          gradientId="composite-gradient-step1"
-          gradientColors={[
-            { offset: "0%", color: "#EAB308" },
-            { offset: "100%", color: "#22C55E" }
-          ]}
-        >
-          <div className="text-center">
-            <div className="text-3xl font-bold text-foreground">685</div>
-            <div className="text-xs text-muted-foreground">Composite</div>
-          </div>
-        </GradientCircularProgress>
+          maxValue={850}
+          variant="primary"
+        />
       </div>
 
       <h2 className="text-2xl font-bold text-foreground mb-6">Contact & Occupation</h2>
