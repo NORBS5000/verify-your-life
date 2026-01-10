@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, User, Stethoscope, Landmark, Shield, Save, ArrowLeft } from "lucide-react";
+import { Heart, User, Stethoscope, Landmark, Shield, Save, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StepOne } from "@/components/apply/StepOne";
 import { StepTwo } from "@/components/apply/StepTwo";
@@ -9,6 +9,8 @@ import { StepFour } from "@/components/apply/StepFour";
 import { StepFive } from "@/components/apply/StepFive";
 import { ProgressBar } from "@/components/apply/ProgressBar";
 import { WhatsAppNotification } from "@/components/apply/WhatsAppNotification";
+import { useAuth } from "@/hooks/useAuth";
+import { useSubmitApplication } from "@/hooks/useSubmitApplication";
 
 export interface FormData {
   // Profile data
@@ -52,6 +54,8 @@ const steps = [
 
 const Apply = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { submitApplication, isSubmitting, error: submitError } = useSubmitApplication();
   const [currentStep, setCurrentStep] = useState(1);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
@@ -85,6 +89,14 @@ const Apply = () => {
     guarantor2Phone: "",
   });
 
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!authLoading && !user) {
+      triggerNotification("Please sign in to continue your application");
+      setTimeout(() => navigate("/auth"), 1500);
+    }
+  }, [user, authLoading, navigate]);
+
   const updateFormData = (data: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
   };
@@ -109,10 +121,15 @@ const Apply = () => {
     }
   };
 
-  const handleSubmit = () => {
-    console.log("Form submitted:", formData);
-    triggerNotification("🎉 Application submitted successfully! We'll contact you shortly.");
-    setTimeout(() => navigate("/"), 2000);
+  const handleSubmit = async () => {
+    const success = await submitApplication(formData);
+    
+    if (success) {
+      triggerNotification("🎉 Application submitted successfully! We'll contact you shortly.");
+      setTimeout(() => navigate("/"), 2000);
+    } else {
+      triggerNotification(submitError || "Failed to submit application. Please try again.");
+    }
   };
 
   const handleSaveDraft = () => {
@@ -206,7 +223,7 @@ const Apply = () => {
             />
           )}
           {currentStep === 5 && (
-            <StepFive formData={formData} prevStep={prevStep} handleSubmit={handleSubmit} />
+            <StepFive formData={formData} prevStep={prevStep} handleSubmit={handleSubmit} isSubmitting={isSubmitting} />
           )}
         </div>
       </main>
