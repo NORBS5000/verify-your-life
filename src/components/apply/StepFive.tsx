@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { ArrowLeft, CheckCircle2, User, Stethoscope, Landmark, Shield, Sparkles, Send } from "lucide-react";
 
 interface StepFiveProps {
   formData: FormData;
@@ -11,133 +10,139 @@ interface StepFiveProps {
 }
 
 export const StepFive = ({ formData, prevStep, handleSubmit }: StepFiveProps) => {
+  const sections = [
+    {
+      icon: <User className="h-5 w-5" />,
+      title: "Profile Information",
+      items: [
+        { label: "Full Name", value: formData.fullName },
+        { label: "ID Number", value: formData.idNumber },
+        { label: "Phone", value: formData.phoneNumber },
+        { label: "Occupation", value: formData.occupation },
+        { label: "Sex", value: formData.sex },
+        { label: "Age", value: formData.age ? `${formData.age} years` : "" },
+      ],
+    },
+    {
+      icon: <Stethoscope className="h-5 w-5" />,
+      title: "Medical Assessment",
+      items: [
+        { label: "Prescription", value: formData.medicalPrescription?.name || "Not uploaded" },
+        { label: "Medication Photo", value: formData.drugImage?.name || "Not uploaded" },
+        { label: "Retail Cost", value: formData.retailCost ? `KES ${formData.retailCost.toLocaleString()}` : "" },
+        { label: "COVA Credit Amount", value: formData.covaCost ? `KES ${formData.covaCost.toLocaleString()}` : "" },
+      ],
+    },
+    {
+      icon: <Landmark className="h-5 w-5" />,
+      title: "Collateral",
+      items: [
+        { label: "Selected Options", value: formData.selectedCollateral?.join(", ") || "None" },
+        { label: "Documents Uploaded", value: `${[formData.logbook, formData.titleDeed, formData.homePhoto, formData.businessPhoto].filter(Boolean).length} files` },
+      ],
+    },
+    {
+      icon: <Shield className="h-5 w-5" />,
+      title: "Verification",
+      items: [
+        { label: "M-Pesa Statement", value: formData.mpesaStatement?.name || "Not uploaded" },
+        { label: "Bank Statement", value: formData.bankStatement?.name || "Not uploaded" },
+        { label: "Guarantor 1 Phone", value: formData.guarantor1Phone || "Not provided" },
+        { label: "Guarantor 2 Phone", value: formData.guarantor2Phone || "Not provided" },
+      ],
+    },
+  ];
+
   return (
-    <Card className="p-4 sm:p-6 md:p-8">
-      <div className="text-center mb-4 sm:mb-6">
-        <CheckCircle2 className="h-12 w-12 sm:h-16 sm:w-16 text-primary mx-auto mb-3 sm:mb-4" />
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground">Review Your Application</h2>
-        <p className="text-sm sm:text-base text-muted-foreground mt-2">Please review all information before submitting</p>
+    <div className="space-y-6">
+      {/* Success Header */}
+      <div className="text-center">
+        <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-health-green to-teal-700 shadow-lg">
+          <Sparkles className="h-10 w-10 text-white" />
+        </div>
+        <h1 className="font-serif text-2xl font-bold text-secondary sm:text-3xl">
+          Almost There!
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          Review your application before submitting
+        </p>
       </div>
-      
-      <div className="space-y-4 sm:space-y-6">
-        {/* Contact & Occupation */}
-        <div>
-          <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-3">Contact & Occupation</h3>
-          <div className="bg-muted/50 p-3 sm:p-4 rounded-lg space-y-2">
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-              <span className="text-sm sm:text-base text-muted-foreground">Phone Number:</span>
-              <span className="text-sm sm:text-base font-medium break-all">{formData.phoneNumber}</span>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-              <span className="text-sm sm:text-base text-muted-foreground">Occupation:</span>
-              <span className="text-sm sm:text-base font-medium capitalize">{formData.occupation}</span>
-            </div>
+
+      {/* Credit Summary Card */}
+      <Card className="overflow-hidden border-0 bg-gradient-to-r from-primary to-coral-600 p-6 text-white shadow-coral-glow">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm opacity-80">Requested Credit Amount</p>
+            <p className="mt-1 text-3xl font-bold">
+              KES {formData.covaCost?.toLocaleString() || "0"}
+            </p>
+          </div>
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20">
+            <CheckCircle2 className="h-8 w-8" />
           </div>
         </div>
-
-        <Separator />
-
-        {/* Personal & Medical */}
-        <div>
-          <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-3">Personal & Medical Information</h3>
-          <div className="bg-muted/50 p-3 sm:p-4 rounded-lg space-y-2">
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-              <span className="text-sm sm:text-base text-muted-foreground">Sex:</span>
-              <span className="text-sm sm:text-base font-medium capitalize">{formData.sex}</span>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-              <span className="text-sm sm:text-base text-muted-foreground">Age:</span>
-              <span className="text-sm sm:text-base font-medium">{formData.age}</span>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-              <span className="text-sm sm:text-base text-muted-foreground">Medical Prescription:</span>
-              <span className="text-sm sm:text-base font-medium break-all">{formData.medicalPrescription?.name}</span>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-              <span className="text-sm sm:text-base text-muted-foreground">Drug Image:</span>
-              <span className="text-sm sm:text-base font-medium break-all">{formData.drugImage?.name}</span>
-            </div>
-          </div>
+        <div className="mt-4 flex items-center gap-2 rounded-lg bg-white/10 p-3">
+          <CheckCircle2 className="h-4 w-4" />
+          <span className="text-sm">
+            You're saving KES {((formData.retailCost || 0) - (formData.covaCost || 0)).toLocaleString()} compared to retail
+          </span>
         </div>
+      </Card>
 
-        <Separator />
-
-        {/* Assets */}
-        <div>
-          <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-3">Asset Information</h3>
-          <div className="bg-muted/50 p-3 sm:p-4 rounded-lg space-y-2">
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-              <span className="text-sm sm:text-base text-muted-foreground">Asset Pictures:</span>
-              <span className="text-sm sm:text-base font-medium">{formData.assetPictures.length} file(s)</span>
+      {/* Application Summary */}
+      <div className="space-y-4">
+        {sections.map((section, index) => (
+          <Card key={index} className="border-0 bg-card p-4 shadow-elegant">
+            <div className="mb-3 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                {section.icon}
+              </div>
+              <h3 className="font-serif font-bold text-secondary">{section.title}</h3>
             </div>
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-              <span className="text-sm sm:text-base text-muted-foreground">Bank Statement:</span>
-              <span className="text-sm sm:text-base font-medium break-all">{formData.bankStatement?.name}</span>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-              <span className="text-sm sm:text-base text-muted-foreground">M-Pesa Statement:</span>
-              <span className="text-sm sm:text-base font-medium break-all">{formData.mpesaStatement?.name}</span>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-              <span className="text-sm sm:text-base text-muted-foreground">Home Photo:</span>
-              <span className="text-sm sm:text-base font-medium break-all">{formData.homePhoto?.name}</span>
-            </div>
-            {formData.hasBusiness && (
-              <>
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-                  <span className="text-sm sm:text-base text-muted-foreground">Business Photo:</span>
-                  <span className="text-sm sm:text-base font-medium break-all">{formData.businessPhoto?.name}</span>
+            <div className="space-y-2">
+              {section.items.map((item, i) => (
+                <div key={i} className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{item.label}</span>
+                  <span className="font-medium capitalize text-secondary">{item.value || "-"}</span>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-                  <span className="text-sm sm:text-base text-muted-foreground">TIN Number:</span>
-                  <span className="text-sm sm:text-base font-medium break-all">{formData.tinNumber}</span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Guarantors */}
-        <div>
-          <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-3">Guarantor Information</h3>
-          <div className="bg-muted/50 p-3 sm:p-4 rounded-lg space-y-2">
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-              <span className="text-sm sm:text-base text-muted-foreground">Call Log History:</span>
-              <span className="text-sm sm:text-base font-medium break-all">{formData.callLogHistory?.name}</span>
+              ))}
             </div>
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-              <span className="text-sm sm:text-base text-muted-foreground">Guarantor 1 Phone:</span>
-              <span className="text-sm sm:text-base font-medium break-all">{formData.guarantor1Phone}</span>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-              <span className="text-sm sm:text-base text-muted-foreground">Guarantor 2 Phone:</span>
-              <span className="text-sm sm:text-base font-medium break-all">{formData.guarantor2Phone}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={prevStep}
-            className="flex-1 text-sm sm:text-base"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            className="flex-1 bg-primary hover:bg-primary/90 text-sm sm:text-base"
-          >
-            Submit Application
-            <CheckCircle2 className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
+          </Card>
+        ))}
       </div>
-    </Card>
+
+      {/* Terms Notice */}
+      <div className="rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">
+        By submitting, you agree to our{" "}
+        <a href="#" className="font-medium text-primary underline">
+          Terms of Service
+        </a>{" "}
+        and{" "}
+        <a href="#" className="font-medium text-primary underline">
+          Privacy Policy
+        </a>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex gap-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={prevStep}
+          className="flex-1 gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          className="flex-1 gap-2 bg-health-green py-6 text-lg font-semibold text-white shadow-lg transition-all hover:bg-health-green/90 hover:shadow-xl"
+        >
+          <Send className="h-5 w-5" />
+          Submit Application
+        </Button>
+      </div>
+    </div>
   );
 };

@@ -1,19 +1,31 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Activity } from "lucide-react";
+import { Heart, User, Stethoscope, Landmark, Shield, Save, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { StepOne } from "@/components/apply/StepOne";
 import { StepTwo } from "@/components/apply/StepTwo";
 import { StepThree } from "@/components/apply/StepThree";
 import { StepFour } from "@/components/apply/StepFour";
 import { StepFive } from "@/components/apply/StepFive";
+import { ProgressBar } from "@/components/apply/ProgressBar";
+import { WhatsAppNotification } from "@/components/apply/WhatsAppNotification";
 
 export interface FormData {
+  // Profile data
+  fullName: string;
+  idNumber: string;
+  dateOfBirth: string;
   phoneNumber: string;
   occupation: string;
   sex: string;
   age: string;
+  // Medical data
   medicalPrescription: File | null;
   drugImage: File | null;
+  retailCost: number;
+  covaCost: number;
+  // Collateral data
+  selectedCollateral: string[];
   assetPictures: File[];
   bankStatement: File | null;
   mpesaStatement: File | null;
@@ -21,6 +33,9 @@ export interface FormData {
   hasBusiness: boolean;
   businessPhoto: File | null;
   tinNumber: string;
+  logbook: File | null;
+  titleDeed: File | null;
+  // Behavior data
   callLogHistory: File | null;
   guarantor1Id: File | null;
   guarantor2Id: File | null;
@@ -28,16 +43,32 @@ export interface FormData {
   guarantor2Phone: string;
 }
 
+const steps = [
+  { label: "Profile", icon: <User className="h-5 w-5" /> },
+  { label: "Medical", icon: <Stethoscope className="h-5 w-5" /> },
+  { label: "Collateral", icon: <Landmark className="h-5 w-5" /> },
+  { label: "Verify", icon: <Shield className="h-5 w-5" /> },
+];
+
 const Apply = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  
   const [formData, setFormData] = useState<FormData>({
+    fullName: "",
+    idNumber: "",
+    dateOfBirth: "",
     phoneNumber: "",
     occupation: "",
     sex: "",
     age: "",
     medicalPrescription: null,
     drugImage: null,
+    retailCost: 0,
+    covaCost: 0,
+    selectedCollateral: [],
     assetPictures: [],
     bankStatement: null,
     mpesaStatement: null,
@@ -45,6 +76,8 @@ const Apply = () => {
     hasBusiness: false,
     businessPhoto: null,
     tinNumber: "",
+    logbook: null,
+    titleDeed: null,
     callLogHistory: null,
     guarantor1Id: null,
     guarantor2Id: null,
@@ -56,77 +89,127 @@ const Apply = () => {
     setFormData((prev) => ({ ...prev, ...data }));
   };
 
+  const triggerNotification = (message: string) => {
+    setNotificationMessage(message);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 5000);
+  };
+
   const nextStep = () => {
     if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handleSubmit = () => {
     console.log("Form submitted:", formData);
-    alert("Application submitted successfully!");
-    navigate("/");
+    triggerNotification("🎉 Application submitted successfully! We'll contact you shortly.");
+    setTimeout(() => navigate("/"), 2000);
+  };
+
+  const handleSaveDraft = () => {
+    // Save to localStorage for demo
+    localStorage.setItem("medicalCreditDraft", JSON.stringify({
+      ...formData,
+      currentStep,
+      savedAt: new Date().toISOString()
+    }));
+    triggerNotification("✅ Draft saved! You can resume anytime.");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20 p-3 sm:p-4 md:p-8">
-      <div className="mx-auto max-w-3xl animate-fade-in">
-        {/* Header */}
-        <div className="text-center space-y-3 mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
-              <Activity className="relative h-8 w-8 sm:h-10 sm:w-10 text-primary" />
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold bg-gradient-to-r from-primary via-primary to-purple-600 bg-clip-text text-transparent">
-              HealthNow PayLater
-            </h1>
-          </div>
-          <p className="text-muted-foreground text-base sm:text-lg font-medium">Credit Application Form</p>
-        </div>
+    <div className="min-h-screen bg-background">
+      {/* WhatsApp Notification */}
+      <WhatsAppNotification
+        show={showNotification}
+        message={notificationMessage}
+        onClose={() => setShowNotification(false)}
+      />
 
-        {/* Progress Indicator */}
-        <div className="mb-6 sm:mb-8 bg-card/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 shadow-elegant">
-          <div className="flex items-center justify-between mb-3">
-            {[1, 2, 3, 4, 5].map((step) => (
-              <div
-                key={step}
-                className={`flex-1 h-2 mx-0.5 sm:mx-1 rounded-full transition-all duration-500 ${
-                  step <= currentStep 
-                    ? "bg-gradient-to-r from-primary to-purple-600 shadow-glow" 
-                    : "bg-muted"
-                }`}
-              />
-            ))}
+      {/* Header */}
+      <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate("/")}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-white"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                <Heart className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-serif text-lg font-bold text-secondary">COVA Credit</span>
+            </div>
           </div>
-          <p className="text-center text-xs sm:text-sm font-medium text-muted-foreground">
-            Step {currentStep} of 5
-          </p>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSaveDraft}
+            className="gap-2"
+          >
+            <Save className="h-4 w-4" />
+            <span className="hidden sm:inline">Save Draft</span>
+          </Button>
         </div>
+      </header>
+
+      <main className="mx-auto max-w-3xl px-4 py-6 sm:py-8">
+        {/* Progress Bar */}
+        {currentStep < 5 && (
+          <ProgressBar currentStep={currentStep} totalSteps={4} steps={steps} />
+        )}
 
         {/* Step Content */}
-        {currentStep === 1 && (
-          <StepOne formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />
-        )}
-        {currentStep === 2 && (
-          <StepTwo formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />
-        )}
-        {currentStep === 3 && (
-          <StepThree formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />
-        )}
-        {currentStep === 4 && (
-          <StepFour formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />
-        )}
-        {currentStep === 5 && (
-          <StepFive formData={formData} prevStep={prevStep} handleSubmit={handleSubmit} />
-        )}
-      </div>
+        <div className="animate-fade-in">
+          {currentStep === 1 && (
+            <StepOne
+              formData={formData}
+              updateFormData={updateFormData}
+              nextStep={nextStep}
+              prevStep={prevStep}
+              triggerNotification={triggerNotification}
+            />
+          )}
+          {currentStep === 2 && (
+            <StepTwo
+              formData={formData}
+              updateFormData={updateFormData}
+              nextStep={nextStep}
+              prevStep={prevStep}
+            />
+          )}
+          {currentStep === 3 && (
+            <StepThree
+              formData={formData}
+              updateFormData={updateFormData}
+              nextStep={nextStep}
+              prevStep={prevStep}
+            />
+          )}
+          {currentStep === 4 && (
+            <StepFour
+              formData={formData}
+              updateFormData={updateFormData}
+              nextStep={nextStep}
+              prevStep={prevStep}
+            />
+          )}
+          {currentStep === 5 && (
+            <StepFive formData={formData} prevStep={prevStep} handleSubmit={handleSubmit} />
+          )}
+        </div>
+      </main>
     </div>
   );
 };

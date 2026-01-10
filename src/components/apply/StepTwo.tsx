@@ -1,11 +1,10 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight, Upload } from "lucide-react";
-import { ScoreMetric } from "@/components/ScoreMetric";
+import { ArrowLeft, ArrowRight, FileText, Pill, Loader2, Stethoscope } from "lucide-react";
+import { FileUploadCard } from "./FileUploadCard";
+import { PriceComparison } from "./PriceComparison";
 
 interface StepTwoProps {
   formData: FormData;
@@ -15,122 +14,145 @@ interface StepTwoProps {
 }
 
 export const StepTwo = ({ formData, updateFormData, nextStep, prevStep }: StepTwoProps) => {
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
+
+  const handleAnalyze = () => {
+    if (formData.medicalPrescription || formData.drugImage) {
+      setIsAnalyzing(true);
+      
+      // Simulate AI analysis
+      setTimeout(() => {
+        setIsAnalyzing(false);
+        updateFormData({
+          retailCost: 45000,
+          covaCost: 28500,
+        });
+        setShowPricing(true);
+      }, 2500);
+    }
+  };
+
   const handleNext = () => {
-    if (formData.sex && formData.age && formData.medicalPrescription && formData.drugImage) {
+    if (showPricing) {
       nextStep();
+    } else if (formData.medicalPrescription || formData.drugImage) {
+      handleAnalyze();
     } else {
-      alert("Please fill in all required fields");
+      alert("Please upload at least one document");
     }
   };
 
   return (
-    <Card className="p-6 md:p-8">
-      <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
-        <ScoreMetric
-          label="Composite Score"
-          value={685}
-          maxValue={850}
-          variant="primary"
-        />
-        <ScoreMetric
-          label="Medical Needs"
-          value={75}
-          variant="secondary"
-        />
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-teal-700 shadow-elegant-lg">
+          <Stethoscope className="h-8 w-8 text-white" />
+        </div>
+        <h1 className="font-serif text-2xl font-bold text-secondary sm:text-3xl">
+          Medical Assessment
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          Upload your prescription or medication photos
+        </p>
       </div>
 
-      <h2 className="text-2xl font-bold text-foreground mb-6">Personal & Medical Information</h2>
-      
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="sex">Sex *</Label>
-            <Select
-              value={formData.sex}
-              onValueChange={(value) => updateFormData({ sex: value })}
-            >
-              <SelectTrigger className="mt-2">
-                <SelectValue placeholder="Select sex" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      {/* Upload Cards */}
+      <Card className="border-0 bg-card p-6 shadow-elegant">
+        <div className="space-y-4">
+          <FileUploadCard
+            label="Medical Prescription"
+            description="Doctor's prescription or referral letter"
+            helpText="Clear images help us process faster"
+            icon={<FileText className="h-6 w-6" />}
+            file={formData.medicalPrescription}
+            onFileChange={(file) => {
+              updateFormData({ medicalPrescription: file });
+              setShowPricing(false);
+            }}
+            accept="image/*,.pdf"
+          />
 
-          <div>
-            <Label htmlFor="age">Age *</Label>
-            <Input
-              id="age"
-              type="number"
-              placeholder="Enter your age"
-              value={formData.age}
-              onChange={(e) => updateFormData({ age: e.target.value })}
-              className="mt-2"
-              min="18"
-              max="120"
-            />
-          </div>
+          <FileUploadCard
+            label="Medication Photo"
+            description="Photo of prescribed medications"
+            helpText="Helps us verify medication costs"
+            icon={<Pill className="h-6 w-6" />}
+            file={formData.drugImage}
+            onFileChange={(file) => {
+              updateFormData({ drugImage: file });
+              setShowPricing(false);
+            }}
+            accept="image/*"
+          />
         </div>
+      </Card>
 
-        <div>
-          <Label htmlFor="medicalPrescription">Medical Prescription *</Label>
-          <div className="mt-2">
-            <Input
-              id="medicalPrescription"
-              type="file"
-              accept="image/*,.pdf"
-              onChange={(e) => updateFormData({ medicalPrescription: e.target.files?.[0] || null })}
-              className="cursor-pointer"
-            />
-            {formData.medicalPrescription && (
-              <p className="text-sm text-muted-foreground mt-2">
-                Selected: {formData.medicalPrescription.name}
+      {/* Analyzing State */}
+      {isAnalyzing && (
+        <Card className="border-0 bg-card p-8 shadow-elegant">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <div className="relative">
+              <div className="h-16 w-16 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+              <Loader2 className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 animate-pulse text-primary" />
+            </div>
+            <div className="text-center">
+              <p className="font-semibold text-secondary">Analyzing Documents...</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Calculating your medical credit needs
               </p>
-            )}
+            </div>
           </div>
-        </div>
+        </Card>
+      )}
 
-        <div>
-          <Label htmlFor="drugImage">Drug Image *</Label>
-          <div className="mt-2">
-            <Input
-              id="drugImage"
-              type="file"
-              accept="image/*"
-              onChange={(e) => updateFormData({ drugImage: e.target.files?.[0] || null })}
-              className="cursor-pointer"
-            />
-            {formData.drugImage && (
-              <p className="text-sm text-muted-foreground mt-2">
-                Selected: {formData.drugImage.name}
-              </p>
-            )}
-          </div>
-        </div>
+      {/* Price Comparison */}
+      <PriceComparison
+        retailPrice={formData.retailCost}
+        covaPrice={formData.covaCost}
+        show={showPricing}
+      />
 
-        <div className="flex gap-4 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={prevStep}
-            className="flex-1"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          <Button
-            type="button"
-            onClick={handleNext}
-            className="flex-1 bg-primary hover:bg-primary/90"
-          >
-            Continue
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
+      {/* Navigation */}
+      <div className="flex gap-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={prevStep}
+          className="flex-1 gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+        <Button
+          type="button"
+          onClick={handleNext}
+          disabled={isAnalyzing}
+          className={`flex-1 gap-2 ${
+            showPricing
+              ? "bg-health-green hover:bg-health-green/90"
+              : "bg-gradient-to-r from-primary to-coral-600"
+          } shadow-coral-glow transition-all hover:shadow-coral-glow-hover`}
+        >
+          {isAnalyzing ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Analyzing...
+            </>
+          ) : showPricing ? (
+            <>
+              Continue to Collateral
+              <ArrowRight className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              Analyze Documents
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
+        </Button>
       </div>
-    </Card>
+    </div>
   );
 };
