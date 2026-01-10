@@ -24,8 +24,11 @@ export type Database = {
           business_photo_url: string | null
           call_log_url: string | null
           composite_score: number | null
+          cova_cost: number | null
           created_at: string
+          date_of_birth: string | null
           drug_image_url: string | null
+          full_name: string | null
           guarantor1_id_url: string | null
           guarantor1_phone: string | null
           guarantor2_id_url: string | null
@@ -33,14 +36,19 @@ export type Database = {
           has_business: boolean | null
           home_photo_url: string | null
           id: string
+          id_number: string | null
+          logbook_url: string | null
           medical_needs_score: number | null
           medical_prescription_url: string | null
           mpesa_statement_url: string | null
           phone_number: string | null
           profession: string | null
+          retail_cost: number | null
+          selected_collateral: string[] | null
           sex: string | null
           status: string | null
           tin_number: string | null
+          title_deed_url: string | null
           updated_at: string
           user_id: string | null
         }
@@ -53,8 +61,11 @@ export type Database = {
           business_photo_url?: string | null
           call_log_url?: string | null
           composite_score?: number | null
+          cova_cost?: number | null
           created_at?: string
+          date_of_birth?: string | null
           drug_image_url?: string | null
+          full_name?: string | null
           guarantor1_id_url?: string | null
           guarantor1_phone?: string | null
           guarantor2_id_url?: string | null
@@ -62,14 +73,19 @@ export type Database = {
           has_business?: boolean | null
           home_photo_url?: string | null
           id?: string
+          id_number?: string | null
+          logbook_url?: string | null
           medical_needs_score?: number | null
           medical_prescription_url?: string | null
           mpesa_statement_url?: string | null
           phone_number?: string | null
           profession?: string | null
+          retail_cost?: number | null
+          selected_collateral?: string[] | null
           sex?: string | null
           status?: string | null
           tin_number?: string | null
+          title_deed_url?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -82,8 +98,11 @@ export type Database = {
           business_photo_url?: string | null
           call_log_url?: string | null
           composite_score?: number | null
+          cova_cost?: number | null
           created_at?: string
+          date_of_birth?: string | null
           drug_image_url?: string | null
+          full_name?: string | null
           guarantor1_id_url?: string | null
           guarantor1_phone?: string | null
           guarantor2_id_url?: string | null
@@ -91,14 +110,19 @@ export type Database = {
           has_business?: boolean | null
           home_photo_url?: string | null
           id?: string
+          id_number?: string | null
+          logbook_url?: string | null
           medical_needs_score?: number | null
           medical_prescription_url?: string | null
           mpesa_statement_url?: string | null
           phone_number?: string | null
           profession?: string | null
+          retail_cost?: number | null
+          selected_collateral?: string[] | null
           sex?: string | null
           status?: string | null
           tin_number?: string | null
+          title_deed_url?: string | null
           updated_at?: string
           user_id?: string | null
         }

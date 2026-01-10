@@ -1,15 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, CheckCircle2, User, Stethoscope, Landmark, Shield, Sparkles, Send } from "lucide-react";
+import { ArrowLeft, CheckCircle2, User, Stethoscope, Landmark, Shield, Sparkles, Send, Loader2 } from "lucide-react";
 
 interface StepFiveProps {
   formData: FormData;
   prevStep: () => void;
   handleSubmit: () => void;
+  isSubmitting?: boolean;
 }
 
-export const StepFive = ({ formData, prevStep, handleSubmit }: StepFiveProps) => {
+export const StepFive = ({ formData, prevStep, handleSubmit, isSubmitting = false }: StepFiveProps) => {
   const sections = [
     {
       icon: <User className="h-5 w-5" />,
@@ -129,6 +130,7 @@ export const StepFive = ({ formData, prevStep, handleSubmit }: StepFiveProps) =>
           type="button"
           variant="outline"
           onClick={prevStep}
+          disabled={isSubmitting}
           className="flex-1 gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -137,10 +139,20 @@ export const StepFive = ({ formData, prevStep, handleSubmit }: StepFiveProps) =>
         <Button
           type="button"
           onClick={handleSubmit}
+          disabled={isSubmitting}
           className="flex-1 gap-2 bg-health-green py-6 text-lg font-semibold text-white shadow-lg transition-all hover:bg-health-green/90 hover:shadow-xl"
         >
-          <Send className="h-5 w-5" />
-          Submit Application
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            <>
+              <Send className="h-5 w-5" />
+              Submit Application
+            </>
+          )}
         </Button>
       </div>
     </div>
