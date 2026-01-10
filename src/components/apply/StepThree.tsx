@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import { ScoreMetric } from "@/components/ScoreMetric";
+import { ArrowLeft, ArrowRight, Car, Home, Briefcase, Landmark, Building2 } from "lucide-react";
+import { CollateralCard } from "./CollateralCard";
+import { FileUploadCard } from "./FileUploadCard";
 
 interface StepThreeProps {
   formData: FormData;
@@ -14,188 +12,174 @@ interface StepThreeProps {
   prevStep: () => void;
 }
 
+const collateralOptions = [
+  {
+    id: "logbook",
+    icon: <Car className="h-6 w-6" />,
+    title: "Car Logbook",
+    description: "Vehicle registration document",
+    helpText: "Adds +35 points to your credit score",
+  },
+  {
+    id: "titleDeed",
+    icon: <Building2 className="h-6 w-6" />,
+    title: "Title Deed",
+    description: "Land or property ownership",
+    helpText: "Adds +50 points to your credit score",
+  },
+  {
+    id: "homePhoto",
+    icon: <Home className="h-6 w-6" />,
+    title: "Home Photos",
+    description: "Photos of your residence",
+    helpText: "Adds +15 points to your credit score",
+  },
+  {
+    id: "business",
+    icon: <Briefcase className="h-6 w-6" />,
+    title: "Business Proof",
+    description: "Business license or TIN",
+    helpText: "Adds +25 points to your credit score",
+  },
+];
+
 export const StepThree = ({ formData, updateFormData, nextStep, prevStep }: StepThreeProps) => {
+  const toggleCollateral = (id: string) => {
+    const current = formData.selectedCollateral || [];
+    const updated = current.includes(id)
+      ? current.filter((c) => c !== id)
+      : [...current, id];
+    updateFormData({ selectedCollateral: updated });
+  };
+
   const handleNext = () => {
-    const baseRequirements = formData.bankStatement && formData.mpesaStatement && formData.homePhoto;
-    const businessRequirements = !formData.hasBusiness || (formData.businessPhoto && formData.tinNumber);
-    
-    if (baseRequirements && businessRequirements) {
+    if (formData.selectedCollateral.length > 0) {
       nextStep();
     } else {
-      alert("Please fill in all required fields");
+      alert("Please select at least one collateral option");
     }
   };
 
+  const isSelected = (id: string) => formData.selectedCollateral?.includes(id);
+
   return (
-    <Card className="p-6 md:p-8">
-      <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
-        <ScoreMetric
-          label="Composite Score"
-          value={685}
-          maxValue={850}
-          variant="primary"
-        />
-        <ScoreMetric
-          label="Asset Valuation"
-          value={82}
-          variant="secondary"
-        />
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-teal-700 shadow-elegant-lg">
+          <Landmark className="h-8 w-8 text-white" />
+        </div>
+        <h1 className="font-serif text-2xl font-bold text-secondary sm:text-3xl">
+          Build Your Credit Case
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          Select collateral options to strengthen your application
+        </p>
       </div>
 
-      <h2 className="text-2xl font-bold text-foreground mb-6">Financial Documents & Assets</h2>
-      
-      <div className="space-y-6">
-        <div>
-          <Label htmlFor="assetPictures">Asset Pictures (Optional)</Label>
-          <div className="mt-2">
-            <Input
-              id="assetPictures"
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={(e) => updateFormData({ assetPictures: Array.from(e.target.files || []) })}
-              className="cursor-pointer"
+      {/* Collateral Options */}
+      <Card className="border-0 bg-card p-6 shadow-elegant">
+        <p className="mb-4 text-sm text-muted-foreground">
+          Select all that apply – more options mean better approval chances:
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {collateralOptions.map((option) => (
+            <CollateralCard
+              key={option.id}
+              icon={option.icon}
+              title={option.title}
+              description={option.description}
+              helpText={option.helpText}
+              selected={isSelected(option.id)}
+              onSelect={() => toggleCollateral(option.id)}
             />
-            {formData.assetPictures.length > 0 && (
-              <div className="mt-3">
-                <p className="text-sm text-muted-foreground mb-2">
-                  {formData.assetPictures.length} file(s) selected
-                </p>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                  {formData.assetPictures.map((file, index) => (
-                    <div key={index} className="aspect-square rounded-lg overflow-hidden border border-border">
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={`Asset ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          ))}
         </div>
+      </Card>
 
-        <div>
-          <Label htmlFor="bankStatement">Bank Statement *</Label>
-          <div className="mt-2">
-            <Input
-              id="bankStatement"
-              type="file"
-              accept=".pdf,image/*"
-              onChange={(e) => updateFormData({ bankStatement: e.target.files?.[0] || null })}
-              className="cursor-pointer"
-            />
-            {formData.bankStatement && (
-              <p className="text-sm text-muted-foreground mt-2">
-                Selected: {formData.bankStatement.name}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor="mpesaStatement">M-Pesa Statement *</Label>
-          <div className="mt-2">
-            <Input
-              id="mpesaStatement"
-              type="file"
-              accept=".pdf,image/*"
-              onChange={(e) => updateFormData({ mpesaStatement: e.target.files?.[0] || null })}
-              className="cursor-pointer"
-            />
-            {formData.mpesaStatement && (
-              <p className="text-sm text-muted-foreground mt-2">
-                Selected: {formData.mpesaStatement.name}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor="homePhoto">Photo of Your Home *</Label>
-          <div className="mt-2">
-            <Input
-              id="homePhoto"
-              type="file"
-              accept="image/*"
-              onChange={(e) => updateFormData({ homePhoto: e.target.files?.[0] || null })}
-              className="cursor-pointer"
-            />
-            {formData.homePhoto && (
-              <p className="text-sm text-muted-foreground mt-2">
-                Selected: {formData.homePhoto.name}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2 py-4">
-          <Checkbox
-            id="hasBusiness"
-            checked={formData.hasBusiness}
-            onCheckedChange={(checked) => updateFormData({ hasBusiness: checked as boolean })}
-          />
-          <Label htmlFor="hasBusiness" className="cursor-pointer">
-            I have a business
-          </Label>
-        </div>
-
-        {formData.hasBusiness && (
-          <div className="space-y-4 pl-6 border-l-2 border-primary">
-            <div>
-              <Label htmlFor="businessPhoto">Photo of Business *</Label>
-              <div className="mt-2">
-                <Input
-                  id="businessPhoto"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => updateFormData({ businessPhoto: e.target.files?.[0] || null })}
-                  className="cursor-pointer"
-                />
-                {formData.businessPhoto && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Selected: {formData.businessPhoto.name}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="tinNumber">TIN Number *</Label>
-              <Input
-                id="tinNumber"
-                type="text"
-                placeholder="Enter TIN number"
-                value={formData.tinNumber}
-                onChange={(e) => updateFormData({ tinNumber: e.target.value })}
-                className="mt-2"
+      {/* Upload Proof Section - Shows for selected options */}
+      {formData.selectedCollateral?.length > 0 && (
+        <Card className="animate-slide-up border-0 bg-card p-6 shadow-elegant">
+          <h3 className="mb-4 font-serif text-lg font-bold text-secondary">
+            Upload Proof Documents
+          </h3>
+          <div className="space-y-4">
+            {isSelected("logbook") && (
+              <FileUploadCard
+                label="Logbook Document"
+                description="Upload your vehicle logbook"
+                icon={<Car className="h-6 w-6" />}
+                file={formData.logbook}
+                onFileChange={(file) => updateFormData({ logbook: file })}
+                required
               />
-            </div>
+            )}
+            {isSelected("titleDeed") && (
+              <FileUploadCard
+                label="Title Deed"
+                description="Upload your property title deed"
+                icon={<Building2 className="h-6 w-6" />}
+                file={formData.titleDeed}
+                onFileChange={(file) => updateFormData({ titleDeed: file })}
+                required
+              />
+            )}
+            {isSelected("homePhoto") && (
+              <FileUploadCard
+                label="Home Photos"
+                description="Take photos of your home exterior and interior"
+                icon={<Home className="h-6 w-6" />}
+                file={formData.homePhoto}
+                onFileChange={(file) => updateFormData({ homePhoto: file })}
+                required
+              />
+            )}
+            {isSelected("business") && (
+              <FileUploadCard
+                label="Business License / TIN"
+                description="Upload your business registration documents"
+                icon={<Briefcase className="h-6 w-6" />}
+                file={formData.businessPhoto}
+                onFileChange={(file) => updateFormData({ businessPhoto: file })}
+                required
+              />
+            )}
           </div>
-        )}
+        </Card>
+      )}
 
-        <div className="flex gap-4 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={prevStep}
-            className="flex-1"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          <Button
-            type="button"
-            onClick={handleNext}
-            className="flex-1 bg-primary hover:bg-primary/90"
-          >
-            Continue
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+      {/* Credit Score Indicator */}
+      {formData.selectedCollateral?.length > 0 && (
+        <div className="rounded-xl bg-gradient-to-r from-teal-50 to-coral-100/30 p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-secondary">Estimated Credit Boost:</span>
+            <span className="text-lg font-bold text-health-green">
+              +{formData.selectedCollateral.length * 25} points
+            </span>
+          </div>
         </div>
+      )}
+
+      {/* Navigation */}
+      <div className="flex gap-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={prevStep}
+          className="flex-1 gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+        <Button
+          type="button"
+          onClick={handleNext}
+          className="flex-1 gap-2 bg-gradient-to-r from-primary to-coral-600 shadow-coral-glow transition-all hover:shadow-coral-glow-hover"
+        >
+          Continue to Verification
+          <ArrowRight className="h-4 w-4" />
+        </Button>
       </div>
-    </Card>
+    </div>
   );
 };
