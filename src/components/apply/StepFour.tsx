@@ -29,7 +29,7 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep }: StepF
         icon={<Shield className="h-5 w-5" />}
         title="Verification & Trust"
         description="Final step – help us verify your application"
-        currentStep={4}
+        formData={formData}
       />
 
       {/* Security Note */}

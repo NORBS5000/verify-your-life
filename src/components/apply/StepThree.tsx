@@ -69,7 +69,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep }: Step
         icon={<Landmark className="h-5 w-5" />}
         title="Build Your Credit Case"
         description="Select collateral options to strengthen your application"
-        currentStep={3}
+        formData={formData}
       />
 
       {/* Collateral Options */}

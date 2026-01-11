@@ -1,27 +1,47 @@
 import { CircularProgress } from "@/components/CircularProgress";
 import { TrendingUp } from "lucide-react";
+import { FormData } from "@/pages/Apply";
 
 interface StepHeaderProps {
   icon: React.ReactNode;
   title: string;
   description: string;
-  currentStep: number;
+  formData: FormData;
 }
 
-// Score increases as user completes more steps
-const getScoreForStep = (step: number): number => {
-  switch (step) {
-    case 2:
-      return 25;
-    case 3:
-      return 55;
-    case 4:
-      return 80;
-    case 5:
-      return 100;
-    default:
-      return 0;
-  }
+// Calculate dynamic credit score based on form completion
+const calculateCreditScore = (formData: FormData): number => {
+  let score = 0;
+
+  // Profile section (max 20 points)
+  if (formData.fullName) score += 4;
+  if (formData.idNumber) score += 4;
+  if (formData.phoneNumber) score += 4;
+  if (formData.occupation) score += 4;
+  if (formData.sex && formData.age) score += 4;
+
+  // Medical section (max 20 points)
+  if (formData.medicalPrescription) score += 10;
+  if (formData.drugImage) score += 5;
+  if (formData.covaCost > 0) score += 5;
+
+  // Collateral section (max 30 points)
+  const collateralCount = formData.selectedCollateral?.length || 0;
+  score += Math.min(collateralCount * 7, 14); // Up to 14 points for selections
+  if (formData.logbook) score += 4;
+  if (formData.titleDeed) score += 4;
+  if (formData.homePhoto) score += 4;
+  if (formData.businessPhoto) score += 4;
+
+  // Verification section (max 30 points)
+  if (formData.mpesaStatement) score += 10;
+  if (formData.bankStatement) score += 5;
+  if (formData.guarantor1Phone) score += 8;
+  if (formData.guarantor1Id) score += 3;
+  if (formData.guarantor2Phone) score += 2;
+  if (formData.guarantor2Id) score += 2;
+
+  return Math.min(score, 100);
 };
 
 const getScoreColor = (score: number): string => {
@@ -30,8 +50,8 @@ const getScoreColor = (score: number): string => {
   return "hsl(var(--coral-500))";
 };
 
-export const StepHeader = ({ icon, title, description, currentStep }: StepHeaderProps) => {
-  const score = getScoreForStep(currentStep);
+export const StepHeader = ({ icon, title, description, formData }: StepHeaderProps) => {
+  const score = calculateCreditScore(formData);
   const color = getScoreColor(score);
 
   return (

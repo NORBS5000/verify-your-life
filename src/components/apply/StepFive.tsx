@@ -61,7 +61,7 @@ export const StepFive = ({ formData, prevStep, handleSubmit, isSubmitting = fals
         icon={<Sparkles className="h-5 w-5" />}
         title="Almost There!"
         description="Review your application before submitting"
-        currentStep={5}
+        formData={formData}
       />
 
       {/* Credit Summary Card */}
