@@ -5,6 +5,7 @@ import { FormData } from "@/pages/Apply";
 import { ArrowLeft, ArrowRight, FileText, Pill, Loader2, Stethoscope } from "lucide-react";
 import { FileUploadCard } from "./FileUploadCard";
 import { PriceComparison } from "./PriceComparison";
+import { StepHeader } from "./StepHeader";
 
 interface StepTwoProps {
   formData: FormData;
@@ -45,18 +46,12 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep }: StepTw
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-teal-700 shadow-elegant-lg">
-          <Stethoscope className="h-8 w-8 text-white" />
-        </div>
-        <h1 className="font-serif text-2xl font-bold text-secondary sm:text-3xl">
-          Medical Assessment
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Upload your prescription or medication photos
-        </p>
-      </div>
+      <StepHeader
+        icon={<Stethoscope className="h-5 w-5" />}
+        title="Medical Assessment"
+        description="Upload your prescription or medication photos"
+        currentStep={2}
+      />
 
       {/* Upload Cards */}
       <Card className="border-0 bg-card p-6 shadow-elegant">

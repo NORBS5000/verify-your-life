@@ -4,6 +4,7 @@ import { FormData } from "@/pages/Apply";
 import { ArrowLeft, ArrowRight, Car, Home, Briefcase, Landmark, Building2 } from "lucide-react";
 import { CollateralCard } from "./CollateralCard";
 import { FileUploadCard } from "./FileUploadCard";
+import { StepHeader } from "./StepHeader";
 
 interface StepThreeProps {
   formData: FormData;
@@ -64,18 +65,12 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep }: Step
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-teal-700 shadow-elegant-lg">
-          <Landmark className="h-8 w-8 text-white" />
-        </div>
-        <h1 className="font-serif text-2xl font-bold text-secondary sm:text-3xl">
-          Build Your Credit Case
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Select collateral options to strengthen your application
-        </p>
-      </div>
+      <StepHeader
+        icon={<Landmark className="h-5 w-5" />}
+        title="Build Your Credit Case"
+        description="Select collateral options to strengthen your application"
+        currentStep={3}
+      />
 
       {/* Collateral Options */}
       <Card className="border-0 bg-card p-6 shadow-elegant">
