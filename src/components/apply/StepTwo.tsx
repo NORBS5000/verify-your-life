@@ -50,7 +50,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep }: StepTw
         icon={<Stethoscope className="h-5 w-5" />}
         title="Medical Assessment"
         description="Upload your prescription or medication photos"
-        currentStep={2}
+        formData={formData}
       />
 
       {/* Upload Cards */}
