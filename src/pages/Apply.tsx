@@ -8,7 +8,7 @@ import { StepThree } from "@/components/apply/StepThree";
 import { StepFour } from "@/components/apply/StepFour";
 import { StepFive } from "@/components/apply/StepFive";
 import { ProgressBar } from "@/components/apply/ProgressBar";
-import { ScoreIndicator } from "@/components/apply/ScoreIndicator";
+
 import { WhatsAppNotification } from "@/components/apply/WhatsAppNotification";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubmitApplication } from "@/hooks/useSubmitApplication";
@@ -188,10 +188,6 @@ const Apply = () => {
           <ProgressBar currentStep={currentStep} totalSteps={4} steps={steps} />
         )}
 
-        {/* Score Indicator - visible from step 2 onwards */}
-        {currentStep >= 2 && (
-          <ScoreIndicator currentStep={currentStep} />
-        )}
 
         {/* Step Content */}
         <div className="animate-fade-in">

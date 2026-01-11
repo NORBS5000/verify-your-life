@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
 import { ArrowLeft, CheckCircle2, User, Stethoscope, Landmark, Shield, Sparkles, Send, Loader2 } from "lucide-react";
+import { StepHeader } from "./StepHeader";
 
 interface StepFiveProps {
   formData: FormData;
@@ -56,18 +57,12 @@ export const StepFive = ({ formData, prevStep, handleSubmit, isSubmitting = fals
 
   return (
     <div className="space-y-6">
-      {/* Success Header */}
-      <div className="text-center">
-        <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-health-green to-teal-700 shadow-lg">
-          <Sparkles className="h-10 w-10 text-white" />
-        </div>
-        <h1 className="font-serif text-2xl font-bold text-secondary sm:text-3xl">
-          Almost There!
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Review your application before submitting
-        </p>
-      </div>
+      <StepHeader
+        icon={<Sparkles className="h-5 w-5" />}
+        title="Almost There!"
+        description="Review your application before submitting"
+        currentStep={5}
+      />
 
       {/* Credit Summary Card */}
       <Card className="overflow-hidden border-0 bg-gradient-to-r from-primary to-coral-600 p-6 text-white shadow-coral-glow">

@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
 import { ArrowLeft, ArrowRight, Shield, Phone, FileText, Users, Lock } from "lucide-react";
 import { FileUploadCard } from "./FileUploadCard";
+import { StepHeader } from "./StepHeader";
 
 interface StepFourProps {
   formData: FormData;
@@ -24,18 +25,12 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep }: StepF
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-teal-700 shadow-elegant-lg">
-          <Shield className="h-8 w-8 text-white" />
-        </div>
-        <h1 className="font-serif text-2xl font-bold text-secondary sm:text-3xl">
-          Verification & Trust
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Final step – help us verify your application
-        </p>
-      </div>
+      <StepHeader
+        icon={<Shield className="h-5 w-5" />}
+        title="Verification & Trust"
+        description="Final step – help us verify your application"
+        currentStep={4}
+      />
 
       {/* Security Note */}
       <div className="flex items-start gap-3 rounded-xl bg-secondary/5 p-4">
