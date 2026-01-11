@@ -126,8 +126,8 @@ const Apply = () => {
     const success = await submitApplication(formData);
     
     if (success) {
-      triggerNotification("🎉 Application submitted successfully! We'll contact you shortly.");
-      setTimeout(() => navigate("/"), 2000);
+      triggerNotification("🎉 Application submitted successfully! Redirecting to your dashboard...");
+      setTimeout(() => navigate("/my-dashboard"), 2000);
     } else {
       triggerNotification(submitError || "Failed to submit application. Please try again.");
     }
