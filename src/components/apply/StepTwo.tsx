@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight, FileText, Pill, Loader2, Stethoscope } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Pill, Loader2, Stethoscope, Save } from "lucide-react";
 import { FileUploadCard } from "./FileUploadCard";
 import { PriceComparison } from "./PriceComparison";
 import { StepHeader } from "./StepHeader";
@@ -12,9 +12,10 @@ interface StepTwoProps {
   updateFormData: (data: Partial<FormData>) => void;
   nextStep: () => void;
   prevStep: () => void;
+  onSaveDraft: () => void;
 }
 
-export const StepTwo = ({ formData, updateFormData, nextStep, prevStep }: StepTwoProps) => {
+export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepTwoProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
 
@@ -115,10 +116,19 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep }: StepTw
           type="button"
           variant="outline"
           onClick={prevStep}
-          className="flex-1 gap-2"
+          className="gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onSaveDraft}
+          className="gap-2"
+        >
+          <Save className="h-4 w-4" />
+          <span className="hidden sm:inline">Save</span>
         </Button>
         <Button
           type="button"

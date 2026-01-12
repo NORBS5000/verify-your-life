@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight, Car, Home, Briefcase, Landmark, Building2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Car, Home, Briefcase, Landmark, Building2, Save } from "lucide-react";
 import { CollateralCard } from "./CollateralCard";
 import { FileUploadCard } from "./FileUploadCard";
 import { StepHeader } from "./StepHeader";
@@ -11,6 +11,7 @@ interface StepThreeProps {
   updateFormData: (data: Partial<FormData>) => void;
   nextStep: () => void;
   prevStep: () => void;
+  onSaveDraft: () => void;
 }
 
 const collateralOptions = [
@@ -44,7 +45,7 @@ const collateralOptions = [
   },
 ];
 
-export const StepThree = ({ formData, updateFormData, nextStep, prevStep }: StepThreeProps) => {
+export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepThreeProps) => {
   const toggleCollateral = (id: string) => {
     const current = formData.selectedCollateral || [];
     const updated = current.includes(id)
@@ -161,10 +162,19 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep }: Step
           type="button"
           variant="outline"
           onClick={prevStep}
-          className="flex-1 gap-2"
+          className="gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onSaveDraft}
+          className="gap-2"
+        >
+          <Save className="h-4 w-4" />
+          <span className="hidden sm:inline">Save</span>
         </Button>
         <Button
           type="button"

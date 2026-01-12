@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowRight, User, Phone, Briefcase, Sparkles } from "lucide-react";
+import { ArrowRight, User, Phone, Briefcase, Sparkles, Save } from "lucide-react";
 import { IDScanner } from "./IDScanner";
 
 interface StepOneProps {
@@ -14,9 +14,10 @@ interface StepOneProps {
   nextStep: () => void;
   prevStep: () => void;
   triggerNotification: (message: string) => void;
+  onSaveDraft: () => void;
 }
 
-export const StepOne = ({ formData, updateFormData, nextStep, triggerNotification }: StepOneProps) => {
+export const StepOne = ({ formData, updateFormData, nextStep, triggerNotification, onSaveDraft }: StepOneProps) => {
   const [idScanned, setIdScanned] = useState(false);
 
   const handleIDScan = (data: {
@@ -160,15 +161,25 @@ export const StepOne = ({ formData, updateFormData, nextStep, triggerNotificatio
         </Card>
       )}
 
-      {/* Continue Button */}
+      {/* Navigation */}
       {idScanned && (
-        <Button
-          onClick={handleNext}
-          className="w-full gap-2 bg-gradient-to-r from-primary to-coral-600 py-6 text-lg font-semibold shadow-coral-glow transition-all hover:shadow-coral-glow-hover"
-        >
-          Continue to Medical Assessment
-          <ArrowRight className="h-5 w-5" />
-        </Button>
+        <div className="flex gap-4">
+          <Button
+            variant="outline"
+            onClick={onSaveDraft}
+            className="gap-2"
+          >
+            <Save className="h-4 w-4" />
+            <span className="hidden sm:inline">Save Draft</span>
+          </Button>
+          <Button
+            onClick={handleNext}
+            className="flex-1 gap-2 bg-gradient-to-r from-primary to-coral-600 py-6 text-lg font-semibold shadow-coral-glow transition-all hover:shadow-coral-glow-hover"
+          >
+            Continue to Medical Assessment
+            <ArrowRight className="h-5 w-5" />
+          </Button>
+        </div>
       )}
     </div>
   );
