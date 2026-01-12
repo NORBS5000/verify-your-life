@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, CheckCircle2, User, Stethoscope, Landmark, Shield, Sparkles, Send, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, User, Stethoscope, Landmark, Shield, Sparkles, Send, Loader2, Save } from "lucide-react";
 import { StepHeader } from "./StepHeader";
 
 interface StepFiveProps {
@@ -9,9 +9,10 @@ interface StepFiveProps {
   prevStep: () => void;
   handleSubmit: () => void;
   isSubmitting?: boolean;
+  onSaveDraft: () => void;
 }
 
-export const StepFive = ({ formData, prevStep, handleSubmit, isSubmitting = false }: StepFiveProps) => {
+export const StepFive = ({ formData, prevStep, handleSubmit, isSubmitting = false, onSaveDraft }: StepFiveProps) => {
   const sections = [
     {
       icon: <User className="h-5 w-5" />,
@@ -126,10 +127,20 @@ export const StepFive = ({ formData, prevStep, handleSubmit, isSubmitting = fals
           variant="outline"
           onClick={prevStep}
           disabled={isSubmitting}
-          className="flex-1 gap-2"
+          className="gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onSaveDraft}
+          disabled={isSubmitting}
+          className="gap-2"
+        >
+          <Save className="h-4 w-4" />
+          <span className="hidden sm:inline">Save</span>
         </Button>
         <Button
           type="button"

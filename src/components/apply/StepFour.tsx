@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight, Shield, Phone, FileText, Users, Lock } from "lucide-react";
+import { ArrowLeft, ArrowRight, Shield, Phone, FileText, Users, Lock, Save } from "lucide-react";
 import { FileUploadCard } from "./FileUploadCard";
 import { StepHeader } from "./StepHeader";
 
@@ -12,9 +12,10 @@ interface StepFourProps {
   updateFormData: (data: Partial<FormData>) => void;
   nextStep: () => void;
   prevStep: () => void;
+  onSaveDraft: () => void;
 }
 
-export const StepFour = ({ formData, updateFormData, nextStep, prevStep }: StepFourProps) => {
+export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepFourProps) => {
   const handleNext = () => {
     if (formData.mpesaStatement && formData.guarantor1Phone) {
       nextStep();
@@ -145,10 +146,19 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep }: StepF
           type="button"
           variant="outline"
           onClick={prevStep}
-          className="flex-1 gap-2"
+          className="gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onSaveDraft}
+          className="gap-2"
+        >
+          <Save className="h-4 w-4" />
+          <span className="hidden sm:inline">Save</span>
         </Button>
         <Button
           type="button"

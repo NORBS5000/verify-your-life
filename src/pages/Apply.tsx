@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, User, Stethoscope, Landmark, Shield, Save, ArrowLeft, Loader2 } from "lucide-react";
+import { Heart, User, Stethoscope, Landmark, Shield, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StepOne } from "@/components/apply/StepOne";
 import { StepTwo } from "@/components/apply/StepTwo";
@@ -155,23 +155,12 @@ const Apply = () => {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate("/")}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-white"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSaveDraft}
-              className="gap-2"
-            >
-              <Save className="h-4 w-4" />
-              <span className="hidden sm:inline">Save Draft</span>
-            </Button>
-          </div>
+          <button
+            onClick={() => navigate("/")}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-white"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
           
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
@@ -179,6 +168,8 @@ const Apply = () => {
             </div>
             <span className="font-serif text-lg font-bold text-secondary">COVA Credit</span>
           </div>
+          
+          <div className="w-10" /> {/* Spacer for balance */}
         </div>
       </header>
 
@@ -198,6 +189,7 @@ const Apply = () => {
               nextStep={nextStep}
               prevStep={prevStep}
               triggerNotification={triggerNotification}
+              onSaveDraft={handleSaveDraft}
             />
           )}
           {currentStep === 2 && (
@@ -206,6 +198,7 @@ const Apply = () => {
               updateFormData={updateFormData}
               nextStep={nextStep}
               prevStep={prevStep}
+              onSaveDraft={handleSaveDraft}
             />
           )}
           {currentStep === 3 && (
@@ -214,6 +207,7 @@ const Apply = () => {
               updateFormData={updateFormData}
               nextStep={nextStep}
               prevStep={prevStep}
+              onSaveDraft={handleSaveDraft}
             />
           )}
           {currentStep === 4 && (
@@ -222,10 +216,11 @@ const Apply = () => {
               updateFormData={updateFormData}
               nextStep={nextStep}
               prevStep={prevStep}
+              onSaveDraft={handleSaveDraft}
             />
           )}
           {currentStep === 5 && (
-            <StepFive formData={formData} prevStep={prevStep} handleSubmit={handleSubmit} isSubmitting={isSubmitting} />
+            <StepFive formData={formData} prevStep={prevStep} handleSubmit={handleSubmit} isSubmitting={isSubmitting} onSaveDraft={handleSaveDraft} />
           )}
         </div>
       </main>
