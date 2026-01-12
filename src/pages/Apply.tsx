@@ -162,23 +162,23 @@ const Apply = () => {
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <Heart className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-serif text-lg font-bold text-secondary">COVA Credit</span>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSaveDraft}
+              className="gap-2"
+            >
+              <Save className="h-4 w-4" />
+              <span className="hidden sm:inline">Save Draft</span>
+            </Button>
           </div>
           
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSaveDraft}
-            className="gap-2"
-          >
-            <Save className="h-4 w-4" />
-            <span className="hidden sm:inline">Save Draft</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+              <Heart className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-serif text-lg font-bold text-secondary">COVA Credit</span>
+          </div>
         </div>
       </header>
 
