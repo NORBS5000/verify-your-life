@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, FileText, Pill, Loader2, Stethoscope, Save } fro
 import { FileUploadCard } from "./FileUploadCard";
 import { PriceComparison } from "./PriceComparison";
 import { StepHeader } from "./StepHeader";
+import { MedicationList, MedicationItem } from "./MedicationList";
 
 interface StepTwoProps {
   formData: FormData;
@@ -15,9 +16,21 @@ interface StepTwoProps {
   onSaveDraft: () => void;
 }
 
+// Simulated extracted medications (in production, this would come from AI analysis)
+const mockExtractedItems: MedicationItem[] = [
+  { name: "Amoxicillin 500mg", dosage: "500mg", quantity: 21, unitPrice: 450, type: "medication" },
+  { name: "Metformin HCL", dosage: "850mg", quantity: 60, unitPrice: 280, type: "medication" },
+  { name: "Omeprazole", dosage: "20mg", quantity: 30, unitPrice: 320, type: "medication" },
+  { name: "Paracetamol", dosage: "500mg", quantity: 20, unitPrice: 150, type: "medication" },
+  { name: "Complete Blood Count (CBC)", dosage: "Lab Test", quantity: 1, unitPrice: 2500, type: "test" },
+  { name: "Lipid Profile", dosage: "Lab Test", quantity: 1, unitPrice: 3500, type: "test" },
+  { name: "HbA1c Test", dosage: "Diabetes Monitoring", quantity: 1, unitPrice: 2800, type: "test" },
+];
+
 export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepTwoProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
+  const [extractedItems, setExtractedItems] = useState<MedicationItem[]>([]);
 
   const handleAnalyze = () => {
     if (formData.medicalPrescription || formData.drugImage) {
@@ -26,9 +39,18 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       // Simulate AI analysis
       setTimeout(() => {
         setIsAnalyzing(false);
+        setExtractedItems(mockExtractedItems);
+        
+        // Calculate total from extracted items
+        const totalRetail = mockExtractedItems.reduce(
+          (sum, item) => sum + item.unitPrice * item.quantity,
+          0
+        );
+        const covaCost = Math.round(totalRetail * 0.63); // ~37% savings
+        
         updateFormData({
-          retailCost: 45000,
-          covaCost: 28500,
+          retailCost: totalRetail,
+          covaCost: covaCost,
         });
         setShowPricing(true);
       }, 2500);
@@ -66,6 +88,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             onFileChange={(file) => {
               updateFormData({ medicalPrescription: file });
               setShowPricing(false);
+              setExtractedItems([]);
             }}
             accept="image/*,.pdf"
           />
@@ -79,6 +102,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             onFileChange={(file) => {
               updateFormData({ drugImage: file });
               setShowPricing(false);
+              setExtractedItems([]);
             }}
             accept="image/*"
           />
@@ -96,12 +120,15 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             <div className="text-center">
               <p className="font-semibold text-secondary">Analyzing Documents...</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Calculating your medical credit needs
+                Extracting medications and calculating costs
               </p>
             </div>
           </div>
         </Card>
       )}
+
+      {/* Extracted Medications List */}
+      <MedicationList medications={extractedItems} show={showPricing} />
 
       {/* Price Comparison */}
       <PriceComparison
