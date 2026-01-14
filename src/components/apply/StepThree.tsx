@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight, Car, Home, Briefcase, Landmark, Building2, Save, X, Plus, CheckCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Car, Home, Briefcase, Landmark, Building2, Save, X, Plus, CheckCircle, Loader2, Tv, Sofa, Trees, Tractor } from "lucide-react";
 import { CollateralCard } from "./CollateralCard";
 import { FileUploadCard } from "./FileUploadCard";
 import { StepHeader } from "./StepHeader";
@@ -16,40 +16,47 @@ interface StepThreeProps {
   onSaveDraft: () => void;
 }
 
-const collateralOptions = [
+// Outdoor assets require collateral documents
+const outdoorCollateralOptions = [
   {
     id: "logbook",
     icon: <Car className="h-6 w-6" />,
-    title: "Car Logbook",
-    description: "Vehicle registration document",
+    title: "Vehicle (Car Logbook)",
+    description: "Cars, motorcycles, trucks with registration",
     helpText: "Adds +35 points to your credit score",
   },
   {
     id: "titleDeed",
     icon: <Building2 className="h-6 w-6" />,
-    title: "Title Deed",
-    description: "Land or property ownership",
+    title: "Land (Title Deed)",
+    description: "Land or property with ownership documents",
     helpText: "Adds +50 points to your credit score",
   },
   {
     id: "homePhoto",
     icon: <Home className="h-6 w-6" />,
-    title: "Home Photos",
-    description: "Photos of your residence",
-    helpText: "Adds +15 points to your credit score",
+    title: "House / Building",
+    description: "Residential or commercial property",
+    helpText: "Adds +40 points to your credit score",
   },
   {
-    id: "business",
-    icon: <Briefcase className="h-6 w-6" />,
-    title: "Business Proof",
-    description: "Business license or TIN",
+    id: "livestock",
+    icon: <Tractor className="h-6 w-6" />,
+    title: "Livestock / Farm Assets",
+    description: "Cattle, poultry, farming equipment",
     helpText: "Adds +25 points to your credit score",
   },
 ];
 
 export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepThreeProps) => {
-  const assetInputRef = useRef<HTMLInputElement>(null);
-  const [uploadingAsset, setUploadingAsset] = useState(false);
+  const indoorAssetInputRef = useRef<HTMLInputElement>(null);
+  const outdoorAssetInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingIndoor, setUploadingIndoor] = useState(false);
+  const [uploadingOutdoor, setUploadingOutdoor] = useState(false);
+
+  // Separate indoor and outdoor asset pictures
+  const indoorAssets = formData.indoorAssetPictures || [];
+  const outdoorAssets = formData.outdoorAssetPictures || [];
 
   const toggleCollateral = (id: string) => {
     const current = formData.selectedCollateral || [];
@@ -59,56 +66,73 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
     updateFormData({ selectedCollateral: updated });
   };
 
-  const handleAssetUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleIndoorAssetUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setUploadingAsset(true);
+      setUploadingIndoor(true);
       const newFiles = Array.from(e.target.files);
       
       setTimeout(() => {
-        const currentAssets = formData.assetPictures || [];
-        updateFormData({ assetPictures: [...currentAssets, ...newFiles] });
-        setUploadingAsset(false);
-        toast.success(`${newFiles.length} asset photo(s) added`);
+        updateFormData({ indoorAssetPictures: [...indoorAssets, ...newFiles] });
+        setUploadingIndoor(false);
+        toast.success(`${newFiles.length} indoor asset photo(s) added`);
       }, 1000);
     }
   };
 
-  const removeAsset = (index: number) => {
-    const currentAssets = formData.assetPictures || [];
-    const updated = currentAssets.filter((_, i) => i !== index);
-    updateFormData({ assetPictures: updated });
+  const handleOutdoorAssetUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setUploadingOutdoor(true);
+      const newFiles = Array.from(e.target.files);
+      
+      setTimeout(() => {
+        updateFormData({ outdoorAssetPictures: [...outdoorAssets, ...newFiles] });
+        setUploadingOutdoor(false);
+        toast.success(`${newFiles.length} outdoor asset photo(s) added`);
+      }, 1000);
+    }
+  };
+
+  const removeIndoorAsset = (index: number) => {
+    const updated = indoorAssets.filter((_, i) => i !== index);
+    updateFormData({ indoorAssetPictures: updated });
+  };
+
+  const removeOutdoorAsset = (index: number) => {
+    const updated = outdoorAssets.filter((_, i) => i !== index);
+    updateFormData({ outdoorAssetPictures: updated });
   };
 
   const handleNext = () => {
-    // Validate required uploads
-    if (formData.selectedCollateral.length === 0) {
-      toast.error("Please select at least one collateral option");
+    const missingItems: string[] = [];
+
+    // At least one category of assets is required
+    if (indoorAssets.length === 0 && outdoorAssets.length === 0) {
+      toast.error("Please upload at least one asset photo (indoor or outdoor)");
       return;
     }
 
-    // Check if required documents are uploaded for selected collateral
-    const missingDocs: string[] = [];
-    
+    // If outdoor assets are selected, collateral documents are required
+    if (outdoorAssets.length > 0 && formData.selectedCollateral.length === 0) {
+      toast.error("Please select at least one collateral type for your outdoor assets");
+      return;
+    }
+
+    // Check if required documents are uploaded for selected outdoor collateral
     if (formData.selectedCollateral.includes("logbook") && !formData.logbook) {
-      missingDocs.push("Car Logbook");
+      missingItems.push("Vehicle Logbook");
     }
     if (formData.selectedCollateral.includes("titleDeed") && !formData.titleDeed) {
-      missingDocs.push("Title Deed");
+      missingItems.push("Title Deed");
     }
     if (formData.selectedCollateral.includes("homePhoto") && !formData.homePhoto) {
-      missingDocs.push("Home Photos");
+      missingItems.push("House/Building Photos");
     }
-    if (formData.selectedCollateral.includes("business") && !formData.businessPhoto) {
-      missingDocs.push("Business Proof");
-    }
-
-    // Asset photos are always required
-    if (!formData.assetPictures || formData.assetPictures.length === 0) {
-      missingDocs.push("Asset Photos");
+    if (formData.selectedCollateral.includes("livestock") && !formData.businessPhoto) {
+      missingItems.push("Livestock/Farm Documentation");
     }
 
-    if (missingDocs.length > 0) {
-      toast.error(`Please upload: ${missingDocs.join(", ")}`);
+    if (missingItems.length > 0) {
+      toast.error(`Please upload: ${missingItems.join(", ")}`);
       return;
     }
 
@@ -116,67 +140,88 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
   };
 
   const isSelected = (id: string) => formData.selectedCollateral?.includes(id);
-  const assetPictures = formData.assetPictures || [];
+
+  const calculateCreditBoost = () => {
+    let points = 0;
+    points += indoorAssets.length * 5;
+    points += outdoorAssets.length * 10;
+    points += formData.selectedCollateral.length * 25;
+    return points;
+  };
 
   return (
     <div className="space-y-6">
       <StepHeader
         icon={<Landmark className="h-5 w-5" />}
-        title="Build Your Credit Case"
-        description="Select collateral options and upload proof documents"
+        title="Asset Declaration"
+        description="Document your assets to strengthen your loan application"
         formData={formData}
       />
 
-      {/* Asset Photos Section - Always Required */}
+      {/* Indoor Assets Section */}
       <Card className="border-0 bg-card p-6 shadow-elegant">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h3 className="font-serif text-lg font-bold text-secondary">
-              Asset Photos <span className="text-primary">*</span>
-            </h3>
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
+            <Tv className="h-6 w-6 text-blue-600" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif text-lg font-bold text-secondary">
+                Indoor Assets
+              </h3>
+              {indoorAssets.length > 0 && (
+                <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-600">
+                  {indoorAssets.length} photo{indoorAssets.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground">
-              Upload photos of your valuable assets (electronics, furniture, vehicles, etc.)
+              Electronics, furniture, appliances & household items
             </p>
           </div>
-          {assetPictures.length > 0 && (
-            <span className="rounded-full bg-health-green/20 px-3 py-1 text-sm font-medium text-health-green">
-              {assetPictures.length} photo{assetPictures.length !== 1 ? 's' : ''}
+        </div>
+
+        {/* Indoor Examples */}
+        <div className="mb-4 flex flex-wrap gap-2">
+          {["Television", "Refrigerator", "Computer", "Sofa", "Tables", "Beds"].map((item) => (
+            <span key={item} className="rounded-full bg-muted/50 px-3 py-1 text-xs text-muted-foreground">
+              {item}
             </span>
-          )}
+          ))}
         </div>
 
         <input
-          ref={assetInputRef}
+          ref={indoorAssetInputRef}
           type="file"
           accept="image/*"
           multiple
           capture="environment"
-          onChange={handleAssetUpload}
+          onChange={handleIndoorAssetUpload}
           className="hidden"
         />
 
-        {/* Asset Grid */}
+        {/* Indoor Asset Grid */}
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-          {assetPictures.map((file, index) => (
+          {indoorAssets.map((file, index) => (
             <div
               key={index}
-              className="group relative aspect-square overflow-hidden rounded-lg border-2 border-health-green bg-teal-50"
+              className="group relative aspect-square overflow-hidden rounded-lg border-2 border-blue-400 bg-blue-50"
             >
               <img
                 src={URL.createObjectURL(file)}
-                alt={`Asset ${index + 1}`}
+                alt={`Indoor Asset ${index + 1}`}
                 className="h-full w-full object-cover"
               />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  removeAsset(index);
+                  removeIndoorAsset(index);
                 }}
                 className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition-opacity group-hover:opacity-100"
               >
                 <X className="h-4 w-4" />
               </button>
-              <div className="absolute bottom-1 left-1 flex h-5 w-5 items-center justify-center rounded-full bg-health-green text-white">
+              <div className="absolute bottom-1 left-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white">
                 <CheckCircle className="h-3 w-3" />
               </div>
             </div>
@@ -184,62 +229,165 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
 
           {/* Add More Button */}
           <button
-            onClick={() => assetInputRef.current?.click()}
-            disabled={uploadingAsset}
-            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 transition-all hover:border-primary hover:bg-coral-100/30"
+            onClick={() => indoorAssetInputRef.current?.click()}
+            disabled={uploadingIndoor}
+            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50/50 transition-all hover:border-blue-500 hover:bg-blue-100/50"
           >
-            {uploadingAsset ? (
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            {uploadingIndoor ? (
+              <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
             ) : (
               <>
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <Plus className="h-5 w-5 text-primary" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                  <Plus className="h-5 w-5 text-blue-600" />
                 </div>
-                <span className="text-xs font-medium text-muted-foreground">Add Photo</span>
+                <span className="text-xs font-medium text-blue-600">Add Photo</span>
               </>
             )}
           </button>
         </div>
 
         <p className="mt-3 text-xs text-muted-foreground">
-          📸 Tip: Clear, well-lit photos of your assets help improve your credit assessment
+          📸 Take clear photos of each indoor item you own
         </p>
       </Card>
 
-      {/* Collateral Options */}
+      {/* Outdoor Assets Section */}
       <Card className="border-0 bg-card p-6 shadow-elegant">
-        <h3 className="mb-2 font-serif text-lg font-bold text-secondary">
-          Collateral Documents <span className="text-primary">*</span>
-        </h3>
-        <p className="mb-4 text-sm text-muted-foreground">
-          Select all that apply – more options mean better approval chances:
-        </p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {collateralOptions.map((option) => (
-            <CollateralCard
-              key={option.id}
-              icon={option.icon}
-              title={option.title}
-              description={option.description}
-              helpText={option.helpText}
-              selected={isSelected(option.id)}
-              onSelect={() => toggleCollateral(option.id)}
-            />
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+            <Trees className="h-6 w-6 text-green-600" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif text-lg font-bold text-secondary">
+                Outdoor Assets
+              </h3>
+              {outdoorAssets.length > 0 && (
+                <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-600">
+                  {outdoorAssets.length} photo{outdoorAssets.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              High-value properties requiring documentation
+            </p>
+          </div>
+        </div>
+
+        {/* Outdoor Examples */}
+        <div className="mb-4 flex flex-wrap gap-2">
+          {["Vehicles", "Land", "Houses", "Livestock", "Farm Equipment"].map((item) => (
+            <span key={item} className="rounded-full bg-muted/50 px-3 py-1 text-xs text-muted-foreground">
+              {item}
+            </span>
           ))}
         </div>
+
+        <input
+          ref={outdoorAssetInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          capture="environment"
+          onChange={handleOutdoorAssetUpload}
+          className="hidden"
+        />
+
+        {/* Outdoor Asset Grid */}
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+          {outdoorAssets.map((file, index) => (
+            <div
+              key={index}
+              className="group relative aspect-square overflow-hidden rounded-lg border-2 border-green-400 bg-green-50"
+            >
+              <img
+                src={URL.createObjectURL(file)}
+                alt={`Outdoor Asset ${index + 1}`}
+                className="h-full w-full object-cover"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeOutdoorAsset(index);
+                }}
+                className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <div className="absolute bottom-1 left-1 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white">
+                <CheckCircle className="h-3 w-3" />
+              </div>
+            </div>
+          ))}
+
+          {/* Add More Button */}
+          <button
+            onClick={() => outdoorAssetInputRef.current?.click()}
+            disabled={uploadingOutdoor}
+            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-green-300 bg-green-50/50 transition-all hover:border-green-500 hover:bg-green-100/50"
+          >
+            {uploadingOutdoor ? (
+              <Loader2 className="h-6 w-6 animate-spin text-green-500" />
+            ) : (
+              <>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                  <Plus className="h-5 w-5 text-green-600" />
+                </div>
+                <span className="text-xs font-medium text-green-600">Add Photo</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        <p className="mt-3 text-xs text-muted-foreground">
+          📸 Outdoor assets require supporting documents (shown below when photos are added)
+        </p>
       </Card>
 
-      {/* Upload Proof Section - Shows for selected options */}
-      {formData.selectedCollateral?.length > 0 && (
+      {/* Collateral Documents - Only shown when outdoor assets exist */}
+      {outdoorAssets.length > 0 && (
+        <Card className="animate-slide-up border-0 bg-card p-6 shadow-elegant">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100">
+              <Landmark className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="font-serif text-lg font-bold text-secondary">
+                Collateral Documents <span className="text-primary">*</span>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Select the types of outdoor assets you've uploaded
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {outdoorCollateralOptions.map((option) => (
+              <CollateralCard
+                key={option.id}
+                icon={option.icon}
+                title={option.title}
+                description={option.description}
+                helpText={option.helpText}
+                selected={isSelected(option.id)}
+                onSelect={() => toggleCollateral(option.id)}
+              />
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Upload Documents Section - Shows for selected outdoor collateral */}
+      {outdoorAssets.length > 0 && formData.selectedCollateral?.length > 0 && (
         <Card className="animate-slide-up border-0 bg-card p-6 shadow-elegant">
           <h3 className="mb-4 font-serif text-lg font-bold text-secondary">
-            Upload Collateral Documents
+            Upload Supporting Documents
           </h3>
           <div className="space-y-4">
             {isSelected("logbook") && (
               <FileUploadCard
-                label="Logbook Document"
-                description="Upload your vehicle logbook"
+                label="Vehicle Logbook"
+                description="Upload your vehicle registration document"
                 icon={<Car className="h-6 w-6" />}
                 file={formData.logbook}
                 onFileChange={(file) => updateFormData({ logbook: file })}
@@ -249,7 +397,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
             {isSelected("titleDeed") && (
               <FileUploadCard
                 label="Title Deed"
-                description="Upload your property title deed"
+                description="Upload your land or property ownership document"
                 icon={<Building2 className="h-6 w-6" />}
                 file={formData.titleDeed}
                 onFileChange={(file) => updateFormData({ titleDeed: file })}
@@ -258,19 +406,19 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
             )}
             {isSelected("homePhoto") && (
               <FileUploadCard
-                label="Home Photos"
-                description="Take photos of your home exterior and interior"
+                label="House / Building Documents"
+                description="Ownership proof, valuation report, or utility bills"
                 icon={<Home className="h-6 w-6" />}
                 file={formData.homePhoto}
                 onFileChange={(file) => updateFormData({ homePhoto: file })}
                 required
               />
             )}
-            {isSelected("business") && (
+            {isSelected("livestock") && (
               <FileUploadCard
-                label="Business License / TIN"
-                description="Upload your business registration documents"
-                icon={<Briefcase className="h-6 w-6" />}
+                label="Livestock / Farm Documentation"
+                description="Veterinary records, farm registration, or purchase receipts"
+                icon={<Tractor className="h-6 w-6" />}
                 file={formData.businessPhoto}
                 onFileChange={(file) => updateFormData({ businessPhoto: file })}
                 required
@@ -281,12 +429,31 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
       )}
 
       {/* Credit Score Indicator */}
-      {formData.selectedCollateral?.length > 0 && (
+      {(indoorAssets.length > 0 || outdoorAssets.length > 0) && (
         <div className="rounded-xl bg-gradient-to-r from-teal-50 to-coral-100/30 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-secondary">Estimated Credit Boost:</span>
+            <div>
+              <span className="text-sm font-medium text-secondary">Estimated Credit Boost</span>
+              <div className="mt-1 flex gap-3 text-xs text-muted-foreground">
+                {indoorAssets.length > 0 && (
+                  <span className="flex items-center gap-1">
+                    <Tv className="h-3 w-3" /> Indoor: +{indoorAssets.length * 5}
+                  </span>
+                )}
+                {outdoorAssets.length > 0 && (
+                  <span className="flex items-center gap-1">
+                    <Trees className="h-3 w-3" /> Outdoor: +{outdoorAssets.length * 10}
+                  </span>
+                )}
+                {formData.selectedCollateral.length > 0 && (
+                  <span className="flex items-center gap-1">
+                    <Landmark className="h-3 w-3" /> Docs: +{formData.selectedCollateral.length * 25}
+                  </span>
+                )}
+              </div>
+            </div>
             <span className="text-lg font-bold text-health-green">
-              +{formData.selectedCollateral.length * 25 + (assetPictures.length * 5)} points
+              +{calculateCreditBoost()} points
             </span>
           </div>
         </div>
