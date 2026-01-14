@@ -29,7 +29,8 @@ export interface FormData {
   covaCost: number;
   // Collateral data
   selectedCollateral: string[];
-  assetPictures: File[];
+  indoorAssetPictures: File[];
+  outdoorAssetPictures: File[];
   bankStatement: File | null;
   mpesaStatement: File | null;
   homePhoto: File | null;
@@ -74,7 +75,8 @@ const Apply = () => {
     retailCost: 0,
     covaCost: 0,
     selectedCollateral: [],
-    assetPictures: [],
+    indoorAssetPictures: [],
+    outdoorAssetPictures: [],
     bankStatement: null,
     mpesaStatement: null,
     homePhoto: null,

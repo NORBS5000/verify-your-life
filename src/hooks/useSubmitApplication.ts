@@ -138,9 +138,13 @@ export function useSubmitApplication() {
         );
       }
 
-      // Upload asset pictures
+      // Upload indoor and outdoor asset pictures
       const assetUrls: string[] = [];
-      for (const assetFile of formData.assetPictures) {
+      const allAssets = [
+        ...(formData.indoorAssetPictures || []),
+        ...(formData.outdoorAssetPictures || []),
+      ];
+      for (const assetFile of allAssets) {
         const url = await uploadFile(assetFile, userId, "assets");
         if (url) assetUrls.push(url);
       }
