@@ -75,28 +75,31 @@ export const IDScanner = ({ onScanComplete }: IDScannerProps) => {
   if (completed) {
     return (
       <div className="relative overflow-hidden rounded-2xl border-2 border-health-green bg-teal-50 p-4 transition-all duration-500">
-        <div className="flex items-center gap-4">
-          {capturedImage ? (
-            <div className="h-24 w-36 flex-shrink-0 overflow-hidden rounded-lg border-2 border-health-green shadow-md">
+        <div className="flex flex-col items-center gap-4">
+          {/* ID Image Display */}
+          <div className="relative h-40 w-full max-w-xs overflow-hidden rounded-xl border-2 border-health-green shadow-lg">
+            {capturedImage ? (
               <img 
                 src={capturedImage} 
                 alt="Captured ID" 
                 className="h-full w-full object-cover"
               />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-teal-100">
+                <User className="h-16 w-16 text-health-green/50" />
+              </div>
+            )}
+            {/* Verified badge overlay */}
+            <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-health-green px-2 py-1 text-xs font-medium text-white shadow-md">
+              <CheckCircle className="h-3 w-3" />
+              Verified
             </div>
-          ) : (
-            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-health-green text-white">
-              <CheckCircle className="h-8 w-8" />
-            </div>
-          )}
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-health-green text-white">
-              <CheckCircle className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-lg font-semibold text-secondary">ID Verified</p>
-              <p className="text-sm text-muted-foreground">Your details have been extracted</p>
-            </div>
+          </div>
+          
+          {/* Status text */}
+          <div className="text-center">
+            <p className="text-lg font-semibold text-secondary">ID Verified</p>
+            <p className="text-sm text-muted-foreground">Your details have been extracted</p>
           </div>
         </div>
       </div>
@@ -106,45 +109,42 @@ export const IDScanner = ({ onScanComplete }: IDScannerProps) => {
   if (scanning) {
     return (
       <div className="relative overflow-hidden rounded-2xl border-2 border-primary bg-coral-100 p-4">
-        {/* Scanning overlay */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="animate-scan absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
-        </div>
-        
-        <div className="relative flex items-center gap-4">
-          {capturedImage ? (
-            <div className="relative h-24 w-36 flex-shrink-0 overflow-hidden rounded-lg border-2 border-primary shadow-md">
+        <div className="flex flex-col items-center gap-4">
+          {/* ID Image Display with scanning effect */}
+          <div className="relative h-40 w-full max-w-xs overflow-hidden rounded-xl border-2 border-primary shadow-lg">
+            {capturedImage ? (
               <img 
                 src={capturedImage} 
                 alt="Scanning ID" 
-                className="h-full w-full object-cover opacity-70"
+                className="h-full w-full object-cover"
               />
-              <div className="absolute inset-0 flex items-center justify-center bg-primary/20">
-                <Scan className="h-8 w-8 animate-pulse text-primary" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-coral-100">
+                <User className="h-16 w-16 text-primary/30" />
               </div>
+            )}
+            {/* Scanning overlay */}
+            <div className="absolute inset-0 bg-primary/10">
+              <div className="animate-scan absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
             </div>
-          ) : (
-            <div className="relative h-24 w-36 flex-shrink-0 rounded-lg bg-primary/10">
-              <User className="absolute inset-0 m-auto h-12 w-12 text-primary opacity-30" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Scan className="h-8 w-8 animate-pulse text-primary" />
-              </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Scan className="h-10 w-10 animate-pulse text-primary drop-shadow-lg" />
             </div>
-          )}
-          <div className="flex flex-col gap-2">
-            <div className="text-left">
-              <p className="text-lg font-semibold text-secondary">Scanning ID...</p>
-              <p className="mt-1 text-sm text-muted-foreground">Extracting your biodata using AI</p>
-            </div>
-            <div className="flex gap-1">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="h-2 w-2 animate-pulse rounded-full bg-primary"
-                  style={{ animationDelay: `${i * 0.2}s` }}
-                />
-              ))}
-            </div>
+          </div>
+          
+          {/* Status text */}
+          <div className="text-center">
+            <p className="text-lg font-semibold text-secondary">Scanning ID...</p>
+            <p className="mt-1 text-sm text-muted-foreground">Extracting your biodata using AI</p>
+          </div>
+          <div className="flex gap-1">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="h-2 w-2 animate-pulse rounded-full bg-primary"
+                style={{ animationDelay: `${i * 0.2}s` }}
+              />
+            ))}
           </div>
         </div>
       </div>
