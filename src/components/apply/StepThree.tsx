@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight, Car, Home, Briefcase, Landmark, Building2, Save, X, Plus, CheckCircle, Loader2, Tv, Sofa, Trees, Tractor } from "lucide-react";
+import { ArrowLeft, ArrowRight, Car, Home, Briefcase, Landmark, Building2, Save, X, Plus, CheckCircle, Loader2, Tv, Sofa, Trees, Tractor, Monitor, Refrigerator, BedDouble, Armchair, Microwave, Fan, Smartphone, Bike, Truck, Fence, Warehouse } from "lucide-react";
 import { CollateralCard } from "./CollateralCard";
 import { FileUploadCard } from "./FileUploadCard";
 import { StepHeader } from "./StepHeader";
@@ -16,7 +16,30 @@ interface StepThreeProps {
   onSaveDraft: () => void;
 }
 
-// Outdoor assets require collateral documents
+// Indoor asset types
+const indoorAssetTypes = [
+  { id: "television", label: "Television", icon: Tv },
+  { id: "refrigerator", label: "Refrigerator", icon: Refrigerator },
+  { id: "computer", label: "Computer/Laptop", icon: Monitor },
+  { id: "phone", label: "Smartphone/Tablet", icon: Smartphone },
+  { id: "sofa", label: "Sofa/Chairs", icon: Armchair },
+  { id: "bed", label: "Bed/Mattress", icon: BedDouble },
+  { id: "table", label: "Tables/Desks", icon: Sofa },
+  { id: "appliance", label: "Other Appliances", icon: Microwave },
+];
+
+// Outdoor asset types (require collateral documents)
+const outdoorAssetTypes = [
+  { id: "car", label: "Car", icon: Car, collateralId: "logbook" },
+  { id: "motorcycle", label: "Motorcycle", icon: Bike, collateralId: "logbook" },
+  { id: "truck", label: "Truck/Bus", icon: Truck, collateralId: "logbook" },
+  { id: "land", label: "Land/Plot", icon: Building2, collateralId: "titleDeed" },
+  { id: "house", label: "House/Building", icon: Home, collateralId: "homePhoto" },
+  { id: "livestock", label: "Livestock", icon: Tractor, collateralId: "livestock" },
+  { id: "farm", label: "Farm Equipment", icon: Warehouse, collateralId: "livestock" },
+];
+
+// Outdoor collateral documents mapping
 const outdoorCollateralOptions = [
   {
     id: "logbook",
@@ -48,16 +71,24 @@ const outdoorCollateralOptions = [
   },
 ];
 
-type AssetType = "indoor" | "outdoor" | null;
+interface AssetWithType {
+  file: File;
+  assetType: string;
+  category: "indoor" | "outdoor";
+}
 
 export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepThreeProps) => {
   const assetInputRef = useRef<HTMLInputElement>(null);
-  const [selectedAssetType, setSelectedAssetType] = useState<AssetType>(null);
+  const [selectedAssetType, setSelectedAssetType] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<"indoor" | "outdoor" | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  // Separate indoor and outdoor asset pictures
-  const indoorAssets = formData.indoorAssetPictures || [];
-  const outdoorAssets = formData.outdoorAssetPictures || [];
+  // Assets with their types
+  const [assetsWithTypes, setAssetsWithTypes] = useState<AssetWithType[]>([]);
+
+  // Derive indoor and outdoor from assetsWithTypes
+  const indoorAssets = assetsWithTypes.filter(a => a.category === "indoor");
+  const outdoorAssets = assetsWithTypes.filter(a => a.category === "outdoor");
 
   const toggleCollateral = (id: string) => {
     const current = formData.selectedCollateral || [];
@@ -67,8 +98,9 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
     updateFormData({ selectedCollateral: updated });
   };
 
-  const handleSelectAssetType = (type: AssetType) => {
-    setSelectedAssetType(type);
+  const handleSelectAssetType = (assetTypeId: string, category: "indoor" | "outdoor") => {
+    setSelectedAssetType(assetTypeId);
+    setSelectedCategory(category);
     // Trigger file input after selecting type
     setTimeout(() => {
       assetInputRef.current?.click();
@@ -76,20 +108,47 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
   };
 
   const handleAssetUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0 && selectedAssetType) {
+    if (e.target.files && e.target.files.length > 0 && selectedAssetType && selectedCategory) {
       setUploading(true);
       const newFiles = Array.from(e.target.files);
       
-      setTimeout(() => {
-        if (selectedAssetType === "indoor") {
-          updateFormData({ indoorAssetPictures: [...indoorAssets, ...newFiles] });
-          toast.success(`${newFiles.length} indoor asset photo(s) added`);
-        } else {
-          updateFormData({ outdoorAssetPictures: [...outdoorAssets, ...newFiles] });
-          toast.success(`${newFiles.length} outdoor asset photo(s) added`);
+      const newAssets: AssetWithType[] = newFiles.map(file => ({
+        file,
+        assetType: selectedAssetType,
+        category: selectedCategory,
+      }));
+
+      // Auto-select collateral for outdoor assets
+      if (selectedCategory === "outdoor") {
+        const outdoorType = outdoorAssetTypes.find(t => t.id === selectedAssetType);
+        if (outdoorType?.collateralId) {
+          const current = formData.selectedCollateral || [];
+          if (!current.includes(outdoorType.collateralId)) {
+            updateFormData({ selectedCollateral: [...current, outdoorType.collateralId] });
+          }
         }
+      }
+
+      setTimeout(() => {
+        const updatedAssets = [...assetsWithTypes, ...newAssets];
+        setAssetsWithTypes(updatedAssets);
+        
+        // Update formData for submission
+        const indoorFiles = updatedAssets.filter(a => a.category === "indoor").map(a => a.file);
+        const outdoorFiles = updatedAssets.filter(a => a.category === "outdoor").map(a => a.file);
+        updateFormData({ 
+          indoorAssetPictures: indoorFiles,
+          outdoorAssetPictures: outdoorFiles,
+        });
+
+        const assetLabel = selectedCategory === "indoor" 
+          ? indoorAssetTypes.find(t => t.id === selectedAssetType)?.label
+          : outdoorAssetTypes.find(t => t.id === selectedAssetType)?.label;
+        
+        toast.success(`${newFiles.length} ${assetLabel} photo(s) added`);
         setUploading(false);
         setSelectedAssetType(null);
+        setSelectedCategory(null);
       }, 1000);
     }
     // Reset file input
@@ -98,28 +157,31 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
     }
   };
 
-  const removeIndoorAsset = (index: number) => {
-    const updated = indoorAssets.filter((_, i) => i !== index);
-    updateFormData({ indoorAssetPictures: updated });
-  };
-
-  const removeOutdoorAsset = (index: number) => {
-    const updated = outdoorAssets.filter((_, i) => i !== index);
-    updateFormData({ outdoorAssetPictures: updated });
+  const removeAsset = (index: number) => {
+    const updated = assetsWithTypes.filter((_, i) => i !== index);
+    setAssetsWithTypes(updated);
+    
+    // Update formData
+    const indoorFiles = updated.filter(a => a.category === "indoor").map(a => a.file);
+    const outdoorFiles = updated.filter(a => a.category === "outdoor").map(a => a.file);
+    updateFormData({ 
+      indoorAssetPictures: indoorFiles,
+      outdoorAssetPictures: outdoorFiles,
+    });
   };
 
   const handleNext = () => {
     const missingItems: string[] = [];
 
-    // At least one category of assets is required
-    if (indoorAssets.length === 0 && outdoorAssets.length === 0) {
-      toast.error("Please upload at least one asset photo (indoor or outdoor)");
+    // At least one asset is required
+    if (assetsWithTypes.length === 0) {
+      toast.error("Please upload at least one asset photo");
       return;
     }
 
-    // If outdoor assets are selected, collateral documents are required
+    // If outdoor assets exist, collateral documents are required
     if (outdoorAssets.length > 0 && formData.selectedCollateral.length === 0) {
-      toast.error("Please select at least one collateral type for your outdoor assets");
+      toast.error("Please ensure collateral documents are selected for your outdoor assets");
       return;
     }
 
@@ -155,6 +217,13 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
     return points;
   };
 
+  const getAssetLabel = (asset: AssetWithType) => {
+    if (asset.category === "indoor") {
+      return indoorAssetTypes.find(t => t.id === asset.assetType)?.label || asset.assetType;
+    }
+    return outdoorAssetTypes.find(t => t.id === asset.assetType)?.label || asset.assetType;
+  };
+
   return (
     <div className="space-y-6">
       <StepHeader
@@ -177,174 +246,162 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
 
       {/* Asset Type Selection */}
       <Card className="border-0 bg-card p-6 shadow-elegant">
-        <div className="mb-5">
-          <h3 className="font-serif text-lg font-bold text-secondary">
-            Select Asset Type to Upload
-          </h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Choose the category of asset you want to photograph
-          </p>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          {/* Indoor Asset Option */}
-          <button
-            onClick={() => handleSelectAssetType("indoor")}
-            disabled={uploading}
-            className={`group relative flex flex-col items-center gap-4 rounded-xl border-2 p-6 transition-all ${
-              selectedAssetType === "indoor"
-                ? "border-blue-500 bg-blue-50"
-                : "border-border hover:border-blue-300 hover:bg-blue-50/50"
-            }`}
-          >
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 transition-transform group-hover:scale-110">
-              <Tv className="h-8 w-8 text-blue-600" />
-            </div>
-            <div className="text-center">
-              <h4 className="font-semibold text-secondary">Indoor Assets</h4>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Electronics, furniture, appliances
-              </p>
-            </div>
-            <div className="flex flex-wrap justify-center gap-1">
-              {["TV", "Fridge", "Computer", "Sofa"].map((item) => (
-                <span key={item} className="rounded-full bg-blue-100/70 px-2 py-0.5 text-[10px] text-blue-700">
-                  {item}
-                </span>
-              ))}
-            </div>
-            {uploading && selectedAssetType === "indoor" && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-blue-50/80">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-              </div>
-            )}
-          </button>
-
-          {/* Outdoor Asset Option */}
-          <button
-            onClick={() => handleSelectAssetType("outdoor")}
-            disabled={uploading}
-            className={`group relative flex flex-col items-center gap-4 rounded-xl border-2 p-6 transition-all ${
-              selectedAssetType === "outdoor"
-                ? "border-green-500 bg-green-50"
-                : "border-border hover:border-green-300 hover:bg-green-50/50"
-            }`}
-          >
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-green-100 transition-transform group-hover:scale-110">
-              <Trees className="h-8 w-8 text-green-600" />
-            </div>
-            <div className="text-center">
-              <h4 className="font-semibold text-secondary">Outdoor Assets</h4>
-              <p className="mt-1 text-xs text-muted-foreground">
-                High-value properties with documents
-              </p>
-            </div>
-            <div className="flex flex-wrap justify-center gap-1">
-              {["Vehicle", "Land", "House", "Livestock"].map((item) => (
-                <span key={item} className="rounded-full bg-green-100/70 px-2 py-0.5 text-[10px] text-green-700">
-                  {item}
-                </span>
-              ))}
-            </div>
-            {uploading && selectedAssetType === "outdoor" && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-green-50/80">
-                <Loader2 className="h-8 w-8 animate-spin text-green-500" />
-              </div>
-            )}
-          </button>
-        </div>
-
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          📸 Click on a category to start uploading photos
-        </p>
-      </Card>
-
-      {/* Uploaded Indoor Assets */}
-      {indoorAssets.length > 0 && (
-        <Card className="animate-slide-up border-0 bg-card p-6 shadow-elegant">
+        {/* Indoor Assets Section */}
+        <div className="mb-6">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
               <Tv className="h-5 w-5 text-blue-600" />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-secondary">
-                  Indoor Assets
-                </h3>
-                <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-600">
-                  {indoorAssets.length} photo{indoorAssets.length !== 1 ? 's' : ''}
-                </span>
-              </div>
+            <div>
+              <h3 className="font-semibold text-secondary">Indoor Assets</h3>
               <p className="text-xs text-muted-foreground">
                 Electronics, furniture & household items
               </p>
             </div>
           </div>
-
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
-            {indoorAssets.map((file, index) => (
-              <div
-                key={index}
-                className="group relative aspect-square overflow-hidden rounded-lg border-2 border-blue-300"
-              >
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={`Indoor Asset ${index + 1}`}
-                  className="h-full w-full object-cover"
-                />
+          
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-4">
+            {indoorAssetTypes.map((assetType) => {
+              const IconComponent = assetType.icon;
+              const isCurrentlySelected = selectedAssetType === assetType.id && selectedCategory === "indoor";
+              return (
                 <button
-                  onClick={() => removeIndoorAsset(index)}
-                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                  key={assetType.id}
+                  onClick={() => handleSelectAssetType(assetType.id, "indoor")}
+                  disabled={uploading}
+                  className={`group relative flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all ${
+                    isCurrentlySelected
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-border hover:border-blue-300 hover:bg-blue-50/50"
+                  }`}
                 >
-                  <X className="h-3 w-3" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 transition-transform group-hover:scale-110">
+                    <IconComponent className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <span className="text-center text-xs font-medium text-secondary">
+                    {assetType.label}
+                  </span>
+                  {uploading && isCurrentlySelected && (
+                    <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-blue-50/80">
+                      <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                    </div>
+                  )}
                 </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
-        </Card>
-      )}
+        </div>
 
-      {/* Uploaded Outdoor Assets */}
-      {outdoorAssets.length > 0 && (
-        <Card className="animate-slide-up border-0 bg-card p-6 shadow-elegant">
+        {/* Divider */}
+        <div className="my-6 border-t border-border" />
+
+        {/* Outdoor Assets Section */}
+        <div>
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
               <Trees className="h-5 w-5 text-green-600" />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-secondary">
-                  Outdoor Assets
-                </h3>
-                <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-600">
-                  {outdoorAssets.length} photo{outdoorAssets.length !== 1 ? 's' : ''}
-                </span>
-              </div>
+            <div>
+              <h3 className="font-semibold text-secondary">Outdoor Assets</h3>
               <p className="text-xs text-muted-foreground">
-                High-value properties requiring documentation
+                High-value properties (requires documents)
               </p>
             </div>
           </div>
+          
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-4">
+            {outdoorAssetTypes.map((assetType) => {
+              const IconComponent = assetType.icon;
+              const isCurrentlySelected = selectedAssetType === assetType.id && selectedCategory === "outdoor";
+              return (
+                <button
+                  key={assetType.id}
+                  onClick={() => handleSelectAssetType(assetType.id, "outdoor")}
+                  disabled={uploading}
+                  className={`group relative flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all ${
+                    isCurrentlySelected
+                      ? "border-green-500 bg-green-50"
+                      : "border-border hover:border-green-300 hover:bg-green-50/50"
+                  }`}
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 transition-transform group-hover:scale-110">
+                    <IconComponent className="h-5 w-5 text-green-600" />
+                  </div>
+                  <span className="text-center text-xs font-medium text-secondary">
+                    {assetType.label}
+                  </span>
+                  {uploading && isCurrentlySelected && (
+                    <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-green-50/80">
+                      <Loader2 className="h-5 w-5 animate-spin text-green-500" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
-            {outdoorAssets.map((file, index) => (
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          📸 Tap an asset type to take or upload photos
+        </p>
+      </Card>
+
+      {/* Uploaded Assets Display */}
+      {assetsWithTypes.length > 0 && (
+        <Card className="animate-slide-up border-0 bg-card p-6 shadow-elegant">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-semibold text-secondary">Uploaded Assets</h3>
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+              {assetsWithTypes.length} photo{assetsWithTypes.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+            {assetsWithTypes.map((asset, index) => (
               <div
                 key={index}
-                className="group relative aspect-square overflow-hidden rounded-lg border-2 border-green-300"
+                className={`group relative overflow-hidden rounded-lg border-2 ${
+                  asset.category === "indoor" ? "border-blue-300" : "border-green-300"
+                }`}
               >
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={`Outdoor Asset ${index + 1}`}
-                  className="h-full w-full object-cover"
-                />
+                <div className="aspect-square">
+                  <img
+                    src={URL.createObjectURL(asset.file)}
+                    alt={getAssetLabel(asset)}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className={`px-2 py-1.5 text-center ${
+                  asset.category === "indoor" ? "bg-blue-50" : "bg-green-50"
+                }`}>
+                  <span className={`text-[10px] font-medium ${
+                    asset.category === "indoor" ? "text-blue-700" : "text-green-700"
+                  }`}>
+                    {getAssetLabel(asset)}
+                  </span>
+                </div>
                 <button
-                  onClick={() => removeOutdoorAsset(index)}
+                  onClick={() => removeAsset(index)}
                   className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition-opacity group-hover:opacity-100"
                 >
                   <X className="h-3 w-3" />
                 </button>
               </div>
             ))}
+          </div>
+
+          {/* Summary */}
+          <div className="mt-4 flex gap-4 text-xs text-muted-foreground">
+            {indoorAssets.length > 0 && (
+              <span className="flex items-center gap-1">
+                <Tv className="h-3 w-3 text-blue-600" /> {indoorAssets.length} Indoor
+              </span>
+            )}
+            {outdoorAssets.length > 0 && (
+              <span className="flex items-center gap-1">
+                <Trees className="h-3 w-3 text-green-600" /> {outdoorAssets.length} Outdoor
+              </span>
+            )}
           </div>
         </Card>
       )}
