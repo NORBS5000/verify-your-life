@@ -272,7 +272,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                     }`}
                   >
                     {hasPhotos ? (
-                      <div className="relative h-14 w-14 overflow-hidden rounded-lg">
+                      <div className="relative h-16 w-16 overflow-hidden rounded-lg">
                         <img 
                           src={URL.createObjectURL(photos[0])} 
                           alt={assetType.label}
@@ -285,8 +285,8 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                         )}
                       </div>
                     ) : (
-                      <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-blue-100 transition-transform group-hover:scale-110">
-                        <IconComponent className="h-6 w-6 text-blue-600" />
+                      <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-blue-100 transition-transform group-hover:scale-110">
+                        <IconComponent className="h-7 w-7 text-blue-600" />
                       </div>
                     )}
                     <span className="text-center text-xs font-medium text-secondary">
@@ -356,7 +356,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                     }`}
                   >
                     {hasPhotos ? (
-                      <div className="relative h-14 w-14 overflow-hidden rounded-lg">
+                      <div className="relative h-16 w-16 overflow-hidden rounded-lg">
                         <img 
                           src={URL.createObjectURL(photos[0])} 
                           alt={assetType.label}
@@ -369,8 +369,8 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                         )}
                       </div>
                     ) : (
-                      <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-green-100 transition-transform group-hover:scale-110">
-                        <IconComponent className="h-6 w-6 text-green-600" />
+                      <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-green-100 transition-transform group-hover:scale-110">
+                        <IconComponent className="h-7 w-7 text-green-600" />
                       </div>
                     )}
                     <span className="text-center text-xs font-medium text-secondary">
