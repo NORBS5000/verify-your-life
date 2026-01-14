@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { Camera, Scan, CheckCircle, User } from "lucide-react";
+import { Camera, Scan, CheckCircle, User, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 interface IDScannerProps {
   onScanComplete: (data: {
@@ -13,29 +14,55 @@ interface IDScannerProps {
 export const IDScanner = ({ onScanComplete }: IDScannerProps) => {
   const [scanning, setScanning] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCapture = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
       setScanning(true);
-      
-      // Simulate AI scanning with delay
-      setTimeout(() => {
+      setError(null);
+
+      try {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        const response = await fetch("https://orionapisalpha.onrender.com/id/analyze", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to analyze ID");
+        }
+
+        const data = await response.json();
+        
         setScanning(false);
         setCompleted(true);
-        
-        // Simulated extracted data
+
+        // Extract data from API response
+        const fullName = data.fields?.["Full Name"] || "";
+        const idNumber = data.fields?.["ID Number"] || data.fields?.["Passport Number"] || "";
+
         onScanComplete({
-          fullName: "John Mwangi Kamau",
-          idNumber: "32456789",
-          dateOfBirth: "1988-05-15",
-          sex: "male",
+          fullName,
+          idNumber,
+          dateOfBirth: "", // API doesn't return this, user can fill manually
+          sex: "", // API doesn't return this, user can fill manually
         });
-      }, 2500);
+
+        toast.success("ID analyzed successfully!");
+      } catch (err) {
+        console.error("ID analysis error:", err);
+        setScanning(false);
+        setError("Failed to analyze ID. Please try again.");
+        toast.error("Failed to analyze ID. Please try again.");
+      }
     }
   };
 
@@ -101,6 +128,13 @@ export const IDScanner = ({ onScanComplete }: IDScannerProps) => {
         onChange={handleFileChange}
         className="hidden"
       />
+      
+      {error && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-red-600">
+          <AlertCircle className="h-5 w-5" />
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
       
       <div className="flex flex-col items-center justify-center gap-4 py-4">
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 transition-transform duration-300 group-hover:scale-110">
