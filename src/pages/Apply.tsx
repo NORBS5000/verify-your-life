@@ -31,6 +31,7 @@ export interface FormData {
   selectedCollateral: string[];
   indoorAssetPictures: File[];
   outdoorAssetPictures: File[];
+  collateralDocuments: { [key: string]: File | null };
   bankStatement: File | null;
   mpesaStatement: File | null;
   homePhoto: File | null;
@@ -77,6 +78,7 @@ const Apply = () => {
     selectedCollateral: [],
     indoorAssetPictures: [],
     outdoorAssetPictures: [],
+    collateralDocuments: {},
     bankStatement: null,
     mpesaStatement: null,
     homePhoto: null,
