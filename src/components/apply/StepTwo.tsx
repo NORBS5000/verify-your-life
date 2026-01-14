@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight, FileText, Pill, Loader2, Stethoscope, Save } from "lucide-react";
+import type { FormData } from "@/pages/Apply";
+import { ArrowLeft, ArrowRight, Pill, Loader2, Stethoscope, Save } from "lucide-react";
 import { FileUploadCard } from "./FileUploadCard";
 import { PriceComparison } from "./PriceComparison";
 import { StepHeader } from "./StepHeader";
 import { MedicationList, MedicationItem } from "./MedicationList";
+import { toast } from "sonner";
 
 interface StepTwoProps {
   formData: FormData;
@@ -16,54 +17,88 @@ interface StepTwoProps {
   onSaveDraft: () => void;
 }
 
-// Simulated extracted medications (in production, this would come from AI analysis)
-const mockExtractedItems: MedicationItem[] = [
-  { name: "Amoxicillin 500mg", dosage: "500mg", quantity: 21, unitPrice: 450, type: "medication" },
-  { name: "Metformin HCL", dosage: "850mg", quantity: 60, unitPrice: 280, type: "medication" },
-  { name: "Omeprazole", dosage: "20mg", quantity: 30, unitPrice: 320, type: "medication" },
-  { name: "Paracetamol", dosage: "500mg", quantity: 20, unitPrice: 150, type: "medication" },
-  { name: "Complete Blood Count (CBC)", dosage: "Lab Test", quantity: 1, unitPrice: 2500, type: "test" },
-  { name: "Lipid Profile", dosage: "Lab Test", quantity: 1, unitPrice: 3500, type: "test" },
-  { name: "HbA1c Test", dosage: "Diabetes Monitoring", quantity: 1, unitPrice: 2800, type: "test" },
-];
+interface MedicineInfo {
+  name: string;
+  amount: string;
+  days: number;
+  unit_price: number;
+  total_cost: number;
+}
+
+interface MedicalNeedsResponse {
+  predicted_conditions: string[];
+  medicines_info: MedicineInfo[];
+}
 
 export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepTwoProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [extractedItems, setExtractedItems] = useState<MedicationItem[]>([]);
+  const [predictedConditions, setPredictedConditions] = useState<string[]>([]);
 
-  const handleAnalyze = () => {
-    if (formData.medicalPrescription || formData.drugImage) {
-      setIsAnalyzing(true);
-      
-      // Simulate AI analysis
-      setTimeout(() => {
-        setIsAnalyzing(false);
-        setExtractedItems(mockExtractedItems);
-        
-        // Calculate total from extracted items
-        const totalRetail = mockExtractedItems.reduce(
-          (sum, item) => sum + item.unitPrice * item.quantity,
-          0
-        );
-        const covaCost = Math.round(totalRetail * 0.63); // ~37% savings
-        
-        updateFormData({
-          retailCost: totalRetail,
-          covaCost: covaCost,
-        });
-        setShowPricing(true);
-      }, 2500);
+  const handleAnalyze = async () => {
+    if (!formData.drugImage) {
+      toast.error("Please upload a medication photo");
+      return;
+    }
+
+    setIsAnalyzing(true);
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("files", formData.drugImage);
+
+      const response = await fetch("https://orionapisalpha.onrender.com/medical_needs/predict", {
+        method: "POST",
+        body: formDataToSend,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to analyze medication");
+      }
+
+      const data: MedicalNeedsResponse = await response.json();
+
+      // Convert API response to MedicationItem format
+      const medications: MedicationItem[] = data.medicines_info.map((medicine) => ({
+        name: medicine.name,
+        dosage: medicine.amount,
+        quantity: medicine.days,
+        unitPrice: medicine.unit_price,
+        type: "medication" as const,
+      }));
+
+      setExtractedItems(medications);
+      setPredictedConditions(data.predicted_conditions);
+
+      // Calculate total from extracted items
+      const totalRetail = data.medicines_info.reduce(
+        (sum, item) => sum + item.total_cost,
+        0
+      );
+      const covaCost = Math.round(totalRetail * 0.63); // ~37% savings
+
+      updateFormData({
+        retailCost: totalRetail,
+        covaCost: covaCost,
+      });
+      setShowPricing(true);
+      toast.success("Medication analyzed successfully!");
+    } catch (err) {
+      console.error("Medication analysis error:", err);
+      toast.error("Failed to analyze medication. Please try again.");
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
   const handleNext = () => {
     if (showPricing) {
       nextStep();
-    } else if (formData.medicalPrescription || formData.drugImage) {
+    } else if (formData.drugImage) {
       handleAnalyze();
     } else {
-      alert("Please upload at least one document");
+      toast.error("Please upload a medication photo");
     }
   };
 
@@ -80,34 +115,39 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       <Card className="border-0 bg-card p-6 shadow-elegant">
         <div className="space-y-4">
           <FileUploadCard
-            label="Medical Prescription"
-            description="Doctor's prescription or referral letter"
-            helpText="Clear images help us process faster"
-            icon={<FileText className="h-6 w-6" />}
-            file={formData.medicalPrescription}
-            onFileChange={(file) => {
-              updateFormData({ medicalPrescription: file });
-              setShowPricing(false);
-              setExtractedItems([]);
-            }}
-            accept="image/*,.pdf"
-          />
-
-          <FileUploadCard
             label="Medication Photo"
             description="Photo of prescribed medications"
-            helpText="Helps us verify medication costs"
+            helpText="Upload a clear photo of your medications for AI analysis"
             icon={<Pill className="h-6 w-6" />}
             file={formData.drugImage}
             onFileChange={(file) => {
               updateFormData({ drugImage: file });
               setShowPricing(false);
               setExtractedItems([]);
+              setPredictedConditions([]);
             }}
             accept="image/*"
+            required
           />
         </div>
       </Card>
+
+      {/* Predicted Conditions */}
+      {predictedConditions.length > 0 && showPricing && (
+        <Card className="animate-slide-up border-0 bg-gradient-to-r from-teal-50 to-cyan-50 p-4 shadow-elegant">
+          <div className="flex items-start gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100">
+              <Stethoscope className="h-4 w-4 text-teal-600" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-secondary">Predicted Conditions</h4>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {predictedConditions.join(", ")}
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Analyzing State */}
       {isAnalyzing && (
