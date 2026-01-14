@@ -28,47 +28,15 @@ const indoorAssetTypes = [
   { id: "appliance", label: "Other Appliances", icon: Microwave },
 ];
 
-// Outdoor asset types (require collateral documents)
+// Outdoor asset types with specific document requirements
 const outdoorAssetTypes = [
-  { id: "car", label: "Car", icon: Car, collateralId: "logbook" },
-  { id: "motorcycle", label: "Motorcycle", icon: Bike, collateralId: "logbook" },
-  { id: "truck", label: "Truck/Bus", icon: Truck, collateralId: "logbook" },
-  { id: "land", label: "Land/Plot", icon: Building2, collateralId: "titleDeed" },
-  { id: "house", label: "House/Building", icon: Home, collateralId: "homePhoto" },
-  { id: "livestock", label: "Livestock", icon: Tractor, collateralId: "livestock" },
-  { id: "farm", label: "Farm Equipment", icon: Warehouse, collateralId: "livestock" },
-];
-
-// Outdoor collateral documents mapping
-const outdoorCollateralOptions = [
-  {
-    id: "logbook",
-    icon: <Car className="h-6 w-6" />,
-    title: "Vehicle (Car Logbook)",
-    description: "Cars, motorcycles, trucks with registration",
-    helpText: "Adds +35 points to your credit score",
-  },
-  {
-    id: "titleDeed",
-    icon: <Building2 className="h-6 w-6" />,
-    title: "Land (Title Deed)",
-    description: "Land or property with ownership documents",
-    helpText: "Adds +50 points to your credit score",
-  },
-  {
-    id: "homePhoto",
-    icon: <Home className="h-6 w-6" />,
-    title: "House / Building",
-    description: "Residential or commercial property",
-    helpText: "Adds +40 points to your credit score",
-  },
-  {
-    id: "livestock",
-    icon: <Tractor className="h-6 w-6" />,
-    title: "Livestock / Farm Assets",
-    description: "Cattle, poultry, farming equipment",
-    helpText: "Adds +25 points to your credit score",
-  },
+  { id: "car", label: "Car", icon: Car, documentId: "carLogbook", documentLabel: "Car Logbook", documentDescription: "Upload your car registration/logbook" },
+  { id: "motorcycle", label: "Motorcycle", icon: Bike, documentId: "motorcycleLogbook", documentLabel: "Motorcycle Logbook", documentDescription: "Upload your motorcycle registration/logbook" },
+  { id: "truck", label: "Truck/Bus", icon: Truck, documentId: "truckLogbook", documentLabel: "Truck/Bus Logbook", documentDescription: "Upload your truck or bus registration/logbook" },
+  { id: "land", label: "Land/Plot", icon: Building2, documentId: "titleDeed", documentLabel: "Title Deed", documentDescription: "Upload your land/plot ownership title deed" },
+  { id: "house", label: "House/Building", icon: Home, documentId: "houseDeed", documentLabel: "House Title Deed / Documents", documentDescription: "Upload house ownership documents or title deed" },
+  { id: "livestock", label: "Livestock", icon: Tractor, documentId: "livestockDocs", documentLabel: "Livestock Documentation", documentDescription: "Veterinary records, purchase receipts, or registration" },
+  { id: "farm", label: "Farm Equipment", icon: Warehouse, documentId: "farmDocs", documentLabel: "Farm Equipment Documents", documentDescription: "Purchase receipts or ownership proof for farm equipment" },
 ];
 
 interface AssetWithType {
@@ -89,6 +57,27 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
   // Derive indoor and outdoor from assetsWithTypes
   const indoorAssets = assetsWithTypes.filter(a => a.category === "indoor");
   const outdoorAssets = assetsWithTypes.filter(a => a.category === "outdoor");
+
+  // Get unique required documents based on uploaded outdoor assets
+  const getRequiredDocuments = () => {
+    const uniqueAssetTypes = [...new Set(outdoorAssets.map(a => a.assetType))];
+    return uniqueAssetTypes.map(assetTypeId => {
+      const assetType = outdoorAssetTypes.find(t => t.id === assetTypeId);
+      return assetType ? {
+        documentId: assetType.documentId,
+        documentLabel: assetType.documentLabel,
+        documentDescription: assetType.documentDescription,
+        icon: assetType.icon,
+        assetLabel: assetType.label,
+      } : null;
+    }).filter(Boolean) as {
+      documentId: string;
+      documentLabel: string;
+      documentDescription: string;
+      icon: React.ComponentType<{ className?: string }>;
+      assetLabel: string;
+    }[];
+  };
 
   const toggleCollateral = (id: string) => {
     const current = formData.selectedCollateral || [];
@@ -121,10 +110,10 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
       // Auto-select collateral for outdoor assets
       if (selectedCategory === "outdoor") {
         const outdoorType = outdoorAssetTypes.find(t => t.id === selectedAssetType);
-        if (outdoorType?.collateralId) {
+        if (outdoorType?.documentId) {
           const current = formData.selectedCollateral || [];
-          if (!current.includes(outdoorType.collateralId)) {
-            updateFormData({ selectedCollateral: [...current, outdoorType.collateralId] });
+          if (!current.includes(outdoorType.documentId)) {
+            updateFormData({ selectedCollateral: [...current, outdoorType.documentId] });
           }
         }
       }
@@ -179,24 +168,16 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
       return;
     }
 
-    // If outdoor assets exist, collateral documents are required
-    if (outdoorAssets.length > 0 && formData.selectedCollateral.length === 0) {
-      toast.error("Please ensure collateral documents are selected for your outdoor assets");
-      return;
-    }
-
-    // Check if required documents are uploaded for selected outdoor collateral
-    if (formData.selectedCollateral.includes("logbook") && !formData.logbook) {
-      missingItems.push("Vehicle Logbook");
-    }
-    if (formData.selectedCollateral.includes("titleDeed") && !formData.titleDeed) {
-      missingItems.push("Title Deed");
-    }
-    if (formData.selectedCollateral.includes("homePhoto") && !formData.homePhoto) {
-      missingItems.push("House/Building Photos");
-    }
-    if (formData.selectedCollateral.includes("livestock") && !formData.businessPhoto) {
-      missingItems.push("Livestock/Farm Documentation");
+    // If outdoor assets exist, check that required documents are uploaded
+    if (outdoorAssets.length > 0) {
+      // Get unique document types required based on uploaded outdoor assets
+      const requiredDocuments = getRequiredDocuments();
+      
+      requiredDocuments.forEach(doc => {
+        if (!formData.collateralDocuments?.[doc.documentId]) {
+          missingItems.push(doc.documentLabel);
+        }
+      });
     }
 
     if (missingItems.length > 0) {
@@ -406,7 +387,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
         </Card>
       )}
 
-      {/* Collateral Documents - Only shown when outdoor assets exist */}
+      {/* Collateral Documents - Dynamically shown based on uploaded outdoor assets */}
       {outdoorAssets.length > 0 && (
         <Card className="animate-slide-up border-0 bg-card p-6 shadow-elegant">
           <div className="mb-4 flex items-center gap-3">
@@ -418,74 +399,31 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                 Collateral Documents <span className="text-primary">*</span>
               </h3>
               <p className="text-sm text-muted-foreground">
-                Select the types of outdoor assets you've uploaded
+                Upload required documents for your outdoor assets
               </p>
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            {outdoorCollateralOptions.map((option) => (
-              <CollateralCard
-                key={option.id}
-                icon={option.icon}
-                title={option.title}
-                description={option.description}
-                helpText={option.helpText}
-                selected={isSelected(option.id)}
-                onSelect={() => toggleCollateral(option.id)}
-              />
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Upload Documents Section - Shows for selected outdoor collateral */}
-      {outdoorAssets.length > 0 && formData.selectedCollateral?.length > 0 && (
-        <Card className="animate-slide-up border-0 bg-card p-6 shadow-elegant">
-          <h3 className="mb-4 font-serif text-lg font-bold text-secondary">
-            Upload Supporting Documents
-          </h3>
           <div className="space-y-4">
-            {isSelected("logbook") && (
-              <FileUploadCard
-                label="Vehicle Logbook"
-                description="Upload your vehicle registration document"
-                icon={<Car className="h-6 w-6" />}
-                file={formData.logbook}
-                onFileChange={(file) => updateFormData({ logbook: file })}
-                required
-              />
-            )}
-            {isSelected("titleDeed") && (
-              <FileUploadCard
-                label="Title Deed"
-                description="Upload your land or property ownership document"
-                icon={<Building2 className="h-6 w-6" />}
-                file={formData.titleDeed}
-                onFileChange={(file) => updateFormData({ titleDeed: file })}
-                required
-              />
-            )}
-            {isSelected("homePhoto") && (
-              <FileUploadCard
-                label="House / Building Documents"
-                description="Ownership proof, valuation report, or utility bills"
-                icon={<Home className="h-6 w-6" />}
-                file={formData.homePhoto}
-                onFileChange={(file) => updateFormData({ homePhoto: file })}
-                required
-              />
-            )}
-            {isSelected("livestock") && (
-              <FileUploadCard
-                label="Livestock / Farm Documentation"
-                description="Veterinary records, farm registration, or purchase receipts"
-                icon={<Tractor className="h-6 w-6" />}
-                file={formData.businessPhoto}
-                onFileChange={(file) => updateFormData({ businessPhoto: file })}
-                required
-              />
-            )}
+            {getRequiredDocuments().map((doc) => {
+              const IconComponent = doc.icon;
+              return (
+                <FileUploadCard
+                  key={doc.documentId}
+                  label={doc.documentLabel}
+                  description={`Required for: ${doc.assetLabel} - ${doc.documentDescription}`}
+                  icon={<IconComponent className="h-6 w-6" />}
+                  file={formData.collateralDocuments?.[doc.documentId] || null}
+                  onFileChange={(file) => updateFormData({ 
+                    collateralDocuments: {
+                      ...formData.collateralDocuments,
+                      [doc.documentId]: file
+                    }
+                  })}
+                  required
+                />
+              );
+            })}
           </div>
         </Card>
       )}
