@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 export const useLoanApplication = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [loanId, setLoanId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Create a draft loan application when user starts the form
-  const createLoanApplication = async () => {
+  const createLoanApplication = useCallback(async () => {
     if (!user) {
       setError("User must be logged in");
       return null;
@@ -60,7 +60,14 @@ export const useLoanApplication = () => {
     } finally {
       setIsCreating(false);
     }
-  };
+  }, [user]);
+
+  // Auto-create loan application when user is ready
+  useEffect(() => {
+    if (user && !authLoading && !loanId && !isCreating) {
+      createLoanApplication();
+    }
+  }, [user, authLoading, loanId, isCreating, createLoanApplication]);
 
   // Update loan application with partial data
   const updateLoanApplication = async (data: Record<string, any>) => {
@@ -90,6 +97,7 @@ export const useLoanApplication = () => {
   return {
     loanId,
     isCreating,
+    isReady: !!loanId && !!user,
     error,
     createLoanApplication,
     updateLoanApplication,
