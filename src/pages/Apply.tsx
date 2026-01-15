@@ -34,7 +34,9 @@ export interface FormData {
   outdoorAssetPictures: File[];
   collateralDocuments: { [key: string]: File | null };
   bankStatement: File | null;
+  bankStatementPassword: string;
   mpesaStatement: File | null;
+  mpesaStatementPassword: string;
   homePhoto: File | null;
   hasBusiness: boolean;
   businessPhoto: File | null;
@@ -82,7 +84,9 @@ const Apply = () => {
     outdoorAssetPictures: [],
     collateralDocuments: {},
     bankStatement: null,
+    bankStatementPassword: "",
     mpesaStatement: null,
+    mpesaStatementPassword: "",
     homePhoto: null,
     hasBusiness: false,
     businessPhoto: null,
