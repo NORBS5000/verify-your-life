@@ -29,6 +29,7 @@ export interface AssetProcessingResult {
 
 export const useAssetProcessing = () => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isUploadingProof, setIsUploadingProof] = useState(false);
   const [processingResults, setProcessingResults] = useState<Record<string, AssetProcessingResult[]>>({});
   const [error, setError] = useState<string | null>(null);
 
@@ -89,6 +90,49 @@ export const useAssetProcessing = () => {
     }
   };
 
+  const submitProofOfOwnership = async (
+    detectedObjectId: number,
+    proofDocument: File
+  ): Promise<boolean> => {
+    setIsUploadingProof(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("proof_document", proofDocument);
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/detected-objects/${detectedObjectId}/proof`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Proof upload API error:", errorData);
+        throw new Error(errorData.detail || `API error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      // Log the API response
+      console.log("=== Proof of Ownership Upload Response ===");
+      console.log("Detected Object ID:", detectedObjectId);
+      console.log("Response:", result);
+      console.log("==========================================");
+
+      return true;
+    } catch (err: any) {
+      setError(err.message || "Failed to upload proof of ownership");
+      console.error("Error uploading proof:", err);
+      return false;
+    } finally {
+      setIsUploadingProof(false);
+    }
+  };
+
   const removeProcessingResult = (assetTypeId: string, imageId: number) => {
     setProcessingResults((prev) => ({
       ...prev,
@@ -120,9 +164,11 @@ export const useAssetProcessing = () => {
 
   return {
     isProcessing,
+    isUploadingProof,
     processingResults,
     error,
     processAssetImage,
+    submitProofOfOwnership,
     removeProcessingResult,
     clearResults,
     getTotalEstimatedValue,

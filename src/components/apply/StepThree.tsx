@@ -58,9 +58,11 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
   // Asset processing hook
   const { 
     isProcessing, 
+    isUploadingProof,
     processingResults, 
     error: processingError,
-    processAssetImage, 
+    processAssetImage,
+    submitProofOfOwnership,
     getTotalEstimatedValue,
     getAllDetectedAssets 
   } = useAssetProcessing();
@@ -79,15 +81,23 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
       .filter(asset => asset.requiredDoc !== null);
   }, [processingResults]);
 
-  const handleProofUpload = (assetId: number, docType: string, file: File) => {
+  const handleProofUpload = async (assetId: number, docType: string, file: File) => {
     const key = `${assetId}-${docType}`;
-    setProofDocuments(prev => ({ ...prev, [key]: file }));
-    const docLabels: Record<string, string> = {
-      'logbook': 'Logbook',
-      'title_deed': 'Title Deed',
-      'ownership_declaration': 'Ownership Declaration'
-    };
-    toast.success(`${docLabels[docType] || 'Document'} uploaded successfully`);
+    
+    // Submit to API
+    const success = await submitProofOfOwnership(assetId, file);
+    
+    if (success) {
+      setProofDocuments(prev => ({ ...prev, [key]: file }));
+      const docLabels: Record<string, string> = {
+        'logbook': 'Logbook',
+        'title_deed': 'Title Deed',
+        'ownership_declaration': 'Ownership Declaration'
+      };
+      toast.success(`${docLabels[docType] || 'Document'} uploaded and verified successfully`);
+    } else {
+      toast.error("Failed to upload document. Please try again.");
+    }
   };
 
   const isProofUploaded = (assetId: number, docType: string) => {
@@ -458,12 +468,18 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                         <CheckCircle className="h-4 w-4 text-green-600" />
                         <span className="text-sm font-medium text-green-700">Uploaded</span>
                       </div>
+                    ) : isUploadingProof ? (
+                      <div className="flex items-center gap-2 rounded-lg bg-primary/80 px-4 py-2 text-white">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm font-medium">Uploading...</span>
+                      </div>
                     ) : (
                       <label className="cursor-pointer">
                         <input
                           type="file"
                           accept="image/*,.pdf"
                           className="hidden"
+                          disabled={isUploadingProof}
                           onChange={(e) => {
                             if (e.target.files?.[0]) {
                               handleProofUpload(
