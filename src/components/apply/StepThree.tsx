@@ -1,8 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight, Landmark, Save, X, Plus, CheckCircle, Loader2, Camera, DollarSign, MapPin, AlertTriangle, Eye, Image } from "lucide-react";
+import { ArrowLeft, ArrowRight, Landmark, Save, X, Plus, CheckCircle, Loader2, Camera, DollarSign, MapPin, AlertTriangle, Eye, Image, FileText, Upload, Car, Home } from "lucide-react";
 import { FileUploadCard } from "./FileUploadCard";
 import { StepHeader } from "./StepHeader";
 import { toast } from "sonner";
@@ -19,10 +19,33 @@ interface StepThreeProps {
   loanId: string | null;
 }
 
+// Mapping of asset types to required documents
+const getRequiredDocument = (objectName: string): { type: string; label: string; icon: React.ReactNode } | null => {
+  const lowerName = objectName.toLowerCase();
+  
+  if (lowerName.includes('car') || lowerName.includes('vehicle') || lowerName.includes('truck') || lowerName.includes('motorcycle') || lowerName.includes('motorbike')) {
+    return { type: 'logbook', label: 'Vehicle Logbook', icon: <Car className="h-4 w-4" /> };
+  }
+  if (lowerName.includes('land') || lowerName.includes('property') || lowerName.includes('house') || lowerName.includes('building') || lowerName.includes('plot')) {
+    return { type: 'title_deed', label: 'Title Deed', icon: <Home className="h-4 w-4" /> };
+  }
+  
+  return null;
+};
+
+interface ProofDocument {
+  assetId: number;
+  assetName: string;
+  documentType: string;
+  documentLabel: string;
+  file: File | null;
+}
+
 export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft, userId, loanId }: StepThreeProps) => {
   const assetInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [assetFiles, setAssetFiles] = useState<File[]>([]);
+  const [proofDocuments, setProofDocuments] = useState<Record<string, File>>({});
 
   // Asset processing hook
   const { 
@@ -33,6 +56,37 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
     getTotalEstimatedValue,
     getAllDetectedAssets 
   } = useAssetProcessing();
+
+  // Get assets that require proof of ownership
+  const assetsRequiringProof = useMemo(() => {
+    return getAllDetectedAssets()
+      .filter(asset => asset.requires_proof_of_ownership)
+      .map(asset => {
+        const docInfo = getRequiredDocument(asset.object_name);
+        return {
+          ...asset,
+          requiredDoc: docInfo,
+        };
+      })
+      .filter(asset => asset.requiredDoc !== null);
+  }, [processingResults]);
+
+  const handleProofUpload = (assetId: number, docType: string, file: File) => {
+    const key = `${assetId}-${docType}`;
+    setProofDocuments(prev => ({ ...prev, [key]: file }));
+    toast.success(`${docType === 'logbook' ? 'Logbook' : 'Title deed'} uploaded successfully`);
+  };
+
+  const isProofUploaded = (assetId: number, docType: string) => {
+    const key = `${assetId}-${docType}`;
+    return !!proofDocuments[key];
+  };
+
+  const allProofsUploaded = useMemo(() => {
+    return assetsRequiringProof.every(asset => 
+      isProofUploaded(asset.detected_object_id, asset.requiredDoc!.type)
+    );
+  }, [assetsRequiringProof, proofDocuments]);
 
   const handleUploadClick = () => {
     assetInputRef.current?.click();
@@ -98,6 +152,12 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
     // At least one asset is required
     if (assetFiles.length === 0) {
       toast.error("Please upload at least one asset photo");
+      return;
+    }
+
+    // Check if all required proof documents are uploaded
+    if (assetsRequiringProof.length > 0 && !allProofsUploaded) {
+      toast.error("Please upload all required ownership documents");
       return;
     }
 
@@ -324,7 +384,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                     <div className="flex items-center gap-1 mt-2">
                       <AlertTriangle className="h-3 w-3 text-amber-500" />
                       <span className="text-xs text-amber-600 font-medium">
-                        Proof of ownership required
+                        Proof of ownership required - upload document below
                       </span>
                     </div>
                   )}
@@ -337,6 +397,111 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
             <div className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">
               <AlertTriangle className="mr-2 inline h-4 w-4" />
               {processingError}
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Proof of Ownership Documents Section */}
+      {assetsRequiringProof.length > 0 && (
+        <Card className="border-2 border-amber-200 bg-amber-50/50 p-6 shadow-sm">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
+              <FileText className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-secondary">Ownership Documents Required</h3>
+              <p className="text-xs text-muted-foreground">
+                Please upload proof of ownership for the following assets
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {assetsRequiringProof.map((asset) => {
+              const docKey = `${asset.detected_object_id}-${asset.requiredDoc!.type}`;
+              const isUploaded = !!proofDocuments[docKey];
+
+              return (
+                <div
+                  key={asset.detected_object_id}
+                  className="rounded-lg border border-amber-200 bg-white p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100">
+                        {asset.requiredDoc!.icon}
+                      </div>
+                      <div>
+                        <p className="font-medium text-secondary">{asset.object_name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Upload: <span className="font-medium text-amber-700">{asset.requiredDoc!.label}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    {isUploaded ? (
+                      <div className="flex items-center gap-2 rounded-full bg-green-100 px-3 py-1">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="text-sm font-medium text-green-700">Uploaded</span>
+                      </div>
+                    ) : (
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*,.pdf"
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                              handleProofUpload(
+                                asset.detected_object_id,
+                                asset.requiredDoc!.type,
+                                e.target.files[0]
+                              );
+                            }
+                          }}
+                        />
+                        <div className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-white transition-all hover:bg-primary/90">
+                          <Upload className="h-4 w-4" />
+                          <span className="text-sm font-medium">Upload</span>
+                        </div>
+                      </label>
+                    )}
+                  </div>
+
+                  {isUploaded && proofDocuments[docKey] && (
+                    <div className="mt-3 flex items-center justify-between rounded-lg bg-green-50 p-2">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-green-600" />
+                        <span className="text-sm text-green-700 truncate max-w-[200px]">
+                          {proofDocuments[docKey].name}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setProofDocuments(prev => {
+                            const updated = { ...prev };
+                            delete updated[docKey];
+                            return updated;
+                          });
+                        }}
+                        className="text-xs text-red-500 hover:text-red-700"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {!allProofsUploaded && (
+            <div className="mt-4 flex items-center gap-2 rounded-lg bg-amber-100 p-3">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <p className="text-sm text-amber-700">
+                {assetsRequiringProof.length - Object.keys(proofDocuments).length} document(s) still required
+              </p>
             </div>
           )}
         </Card>
