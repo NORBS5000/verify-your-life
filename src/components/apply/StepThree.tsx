@@ -23,11 +23,19 @@ interface StepThreeProps {
 const getRequiredDocument = (objectName: string): { type: string; label: string; icon: React.ReactNode } | null => {
   const lowerName = objectName.toLowerCase();
   
+  // Vehicles - require logbook
   if (lowerName.includes('car') || lowerName.includes('vehicle') || lowerName.includes('truck') || lowerName.includes('motorcycle') || lowerName.includes('motorbike')) {
     return { type: 'logbook', label: 'Vehicle Logbook', icon: <Car className="h-4 w-4" /> };
   }
-  if (lowerName.includes('land') || lowerName.includes('property') || lowerName.includes('house') || lowerName.includes('building') || lowerName.includes('plot')) {
+  
+  // Land and buildings - require title deed
+  if (lowerName.includes('land') || lowerName.includes('property') || lowerName.includes('house') || lowerName.includes('apartment') || lowerName.includes('building') || lowerName.includes('plot')) {
     return { type: 'title_deed', label: 'Title Deed', icon: <Home className="h-4 w-4" /> };
+  }
+  
+  // Machinery - require ownership declaration
+  if (lowerName.includes('machinery') || lowerName.includes('machine') || lowerName.includes('equipment') || lowerName.includes('tractor') || lowerName.includes('generator')) {
+    return { type: 'ownership_declaration', label: 'Ownership Declaration', icon: <FileText className="h-4 w-4" /> };
   }
   
   return null;
@@ -74,7 +82,12 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
   const handleProofUpload = (assetId: number, docType: string, file: File) => {
     const key = `${assetId}-${docType}`;
     setProofDocuments(prev => ({ ...prev, [key]: file }));
-    toast.success(`${docType === 'logbook' ? 'Logbook' : 'Title deed'} uploaded successfully`);
+    const docLabels: Record<string, string> = {
+      'logbook': 'Logbook',
+      'title_deed': 'Title Deed',
+      'ownership_declaration': 'Ownership Declaration'
+    };
+    toast.success(`${docLabels[docType] || 'Document'} uploaded successfully`);
   };
 
   const isProofUploaded = (assetId: number, docType: string) => {
