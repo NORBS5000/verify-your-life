@@ -273,10 +273,10 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                 Add more
               </button>
             </div>
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
               {assetFiles.map((file, index) => (
                 <div key={index} className="relative">
-                  <div className="aspect-square overflow-hidden rounded-xl border border-border">
+                  <div className="aspect-square overflow-hidden rounded-lg sm:rounded-xl border border-border">
                     <img
                       src={URL.createObjectURL(file)}
                       alt={`Asset ${index + 1}`}
@@ -285,12 +285,12 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                   </div>
                   <button
                     onClick={() => removeAsset(index)}
-                    className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white shadow-md transition-transform hover:scale-110"
+                    className="absolute -right-1 -top-1 sm:-right-2 sm:-top-2 flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-destructive text-white shadow-md transition-transform hover:scale-110"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                   </button>
-                  <div className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5">
-                    <span className="text-[10px] font-medium text-white">#{index + 1}</span>
+                  <div className="absolute bottom-1 left-1 rounded bg-black/60 px-1 sm:px-1.5 py-0.5">
+                    <span className="text-[9px] sm:text-[10px] font-medium text-white">#{index + 1}</span>
                   </div>
                 </div>
               ))}
@@ -427,15 +427,15 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
 
       {/* Proof of Ownership Documents Section */}
       {assetsRequiringProof.length > 0 && (
-        <Card className="border-2 border-amber-200 bg-amber-50/50 p-6 shadow-sm">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
-              <FileText className="h-5 w-5 text-amber-600" />
+        <Card className="border-2 border-amber-200 bg-amber-50/50 p-4 sm:p-6 shadow-sm">
+          <div className="mb-4 flex items-start sm:items-center gap-3">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100">
+              <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-secondary">Ownership Documents Required</h3>
+              <h3 className="font-semibold text-secondary text-sm sm:text-base">Ownership Documents Required</h3>
               <p className="text-xs text-muted-foreground">
-                Please upload proof of ownership for the following assets
+                Upload proof of ownership for these assets
               </p>
             </div>
           </div>
@@ -448,61 +448,63 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
               return (
                 <div
                   key={asset.detected_object_id}
-                  className="rounded-lg border border-amber-200 bg-white p-4"
+                  className="rounded-lg border border-amber-200 bg-white p-3 sm:p-4"
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100">
+                      <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100">
                         {asset.requiredDoc!.icon}
                       </div>
-                      <div>
-                        <p className="font-medium text-secondary">{asset.object_name}</p>
-                        <p className="text-sm text-muted-foreground">
+                      <div className="min-w-0">
+                        <p className="font-medium text-secondary text-sm sm:text-base truncate">{asset.object_name}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                           Upload: <span className="font-medium text-amber-700">{asset.requiredDoc!.label}</span>
                         </p>
                       </div>
                     </div>
 
-                    {isUploaded ? (
-                      <div className="flex items-center gap-2 rounded-full bg-green-100 px-3 py-1">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <span className="text-sm font-medium text-green-700">Uploaded</span>
-                      </div>
-                    ) : isUploadingProof ? (
-                      <div className="flex items-center gap-2 rounded-lg bg-primary/80 px-4 py-2 text-white">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="text-sm font-medium">Uploading...</span>
-                      </div>
-                    ) : (
-                      <label className="cursor-pointer">
-                        <input
-                          type="file"
-                          accept="image/*,.pdf"
-                          className="hidden"
-                          disabled={isUploadingProof}
-                          onChange={(e) => {
-                            if (e.target.files?.[0]) {
-                              handleProofUpload(
-                                asset.detected_object_id,
-                                asset.requiredDoc!.type,
-                                e.target.files[0]
-                              );
-                            }
-                          }}
-                        />
-                        <div className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-white transition-all hover:bg-primary/90">
-                          <Upload className="h-4 w-4" />
-                          <span className="text-sm font-medium">Upload</span>
+                    <div className="self-end sm:self-auto shrink-0">
+                      {isUploaded ? (
+                        <div className="flex items-center gap-1.5 sm:gap-2 rounded-full bg-green-100 px-2.5 sm:px-3 py-1">
+                          <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
+                          <span className="text-xs sm:text-sm font-medium text-green-700">Uploaded</span>
                         </div>
-                      </label>
-                    )}
+                      ) : isUploadingProof ? (
+                        <div className="flex items-center gap-1.5 sm:gap-2 rounded-lg bg-primary/80 px-3 sm:px-4 py-1.5 sm:py-2 text-white">
+                          <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
+                          <span className="text-xs sm:text-sm font-medium">Uploading...</span>
+                        </div>
+                      ) : (
+                        <label className="cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            className="hidden"
+                            disabled={isUploadingProof}
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                handleProofUpload(
+                                  asset.detected_object_id,
+                                  asset.requiredDoc!.type,
+                                  e.target.files[0]
+                                );
+                              }
+                            }}
+                          />
+                          <div className="flex items-center gap-1.5 sm:gap-2 rounded-lg bg-primary px-3 sm:px-4 py-1.5 sm:py-2 text-white transition-all hover:bg-primary/90">
+                            <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            <span className="text-xs sm:text-sm font-medium">Upload</span>
+                          </div>
+                        </label>
+                      )}
+                    </div>
                   </div>
 
                   {isUploaded && proofDocuments[docKey] && (
-                    <div className="mt-3 flex items-center justify-between rounded-lg bg-green-50 p-2">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-green-600" />
-                        <span className="text-sm text-green-700 truncate max-w-[200px]">
+                    <div className="mt-3 flex items-center justify-between gap-2 rounded-lg bg-green-50 p-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <FileText className="h-4 w-4 shrink-0 text-green-600" />
+                        <span className="text-xs sm:text-sm text-green-700 truncate">
                           {proofDocuments[docKey].name}
                         </span>
                       </div>
@@ -514,7 +516,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                             return updated;
                           });
                         }}
-                        className="text-xs text-red-500 hover:text-red-700"
+                        className="text-xs text-red-500 hover:text-red-700 shrink-0"
                       >
                         Remove
                       </button>
@@ -556,31 +558,34 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
       )}
 
       {/* Navigation */}
-      <div className="flex gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={prevStep}
-          className="gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onSaveDraft}
-          className="gap-2"
-        >
-          <Save className="h-4 w-4" />
-          <span className="hidden sm:inline">Save</span>
-        </Button>
+      <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+        <div className="flex gap-2 sm:gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={prevStep}
+            className="gap-1.5 sm:gap-2 px-3 sm:px-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Back</span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onSaveDraft}
+            className="gap-1.5 sm:gap-2 px-3 sm:px-4"
+          >
+            <Save className="h-4 w-4" />
+            <span className="hidden sm:inline">Save</span>
+          </Button>
+        </div>
         <Button
           type="button"
           onClick={handleNext}
-          className="flex-1 gap-2 bg-gradient-to-r from-primary to-coral-600 shadow-coral-glow transition-all hover:shadow-coral-glow-hover"
+          className="flex-1 gap-2 bg-gradient-to-r from-primary to-coral-600 shadow-coral-glow transition-all hover:shadow-coral-glow-hover text-sm sm:text-base"
         >
-          Continue to Verification
+          <span className="sm:hidden">Continue</span>
+          <span className="hidden sm:inline">Continue to Verification</span>
           <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
