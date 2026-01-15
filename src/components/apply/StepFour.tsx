@@ -50,25 +50,59 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
           <FileText className="h-5 w-5 text-primary" />
           Financial Verification
         </h3>
-        <div className="space-y-4">
-          <FileUploadCard
-            label="M-Pesa Statement"
-            description="Last 6 months M-Pesa statement"
-            helpText="Shows your transaction history and financial behavior"
-            file={formData.mpesaStatement}
-            onFileChange={(file) => updateFormData({ mpesaStatement: file })}
-            accept=".pdf,image/*"
-            required
-          />
+        <div className="space-y-6">
+          {/* M-Pesa Statement */}
+          <div className="space-y-3">
+            <FileUploadCard
+              label="M-Pesa Statement"
+              description="Last 6 months M-Pesa statement"
+              helpText="Shows your transaction history and financial behavior"
+              file={formData.mpesaStatement}
+              onFileChange={(file) => updateFormData({ mpesaStatement: file })}
+              accept=".pdf,image/*"
+              required
+            />
+            <div className="ml-16">
+              <Label htmlFor="mpesaPassword" className="flex items-center gap-2 text-sm">
+                <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                PDF Password (if protected)
+              </Label>
+              <Input
+                id="mpesaPassword"
+                type="password"
+                placeholder="Enter password if document is protected"
+                value={formData.mpesaStatementPassword}
+                onChange={(e) => updateFormData({ mpesaStatementPassword: e.target.value })}
+                className="mt-1.5"
+              />
+            </div>
+          </div>
 
-          <FileUploadCard
-            label="Bank Statement (Optional)"
-            description="Last 6 months bank statement"
-            helpText="Additional proof strengthens your application"
-            file={formData.bankStatement}
-            onFileChange={(file) => updateFormData({ bankStatement: file })}
-            accept=".pdf,image/*"
-          />
+          {/* Bank Statement */}
+          <div className="space-y-3">
+            <FileUploadCard
+              label="Bank Statement (Optional)"
+              description="Last 6 months bank statement"
+              helpText="Additional proof strengthens your application"
+              file={formData.bankStatement}
+              onFileChange={(file) => updateFormData({ bankStatement: file })}
+              accept=".pdf,image/*"
+            />
+            <div className="ml-16">
+              <Label htmlFor="bankPassword" className="flex items-center gap-2 text-sm">
+                <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                PDF Password (if protected)
+              </Label>
+              <Input
+                id="bankPassword"
+                type="password"
+                placeholder="Enter password if document is protected"
+                value={formData.bankStatementPassword}
+                onChange={(e) => updateFormData({ bankStatementPassword: e.target.value })}
+                className="mt-1.5"
+              />
+            </div>
+          </div>
         </div>
       </Card>
 
