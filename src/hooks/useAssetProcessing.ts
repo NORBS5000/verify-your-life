@@ -54,10 +54,24 @@ export const useAssetProcessing = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error("Asset processing API error:", errorData);
         throw new Error(errorData.detail || `API error: ${response.status}`);
       }
 
       const result: AssetProcessingResult = await response.json();
+      
+      // Log the API response
+      console.log("=== Asset Processing API Response ===");
+      console.log("User ID:", result.user_id);
+      console.log("Loan ID:", result.loan_id);
+      console.log("Image ID:", result.image_id);
+      console.log("Status:", result.status);
+      console.log("Location:", result.location);
+      console.log("Estimated Value:", result.estimated_value, result.currency);
+      console.log("Assets Detected:", result.assets_detected);
+      console.log("Requires Proof:", result.requires_proof_for_any);
+      console.log("Full Response:", result);
+      console.log("=====================================");
 
       // Store the result keyed by asset type
       setProcessingResults((prev) => ({
