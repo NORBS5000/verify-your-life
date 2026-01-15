@@ -1,11 +1,14 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight, Shield, Phone, FileText, Users, Lock, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Shield, Phone, FileText, Users, Lock, Save, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { FileUploadCard } from "./FileUploadCard";
 import { StepHeader } from "./StepHeader";
+import { useBankStatementProcessing, BankStatementAnalysisResult } from "@/hooks/useBankStatementProcessing";
+import { toast } from "sonner";
 
 interface StepFourProps {
   formData: FormData;
@@ -13,14 +16,57 @@ interface StepFourProps {
   nextStep: () => void;
   prevStep: () => void;
   onSaveDraft: () => void;
+  userId: string | null;
+  loanId: string | null;
 }
 
-export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepFourProps) => {
+export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft, userId, loanId }: StepFourProps) => {
+  const { isAnalyzing, analysisResult, error, analyzeBankStatement, clearAnalysisResult } = useBankStatementProcessing();
+  const [hasAnalyzed, setHasAnalyzed] = useState(false);
+
   const handleNext = () => {
     if (formData.mpesaStatement && formData.guarantor1Phone) {
       nextStep();
     } else {
       alert("Please provide M-Pesa statement and at least one guarantor");
+    }
+  };
+
+  // Auto-analyze bank statement when file is uploaded
+  const handleBankStatementUpload = async (file: File | null) => {
+    updateFormData({ bankStatement: file });
+    clearAnalysisResult();
+    setHasAnalyzed(false);
+    
+    if (file && userId && loanId) {
+      toast.info("Analyzing bank statement...", { duration: 3000 });
+      const result = await analyzeBankStatement(userId, loanId, file, formData.bankStatementPassword || undefined);
+      setHasAnalyzed(true);
+      
+      if (result) {
+        toast.success("Bank statement analyzed successfully!");
+      } else {
+        toast.error("Failed to analyze bank statement. Please try again.");
+      }
+    }
+  };
+
+  // Re-analyze when password changes (if file already exists)
+  const handlePasswordChange = (password: string) => {
+    updateFormData({ bankStatementPassword: password });
+  };
+
+  const handleAnalyzeWithPassword = async () => {
+    if (formData.bankStatement && userId && loanId) {
+      toast.info("Re-analyzing with password...", { duration: 3000 });
+      const result = await analyzeBankStatement(userId, loanId, formData.bankStatement, formData.bankStatementPassword || undefined);
+      setHasAnalyzed(true);
+      
+      if (result) {
+        toast.success("Bank statement analyzed successfully!");
+      } else {
+        toast.error("Failed to analyze. Check if password is correct.");
+      }
     }
   };
 
@@ -85,22 +131,98 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
               description="Last 6 months bank statement"
               helpText="Additional proof strengthens your application"
               file={formData.bankStatement}
-              onFileChange={(file) => updateFormData({ bankStatement: file })}
+              onFileChange={handleBankStatementUpload}
               accept=".pdf,image/*"
             />
-            <div className="ml-16">
-              <Label htmlFor="bankPassword" className="flex items-center gap-2 text-sm">
-                <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                PDF Password (if protected)
-              </Label>
-              <Input
-                id="bankPassword"
-                type="password"
-                placeholder="Enter password if document is protected"
-                value={formData.bankStatementPassword}
-                onChange={(e) => updateFormData({ bankStatementPassword: e.target.value })}
-                className="mt-1.5"
-              />
+            <div className="ml-16 space-y-3">
+              <div>
+                <Label htmlFor="bankPassword" className="flex items-center gap-2 text-sm">
+                  <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                  PDF Password (if protected)
+                </Label>
+                <div className="flex gap-2 mt-1.5">
+                  <Input
+                    id="bankPassword"
+                    type="password"
+                    placeholder="Enter password if document is protected"
+                    value={formData.bankStatementPassword}
+                    onChange={(e) => handlePasswordChange(e.target.value)}
+                    className="flex-1"
+                  />
+                  {formData.bankStatement && formData.bankStatementPassword && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAnalyzeWithPassword}
+                      disabled={isAnalyzing}
+                      className="shrink-0"
+                    >
+                      {isAnalyzing ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Unlock & Analyze"
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Analysis Status */}
+              {isAnalyzing && (
+                <div className="flex items-center gap-2 rounded-lg bg-primary/10 p-3 text-sm text-primary">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Analyzing bank statement...</span>
+                </div>
+              )}
+
+              {hasAnalyzed && analysisResult && (
+                <div className="rounded-lg border border-health-green/30 bg-health-green/10 p-4 space-y-3">
+                  <div className="flex items-center gap-2 text-health-green">
+                    <CheckCircle className="h-5 w-5" />
+                    <span className="font-medium">Analysis Complete</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Credit Score:</span>
+                      <span className="ml-2 font-bold text-secondary">
+                        {analysisResult.output_from_credit_score_engine.bank_statement_credit_score}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Recommendation:</span>
+                      <span className={`ml-2 font-medium ${
+                        analysisResult.output_from_credit_score_engine.recommendation === "Eligible" 
+                          ? "text-health-green" 
+                          : "text-amber-600"
+                      }`}>
+                        {analysisResult.output_from_credit_score_engine.recommendation}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Bank:</span>
+                      <span className="ml-2 text-foreground">
+                        {analysisResult.credit_score_ready_values.features.other_features?.bank_name || "N/A"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Avg Balance:</span>
+                      <span className="ml-2 text-foreground">
+                        {analysisResult.credit_score_ready_values.features.other_features?.currency || ""}
+                        {" "}
+                        {analysisResult.credit_score_ready_values.features.average_balance?.toLocaleString() || "N/A"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {hasAnalyzed && error && (
+                <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>{error}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
