@@ -149,7 +149,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
           }
         }
       } else {
-        toast.warning("Please sign in to enable asset verification");
+        toast.warning("Still preparing your application. Please wait a moment and try again.");
       }
 
       setUploading(false);
