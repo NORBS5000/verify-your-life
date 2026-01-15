@@ -104,12 +104,7 @@ const Apply = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Create loan application when user is authenticated
-  useEffect(() => {
-    if (user && !loanId && !isCreating) {
-      createLoanApplication();
-    }
-  }, [user, loanId, isCreating]);
+  // Loan application is now auto-created by useLoanApplication hook
 
   const updateFormData = (data: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
