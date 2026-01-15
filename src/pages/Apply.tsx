@@ -12,6 +12,7 @@ import { ProgressBar } from "@/components/apply/ProgressBar";
 import { WhatsAppNotification } from "@/components/apply/WhatsAppNotification";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubmitApplication } from "@/hooks/useSubmitApplication";
+import { useLoanApplication } from "@/hooks/useLoanApplication";
 
 export interface FormData {
   // Profile data
@@ -59,6 +60,7 @@ const Apply = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { submitApplication, isSubmitting, error: submitError } = useSubmitApplication();
+  const { loanId, isCreating, createLoanApplication } = useLoanApplication();
   const [currentStep, setCurrentStep] = useState(1);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
@@ -101,6 +103,13 @@ const Apply = () => {
       setTimeout(() => navigate("/auth"), 1500);
     }
   }, [user, authLoading, navigate]);
+
+  // Create loan application when user is authenticated
+  useEffect(() => {
+    if (user && !loanId && !isCreating) {
+      createLoanApplication();
+    }
+  }, [user, loanId, isCreating]);
 
   const updateFormData = (data: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
@@ -166,11 +175,18 @@ const Apply = () => {
             <ArrowLeft className="h-5 w-5" />
           </button>
           
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Heart className="h-4 w-4 text-white" />
+          <div className="flex flex-col items-center">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                <Heart className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-serif text-lg font-bold text-secondary">COVA Credit</span>
             </div>
-            <span className="font-serif text-lg font-bold text-secondary">COVA Credit</span>
+            {loanId && (
+              <span className="text-xs text-muted-foreground mt-1">
+                Application ID: {loanId.slice(0, 8).toUpperCase()}
+              </span>
+            )}
           </div>
           
           <div className="w-10" /> {/* Spacer for balance */}
@@ -178,6 +194,26 @@ const Apply = () => {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-6 sm:py-8">
+        {/* User & Loan Info */}
+        {user && loanId && (
+          <div className="mb-4 flex items-center justify-between rounded-lg bg-muted/50 px-4 py-2 text-sm">
+            <span className="text-muted-foreground">
+              User: <span className="font-medium text-foreground">{user.email}</span>
+            </span>
+            <span className="text-muted-foreground">
+              Loan ID: <span className="font-mono font-medium text-primary">{loanId.slice(0, 8).toUpperCase()}</span>
+            </span>
+          </div>
+        )}
+
+        {/* Loading state while creating loan */}
+        {isCreating && (
+          <div className="mb-4 flex items-center justify-center gap-2 rounded-lg bg-primary/10 px-4 py-3 text-primary">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm">Creating your application...</span>
+          </div>
+        )}
+
         {/* Progress Bar */}
         {currentStep < 5 && (
           <ProgressBar currentStep={currentStep} totalSteps={4} steps={steps} />
