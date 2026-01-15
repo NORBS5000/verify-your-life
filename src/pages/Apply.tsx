@@ -248,6 +248,8 @@ const Apply = () => {
               nextStep={nextStep}
               prevStep={prevStep}
               onSaveDraft={handleSaveDraft}
+              userId={user?.id || null}
+              loanId={loanId}
             />
           )}
           {currentStep === 4 && (

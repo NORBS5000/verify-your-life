@@ -2,11 +2,13 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight, Car, Home, Briefcase, Landmark, Building2, Save, X, Plus, CheckCircle, Loader2, Tv, Sofa, Trees, Tractor, Monitor, Refrigerator, BedDouble, Armchair, Microwave, Fan, Smartphone, Bike, Truck, Fence, Warehouse } from "lucide-react";
+import { ArrowLeft, ArrowRight, Car, Home, Briefcase, Landmark, Building2, Save, X, Plus, CheckCircle, Loader2, Tv, Sofa, Trees, Tractor, Monitor, Refrigerator, BedDouble, Armchair, Microwave, Fan, Smartphone, Bike, Truck, Fence, Warehouse, DollarSign, MapPin, AlertTriangle, Eye } from "lucide-react";
 import { CollateralCard } from "./CollateralCard";
 import { FileUploadCard } from "./FileUploadCard";
 import { StepHeader } from "./StepHeader";
 import { toast } from "sonner";
+import { useAssetProcessing, AssetProcessingResult, DetectedAsset } from "@/hooks/useAssetProcessing";
+import { Badge } from "@/components/ui/badge";
 
 interface StepThreeProps {
   formData: FormData;
@@ -14,6 +16,8 @@ interface StepThreeProps {
   nextStep: () => void;
   prevStep: () => void;
   onSaveDraft: () => void;
+  userId: string | null;
+  loanId: string | null;
 }
 
 // Indoor asset types
@@ -40,11 +44,21 @@ const outdoorAssetTypes = [
 ];
 
 
-export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepThreeProps) => {
+export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft, userId, loanId }: StepThreeProps) => {
   const assetInputRef = useRef<HTMLInputElement>(null);
   const [selectedAssetType, setSelectedAssetType] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<"indoor" | "outdoor" | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Asset processing hook for outdoor assets
+  const { 
+    isProcessing, 
+    processingResults, 
+    error: processingError,
+    processAssetImage, 
+    getTotalEstimatedValue,
+    getAllDetectedAssets 
+  } = useAssetProcessing();
 
   // Assets with their types - keyed by asset type id
   const [assetsByType, setAssetsByType] = useState<Record<string, File[]>>({});
@@ -96,7 +110,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
     }, 100);
   };
 
-  const handleAssetUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAssetUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0 && selectedAssetType && selectedCategory) {
       setUploading(true);
       const newFiles = Array.from(e.target.files);
@@ -112,35 +126,57 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
         }
       }
 
-      setTimeout(() => {
-        const updatedAssetsByType = { ...assetsByType };
-        if (!updatedAssetsByType[selectedAssetType]) {
-          updatedAssetsByType[selectedAssetType] = [];
-        }
-        updatedAssetsByType[selectedAssetType] = [...updatedAssetsByType[selectedAssetType], ...newFiles];
-        setAssetsByType(updatedAssetsByType);
-        
-        // Update formData for submission
-        const allIndoorFiles = Object.entries(updatedAssetsByType)
-          .filter(([key]) => indoorAssetTypes.some(t => t.id === key))
-          .flatMap(([, files]) => files);
-        const allOutdoorFiles = Object.entries(updatedAssetsByType)
-          .filter(([key]) => outdoorAssetTypes.some(t => t.id === key))
-          .flatMap(([, files]) => files);
-        updateFormData({ 
-          indoorAssetPictures: allIndoorFiles,
-          outdoorAssetPictures: allOutdoorFiles,
-        });
+      // Update local state with files
+      const updatedAssetsByType = { ...assetsByType };
+      if (!updatedAssetsByType[selectedAssetType]) {
+        updatedAssetsByType[selectedAssetType] = [];
+      }
+      updatedAssetsByType[selectedAssetType] = [...updatedAssetsByType[selectedAssetType], ...newFiles];
+      setAssetsByType(updatedAssetsByType);
+      
+      // Update formData for submission
+      const allIndoorFiles = Object.entries(updatedAssetsByType)
+        .filter(([key]) => indoorAssetTypes.some(t => t.id === key))
+        .flatMap(([, files]) => files);
+      const allOutdoorFiles = Object.entries(updatedAssetsByType)
+        .filter(([key]) => outdoorAssetTypes.some(t => t.id === key))
+        .flatMap(([, files]) => files);
+      updateFormData({ 
+        indoorAssetPictures: allIndoorFiles,
+        outdoorAssetPictures: allOutdoorFiles,
+      });
 
-        const assetLabel = selectedCategory === "indoor" 
-          ? indoorAssetTypes.find(t => t.id === selectedAssetType)?.label
-          : outdoorAssetTypes.find(t => t.id === selectedAssetType)?.label;
+      const assetLabel = selectedCategory === "indoor" 
+        ? indoorAssetTypes.find(t => t.id === selectedAssetType)?.label
+        : outdoorAssetTypes.find(t => t.id === selectedAssetType)?.label;
+
+      // Process outdoor assets with the API
+      if (selectedCategory === "outdoor" && userId && loanId) {
+        toast.info(`Analyzing ${assetLabel} with AI...`);
         
+        for (const file of newFiles) {
+          const result = await processAssetImage(userId, loanId, file, selectedAssetType);
+          if (result) {
+            const detectedCount = result.assets_detected.length;
+            const totalValue = result.estimated_value;
+            if (totalValue > 0) {
+              toast.success(`Detected ${detectedCount} asset(s) worth $${totalValue.toLocaleString()}`);
+            } else if (detectedCount > 0) {
+              toast.info(`Detected ${detectedCount} item(s) - ${result.assets_detected[0]?.object_name || 'processing complete'}`);
+            } else {
+              toast.warning("No assets detected in this image. Try uploading a clearer photo.");
+            }
+          }
+        }
+      } else if (selectedCategory === "indoor") {
         toast.success(`${newFiles.length} ${assetLabel} photo(s) added`);
-        setUploading(false);
-        setSelectedAssetType(null);
-        setSelectedCategory(null);
-      }, 1000);
+      } else if (!userId || !loanId) {
+        toast.warning("Please sign in to enable asset verification");
+      }
+
+      setUploading(false);
+      setSelectedAssetType(null);
+      setSelectedCategory(null);
     }
     // Reset file input
     if (e.target) {
@@ -427,6 +463,128 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
             </span>
           )}
         </div>
+      )}
+
+      {/* AI Processing Status */}
+      {isProcessing && (
+        <Card className="border-0 bg-gradient-to-r from-purple-50 to-blue-50 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+                <Eye className="h-5 w-5 text-purple-600" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 h-4 w-4">
+                <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium text-secondary">AI Analysis in Progress</h4>
+              <p className="text-sm text-muted-foreground">
+                Identifying assets and estimating values...
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* AI Detected Assets Results */}
+      {Object.keys(processingResults).length > 0 && (
+        <Card className="animate-slide-up border-0 bg-card p-6 shadow-elegant">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100">
+                <Eye className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-secondary">AI Asset Analysis</h3>
+                <p className="text-xs text-muted-foreground">
+                  Assets detected from your photos
+                </p>
+              </div>
+            </div>
+            {getTotalEstimatedValue() > 0 && (
+              <div className="text-right">
+                <span className="text-xs text-muted-foreground">Total Value</span>
+                <p className="text-lg font-bold text-green-600">
+                  ${getTotalEstimatedValue().toLocaleString()}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            {getAllDetectedAssets().map((asset, idx) => (
+              <div
+                key={`${asset.detected_object_id}-${idx}`}
+                className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-3"
+              >
+                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                  asset.estimated_value > 0 ? 'bg-green-100' : 'bg-gray-100'
+                }`}>
+                  <DollarSign className={`h-4 w-4 ${
+                    asset.estimated_value > 0 ? 'text-green-600' : 'text-gray-400'
+                  }`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium text-secondary text-sm">
+                      {asset.object_name}
+                    </span>
+                    <Badge 
+                      variant={asset.confidence >= 0.8 ? "default" : "secondary"}
+                      className="text-xs"
+                    >
+                      {Math.round(asset.confidence * 100)}% confident
+                    </Badge>
+                    <Badge 
+                      variant="outline" 
+                      className={`text-xs ${
+                        asset.condition === 'good' ? 'border-green-300 text-green-700' :
+                        asset.condition === 'fair' ? 'border-yellow-300 text-yellow-700' :
+                        'border-gray-300 text-gray-700'
+                      }`}
+                    >
+                      {asset.condition}
+                    </Badge>
+                  </div>
+                  {asset.estimated_value > 0 && (
+                    <p className="text-sm font-semibold text-green-600 mt-1">
+                      Estimated: ${asset.estimated_value.toLocaleString()}
+                    </p>
+                  )}
+                  {asset.reasoning && (
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {asset.reasoning}
+                    </p>
+                  )}
+                  {asset.exif_location && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <MapPin className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">
+                        {asset.exif_location}
+                      </span>
+                    </div>
+                  )}
+                  {asset.requires_proof_of_ownership && (
+                    <div className="flex items-center gap-1 mt-2">
+                      <AlertTriangle className="h-3 w-3 text-amber-500" />
+                      <span className="text-xs text-amber-600 font-medium">
+                        Proof of ownership required
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {processingError && (
+            <div className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+              <AlertTriangle className="mr-2 inline h-4 w-4" />
+              {processingError}
+            </div>
+          )}
+        </Card>
       )}
 
       {/* Collateral Documents - Dynamically shown based on uploaded outdoor assets */}
