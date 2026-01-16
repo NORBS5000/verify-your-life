@@ -121,42 +121,45 @@ export const StepSix = ({ formData, prevStep, handleSubmit, isSubmitting = false
       </div>
 
       {/* Navigation */}
-      <div className="flex gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={prevStep}
-          disabled={isSubmitting}
-          className="gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onSaveDraft}
-          disabled={isSubmitting}
-          className="gap-2"
-        >
-          <Save className="h-4 w-4" />
-          <span className="hidden sm:inline">Save</span>
-        </Button>
+      <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+        <div className="flex gap-2 sm:gap-4 order-2 sm:order-1">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={prevStep}
+            disabled={isSubmitting}
+            className="gap-1.5 sm:gap-2 flex-1 sm:flex-none"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back</span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onSaveDraft}
+            disabled={isSubmitting}
+            className="gap-1.5 sm:gap-2 flex-1 sm:flex-none"
+          >
+            <Save className="h-4 w-4" />
+            <span>Save</span>
+          </Button>
+        </div>
         <Button
           type="button"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="flex-1 gap-2 bg-health-green py-6 text-lg font-semibold text-white shadow-lg transition-all hover:bg-health-green/90 hover:shadow-xl"
+          className="flex-1 gap-2 bg-health-green py-4 sm:py-6 text-base sm:text-lg font-semibold text-white shadow-lg transition-all hover:bg-health-green/90 hover:shadow-xl order-1 sm:order-2"
         >
           {isSubmitting ? (
             <>
               <Loader2 className="h-5 w-5 animate-spin" />
-              Submitting...
+              <span>Submitting...</span>
             </>
           ) : (
             <>
               <Send className="h-5 w-5" />
-              Submit Application
+              <span className="sm:hidden">Submit</span>
+              <span className="hidden sm:inline">Submit Application</span>
             </>
           )}
         </Button>
