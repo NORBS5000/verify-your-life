@@ -113,7 +113,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         0
       );
       const totalRetail = prescriptionTotal + existingMedicationTotal;
-      const covaCost = Math.round(totalRetail * 0.63); // ~37% savings
+      const covaCost = Math.round(totalRetail * 0.8); // 20% savings
 
       // Calculate medical needs score
       const totalDrugs = data.files.reduce((sum, f) => sum + f.drugs.length, 0) + medicationItems.length;
@@ -191,7 +191,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         0
       );
       const totalRetail = medicationTotal + existingPrescriptionTotal;
-      const covaCost = Math.round(totalRetail * 0.63);
+      const covaCost = Math.round(totalRetail * 0.8); // 20% savings
 
       const medicalNeedsScore = Math.min(100, Math.round(
         (data.predicted_conditions.length * 15) + 
