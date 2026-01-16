@@ -207,20 +207,20 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
               accept=".pdf,image/*"
               required
             />
-            <div className="ml-16 space-y-3">
+            <div className="ml-12 sm:ml-16 space-y-3">
               <div>
-                <Label htmlFor="mpesaPassword" className="flex items-center gap-2 text-sm">
-                  <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                  PDF Password (if protected)
+                <Label htmlFor="mpesaPassword" className="flex items-center gap-2 text-xs sm:text-sm">
+                  <Lock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
+                  <span className="truncate">PDF Password (if protected)</span>
                 </Label>
-                <div className="flex gap-2 mt-1.5">
+                <div className="flex flex-col sm:flex-row gap-2 mt-1.5">
                   <Input
                     id="mpesaPassword"
                     type="password"
-                    placeholder="Enter password if document is protected"
+                    placeholder="Enter password"
                     value={formData.mpesaStatementPassword}
                     onChange={(e) => handleMpesaPasswordChange(e.target.value)}
-                    className="flex-1"
+                    className="flex-1 text-sm"
                   />
                   {formData.mpesaStatement && formData.mpesaStatementPassword && (
                     <Button
@@ -229,12 +229,12 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                       size="sm"
                       onClick={handleAnalyzeMpesaWithPassword}
                       disabled={isAnalyzingMpesa}
-                      className="shrink-0"
+                      className="shrink-0 text-xs sm:text-sm"
                     >
                       {isAnalyzingMpesa ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        "Unlock & Analyze"
+                        "Unlock"
                       )}
                     </Button>
                   )}
@@ -319,20 +319,20 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
               onFileChange={handleBankStatementUpload}
               accept=".pdf,image/*"
             />
-            <div className="ml-16 space-y-3">
+            <div className="ml-12 sm:ml-16 space-y-3">
               <div>
-                <Label htmlFor="bankPassword" className="flex items-center gap-2 text-sm">
-                  <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                  PDF Password (if protected)
+                <Label htmlFor="bankPassword" className="flex items-center gap-2 text-xs sm:text-sm">
+                  <Lock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
+                  <span className="truncate">PDF Password (if protected)</span>
                 </Label>
-                <div className="flex gap-2 mt-1.5">
+                <div className="flex flex-col sm:flex-row gap-2 mt-1.5">
                   <Input
                     id="bankPassword"
                     type="password"
-                    placeholder="Enter password if document is protected"
+                    placeholder="Enter password"
                     value={formData.bankStatementPassword}
                     onChange={(e) => handlePasswordChange(e.target.value)}
-                    className="flex-1"
+                    className="flex-1 text-sm"
                   />
                   {formData.bankStatement && formData.bankStatementPassword && (
                     <Button
@@ -341,12 +341,12 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                       size="sm"
                       onClick={handleAnalyzeWithPassword}
                       disabled={isAnalyzing}
-                      className="shrink-0"
+                      className="shrink-0 text-xs sm:text-sm"
                     >
                       {isAnalyzing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        "Unlock & Analyze"
+                        "Unlock"
                       )}
                     </Button>
                   )}
