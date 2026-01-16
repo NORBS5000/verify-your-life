@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FormData } from "@/pages/Apply";
 
-// Calculate composite score from individual scores (0-1000 scale)
+// Calculate composite score from individual scores (0-100 scale)
 const calculateCompositeScore = (
   medicalNeedsScore: number | null,
   assetValuationScore: number | null,
@@ -22,9 +22,9 @@ const calculateCompositeScore = (
   
   if (scores.length === 0) return null;
   
-  // Average of available scores, scaled to 0-1000
+  // Average of available scores (0-100 scale)
   const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
-  return Math.round(avgScore * 10); // Scale 0-100 to 0-1000
+  return Math.round(avgScore);
 };
 
 export function useSubmitApplication() {
