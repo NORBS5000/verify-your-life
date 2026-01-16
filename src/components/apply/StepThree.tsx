@@ -184,6 +184,15 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
       return;
     }
 
+    // Calculate asset valuation score (0-100) based on total value
+    const totalValue = getTotalEstimatedValue();
+    const assetScore = Math.min(100, Math.round(totalValue / 100)); // $10,000 = 100 score
+    
+    updateFormData({
+      assetValuationScore: assetScore,
+      totalAssetValue: totalValue,
+    });
+
     nextStep();
   };
 

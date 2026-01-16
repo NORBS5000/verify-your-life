@@ -44,6 +44,20 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
 
   const handleNext = () => {
     if (formData.mpesaStatement) {
+      // Calculate behavior risk score from call logs if available
+      if (callLogsResult) {
+        updateFormData({
+          behaviorRiskScore: callLogsResult.score || null,
+        });
+      }
+      
+      // Save bank statement credit score if available
+      if (analysisResult) {
+        updateFormData({
+          bankStatementCreditScore: analysisResult.output_from_credit_score_engine?.bank_statement_credit_score || null,
+        });
+      }
+      
       nextStep();
     } else {
       toast.error("Please provide M-Pesa statement");

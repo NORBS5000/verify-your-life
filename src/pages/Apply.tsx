@@ -50,6 +50,12 @@ export interface FormData {
   guarantor2Id: File | null;
   guarantor1Phone: string;
   guarantor2Phone: string;
+  // API-derived scores
+  medicalNeedsScore: number | null;
+  assetValuationScore: number | null;
+  behaviorRiskScore: number | null;
+  bankStatementCreditScore: number | null;
+  totalAssetValue: number | null;
 }
 
 const steps = [
@@ -101,6 +107,12 @@ const Apply = () => {
     guarantor2Id: null,
     guarantor1Phone: "",
     guarantor2Phone: "",
+    // API-derived scores
+    medicalNeedsScore: null,
+    assetValuationScore: null,
+    behaviorRiskScore: null,
+    bankStatementCreditScore: null,
+    totalAssetValue: null,
   });
 
   // Redirect to auth if not logged in

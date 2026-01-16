@@ -81,9 +81,18 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       );
       const covaCost = Math.round(totalRetail * 0.63); // ~37% savings
 
+      // Calculate medical needs score (0-100 based on medication complexity)
+      // Higher score = higher medical need
+      const medicalNeedsScore = Math.min(100, Math.round(
+        (data.predicted_conditions.length * 15) + 
+        (data.medicines_info.length * 10) + 
+        Math.min(40, totalRetail / 100)
+      ));
+
       updateFormData({
         retailCost: totalRetail,
         covaCost: covaCost,
+        medicalNeedsScore: medicalNeedsScore,
       });
       setShowPricing(true);
       toast.success("Medication analyzed successfully!");

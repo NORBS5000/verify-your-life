@@ -2,6 +2,31 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FormData } from "@/pages/Apply";
 
+// Calculate composite score from individual scores (0-1000 scale)
+const calculateCompositeScore = (
+  medicalNeedsScore: number | null,
+  assetValuationScore: number | null,
+  behaviorRiskScore: number | null,
+  bankStatementCreditScore: number | null
+): number | null => {
+  const scores: number[] = [];
+  
+  // Medical needs (lower is better for credit, but we want high need = funded)
+  if (medicalNeedsScore !== null) scores.push(medicalNeedsScore);
+  // Asset valuation (higher is better)
+  if (assetValuationScore !== null) scores.push(assetValuationScore);
+  // Behavior risk (higher is better - less risky)
+  if (behaviorRiskScore !== null) scores.push(behaviorRiskScore);
+  // Bank statement credit score (typically 0-100 from API)
+  if (bankStatementCreditScore !== null) scores.push(bankStatementCreditScore);
+  
+  if (scores.length === 0) return null;
+  
+  // Average of available scores, scaled to 0-1000
+  const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+  return Math.round(avgScore * 10); // Scale 0-100 to 0-1000
+};
+
 export function useSubmitApplication() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -172,6 +197,17 @@ export function useSubmitApplication() {
         guarantor1_phone: formData.guarantor1Phone || null,
         guarantor2_phone: formData.guarantor2Phone || null,
         asset_pictures_urls: assetUrls.length > 0 ? assetUrls : null,
+        // API-derived scores
+        medical_needs_score: formData.medicalNeedsScore,
+        asset_valuation_score: formData.assetValuationScore,
+        behavior_risk_score: formData.behaviorRiskScore,
+        // Calculate composite score (weighted average)
+        composite_score: calculateCompositeScore(
+          formData.medicalNeedsScore,
+          formData.assetValuationScore,
+          formData.behaviorRiskScore,
+          formData.bankStatementCreditScore
+        ),
         status: "pending",
       };
 
