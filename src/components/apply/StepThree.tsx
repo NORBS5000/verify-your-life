@@ -149,7 +149,12 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
           }
         }
       } else {
-        toast.warning("Still preparing your application. Please wait a moment and try again.");
+        // Show specific message about what's missing
+        if (!userId) {
+          toast.error("Please complete Step 1 with your phone number first.");
+        } else if (!loanId) {
+          toast.warning("Your application is being set up. Please wait a moment and try again.");
+        }
       }
 
       setUploading(false);
@@ -238,10 +243,22 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
         {/* Upload Area */}
         <button
           onClick={handleUploadClick}
-          disabled={uploading || isProcessing}
-          className="group relative flex w-full flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-border bg-muted/30 p-8 transition-all hover:border-primary hover:bg-primary/5"
+          disabled={uploading || isProcessing || !userId || !loanId}
+          className="group relative flex w-full flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-border bg-muted/30 p-8 transition-all hover:border-primary hover:bg-primary/5 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {uploading || isProcessing ? (
+          {!userId || !loanId ? (
+            <>
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+                <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
+              </div>
+              <div className="text-center">
+                <p className="font-medium text-secondary">Setting up your application...</p>
+                <p className="text-sm text-muted-foreground">
+                  {!userId ? "Please complete Step 1 first" : "Creating your loan application"}
+                </p>
+              </div>
+            </>
+          ) : uploading || isProcessing ? (
             <>
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
