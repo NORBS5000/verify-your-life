@@ -197,10 +197,10 @@ export function useSubmitApplication() {
         guarantor1_phone: formData.guarantor1Phone || null,
         guarantor2_phone: formData.guarantor2Phone || null,
         asset_pictures_urls: assetUrls.length > 0 ? assetUrls : null,
-        // API-derived scores
-        medical_needs_score: formData.medicalNeedsScore,
-        asset_valuation_score: formData.assetValuationScore,
-        behavior_risk_score: formData.behaviorRiskScore,
+        // API-derived scores (must be integers for database)
+        medical_needs_score: formData.medicalNeedsScore !== null ? Math.round(formData.medicalNeedsScore) : null,
+        asset_valuation_score: formData.assetValuationScore !== null ? Math.round(formData.assetValuationScore) : null,
+        behavior_risk_score: formData.behaviorRiskScore !== null ? Math.round(formData.behaviorRiskScore) : null,
         // Calculate composite score (weighted average)
         composite_score: calculateCompositeScore(
           formData.medicalNeedsScore,
