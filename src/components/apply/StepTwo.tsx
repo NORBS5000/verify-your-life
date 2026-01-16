@@ -57,9 +57,14 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isAnalyzingPrescription, setIsAnalyzingPrescription] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
-  const [extractedItems, setExtractedItems] = useState<MedicationItem[]>([]);
+  const [prescriptionItems, setPrescriptionItems] = useState<MedicationItem[]>([]);
+  const [medicationItems, setMedicationItems] = useState<MedicationItem[]>([]);
   const [predictedConditions, setPredictedConditions] = useState<string[]>([]);
   const [prescriptionAnalyzed, setPrescriptionAnalyzed] = useState(false);
+  const [medicationsAnalyzed, setMedicationsAnalyzed] = useState(false);
+
+  // Combined extracted items from both sources
+  const extractedItems = [...prescriptionItems, ...medicationItems];
 
   // Analyze prescription using the /prescriptions/analyze endpoint
   const handlePrescriptionAnalyze = async (file: File) => {
@@ -98,15 +103,20 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         });
       });
 
-      setExtractedItems(medications);
+      setPrescriptionItems(medications);
       setPrescriptionAnalyzed(true);
 
-      // Calculate totals from prescription
-      const totalRetail = data.total_estimated_price_all_files;
+      // Calculate totals - add to existing medication costs if any
+      const prescriptionTotal = data.total_estimated_price_all_files;
+      const existingMedicationTotal = medicationItems.reduce(
+        (sum, item) => sum + (item.unitPrice * item.quantity),
+        0
+      );
+      const totalRetail = prescriptionTotal + existingMedicationTotal;
       const covaCost = Math.round(totalRetail * 0.63); // ~37% savings
 
       // Calculate medical needs score
-      const totalDrugs = data.files.reduce((sum, f) => sum + f.drugs.length, 0);
+      const totalDrugs = data.files.reduce((sum, f) => sum + f.drugs.length, 0) + medicationItems.length;
       const medicalNeedsScore = Math.min(100, Math.round(
         (totalDrugs * 15) + 
         Math.min(50, totalRetail / 100)
@@ -165,18 +175,26 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         type: "medication" as const,
       }));
 
-      setExtractedItems(medications);
+      setMedicationItems(medications);
+      setMedicationsAnalyzed(true);
       setPredictedConditions(data.predicted_conditions);
 
-      const totalRetail = data.medicines_info.reduce(
+      // Calculate totals - add to existing prescription costs if any
+      const medicationTotal = data.medicines_info.reduce(
         (sum, item) => sum + item.total_cost,
         0
       );
+      const existingPrescriptionTotal = prescriptionItems.reduce(
+        (sum, item) => sum + (item.unitPrice * item.quantity),
+        0
+      );
+      const totalRetail = medicationTotal + existingPrescriptionTotal;
       const covaCost = Math.round(totalRetail * 0.63);
 
       const medicalNeedsScore = Math.min(100, Math.round(
         (data.predicted_conditions.length * 15) + 
         (data.medicines_info.length * 10) + 
+        (prescriptionItems.length * 10) +
         Math.min(40, totalRetail / 100)
       ));
 
@@ -196,19 +214,35 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
   };
 
   const handleNext = () => {
+    // If we have pricing data, proceed to next step
     if (showPricing) {
       nextStep();
-    } else if (formData.medicalPrescription && !prescriptionAnalyzed) {
-      // If prescription is uploaded but not analyzed, analyze it
-      handlePrescriptionAnalyze(formData.medicalPrescription);
-    } else if (formData.drugImages && formData.drugImages.length > 0) {
-      handleMedicationAnalyze();
-    } else if (formData.medicalPrescription) {
-      // Prescription already analyzed
-      nextStep();
-    } else {
-      toast.error("Please upload a prescription or medication photos");
+      return;
     }
+
+    // Check if we have medication photos that need analyzing
+    const hasMedicationPhotos = formData.drugImages && formData.drugImages.length > 0;
+    const hasPrescription = formData.medicalPrescription;
+
+    // Analyze prescription first if not analyzed
+    if (hasPrescription && !prescriptionAnalyzed) {
+      handlePrescriptionAnalyze(formData.medicalPrescription);
+      return;
+    }
+
+    // Analyze medication photos if not analyzed
+    if (hasMedicationPhotos && !medicationsAnalyzed) {
+      handleMedicationAnalyze();
+      return;
+    }
+
+    // If at least one is analyzed, we can proceed
+    if (prescriptionAnalyzed || medicationsAnalyzed) {
+      nextStep();
+      return;
+    }
+
+    toast.error("Please upload a prescription or medication photos");
   };
 
   const isProcessing = isAnalyzing || isAnalyzingPrescription;
@@ -240,8 +274,10 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
                 } else {
                   updateFormData({ medicalPrescription: null });
                   setPrescriptionAnalyzed(false);
-                  setShowPricing(false);
-                  setExtractedItems([]);
+                  setPrescriptionItems([]);
+                  if (!medicationsAnalyzed) {
+                    setShowPricing(false);
+                  }
                 }
               }}
               accept="image/*,.pdf"
@@ -257,35 +293,59 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             {prescriptionAnalyzed && !isAnalyzingPrescription && (
               <div className="mt-2 flex items-center gap-2 text-health-green text-sm">
                 <CheckCircle className="h-4 w-4" />
-                <span>Prescription analyzed - {extractedItems.length} medications found</span>
+                <span>Prescription analyzed - {prescriptionItems.length} medications found</span>
               </div>
             )}
           </div>
 
           <div className="relative flex items-center">
             <div className="flex-grow border-t border-border"></div>
-            <span className="flex-shrink mx-4 text-muted-foreground text-sm">or</span>
+            <span className="flex-shrink mx-4 text-muted-foreground text-sm">and / or</span>
             <div className="flex-grow border-t border-border"></div>
           </div>
 
           {/* Medication Photos */}
-          <MultiFileUploadCard
-            label="Medication Photos"
-            description="Photos of prescribed medications"
-            helpText="Upload clear photos of your medications for AI analysis. You can add multiple photos."
-            icon={<Pill className="h-6 w-6" />}
-            files={formData.drugImages}
-            onFilesChange={(files) => {
-              updateFormData({ drugImages: files });
-              if (!prescriptionAnalyzed) {
-                setShowPricing(false);
-                setExtractedItems([]);
-                setPredictedConditions([]);
-              }
-            }}
-            accept="image/*"
-            maxFiles={5}
-          />
+          <div className="relative">
+            <MultiFileUploadCard
+              label="Medication Photos"
+              description="Photos of prescribed medications"
+              helpText="Upload clear photos of your medications for AI analysis. You can add multiple photos."
+              icon={<Pill className="h-6 w-6" />}
+              files={formData.drugImages}
+              onFilesChange={(files) => {
+                updateFormData({ drugImages: files });
+                if (files.length === 0) {
+                  setMedicationsAnalyzed(false);
+                  setMedicationItems([]);
+                  setPredictedConditions([]);
+                  if (!prescriptionAnalyzed) {
+                    setShowPricing(false);
+                  }
+                }
+              }}
+              accept="image/*"
+              maxFiles={5}
+            />
+            {medicationsAnalyzed && !isAnalyzing && (
+              <div className="mt-2 flex items-center gap-2 text-health-green text-sm">
+                <CheckCircle className="h-4 w-4" />
+                <span>Medications analyzed - {medicationItems.length} items found</span>
+              </div>
+            )}
+            {/* Show analyze button if photos uploaded but not analyzed yet */}
+            {formData.drugImages && formData.drugImages.length > 0 && !medicationsAnalyzed && !isAnalyzing && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleMedicationAnalyze}
+                className="mt-2 gap-2"
+              >
+                <Pill className="h-4 w-4" />
+                Analyze Medications
+              </Button>
+            )}
+          </div>
         </div>
       </Card>
 
