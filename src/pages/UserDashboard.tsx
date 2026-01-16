@@ -71,35 +71,32 @@ const UserDashboard = () => {
     }
   };
 
-  // Calculate composite score from individual scores
+  // Calculate composite score out of 100 from individual scores
   const compositeScore = application?.composite_score ?? 
     Math.round(((application?.medical_needs_score ?? 60) + 
     (application?.asset_valuation_score ?? 70) + 
-    (application?.behavior_risk_score ?? 75)) / 3 * 10);
+    (application?.behavior_risk_score ?? 75)) / 3);
 
   const medicalScore = application?.medical_needs_score ?? 58;
   const assetScore = application?.asset_valuation_score ?? 78;
   const behaviorScore = application?.behavior_risk_score ?? 82;
 
-  const getRiskLevel = (score: number) => {
-    if (score >= 700) return { label: "Excellent", color: "text-health-green", bg: "bg-health-green" };
-    if (score >= 600) return { label: "Good", color: "text-health-green", bg: "bg-health-green" };
-    if (score >= 500) return { label: "Fair", color: "text-health-yellow", bg: "bg-health-yellow" };
-    return { label: "Needs Work", color: "text-health-orange", bg: "bg-health-orange" };
-  };
+  // Credit limit from retail_cost (estimated medical value)
+  const creditLimit = application?.retail_cost ?? 0;
 
-  const getCreditLimit = (score: number) => {
-    if (score >= 700) return "KSh 150,000";
-    if (score >= 600) return "KSh 100,000";
-    if (score >= 500) return "KSh 50,000";
-    return "KSh 25,000";
-  };
-
-  const getAPR = (score: number) => {
-    if (score >= 700) return "8.5%";
-    if (score >= 600) return "12.5%";
-    if (score >= 500) return "18%";
+  // Interest rate based on behavior risk score
+  const getInterestRate = (behaviorScore: number) => {
+    if (behaviorScore >= 80) return "8.5%";
+    if (behaviorScore >= 60) return "12.5%";
+    if (behaviorScore >= 40) return "18%";
     return "24%";
+  };
+
+  const getRiskLevel = (score: number) => {
+    if (score >= 80) return { label: "Excellent", color: "text-health-green", bg: "bg-health-green" };
+    if (score >= 60) return { label: "Good", color: "text-health-green", bg: "bg-health-green" };
+    if (score >= 40) return { label: "Fair", color: "text-health-yellow", bg: "bg-health-yellow" };
+    return { label: "Needs Work", color: "text-health-orange", bg: "bg-health-orange" };
   };
 
   const getScoreColor = (score: number) => {
@@ -256,7 +253,7 @@ const UserDashboard = () => {
               <div className="flex-shrink-0">
                 <GradientCircularProgress
                   value={compositeScore}
-                  max={1000}
+                  max={100}
                   size={180}
                   strokeWidth={12}
                   gradientId="composite-score"
@@ -269,7 +266,7 @@ const UserDashboard = () => {
                 >
                   <div className="text-center">
                     <span className="text-4xl font-bold">{compositeScore}</span>
-                    <span className="text-xs opacity-60 block mt-1">out of 1000</span>
+                    <span className="text-xs opacity-60 block mt-1">out of 100</span>
                   </div>
                 </GradientCircularProgress>
               </div>
@@ -282,14 +279,14 @@ const UserDashboard = () => {
                       <TrendingUp className="h-4 w-4 opacity-70" />
                       <span className="text-xs opacity-70">Credit Limit</span>
                     </div>
-                    <p className="text-xl font-bold">{getCreditLimit(compositeScore)}</p>
+                    <p className="text-xl font-bold">KSh {creditLimit.toLocaleString()}</p>
                   </div>
                   <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
                     <div className="flex items-center gap-2 mb-2">
                       <BarChart3 className="h-4 w-4 opacity-70" />
-                      <span className="text-xs opacity-70">APR Rate</span>
+                      <span className="text-xs opacity-70">Interest Rate</span>
                     </div>
-                    <p className="text-xl font-bold">{getAPR(compositeScore)}</p>
+                    <p className="text-xl font-bold">{getInterestRate(behaviorScore)}</p>
                   </div>
                 </div>
               </div>
