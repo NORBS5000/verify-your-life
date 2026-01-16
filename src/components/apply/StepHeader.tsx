@@ -22,7 +22,7 @@ const calculateCreditScore = (formData: FormData): number => {
 
   // Medical section (max 20 points)
   if (formData.medicalPrescription) score += 10;
-  if (formData.drugImage) score += 5;
+  if (formData.drugImages?.length > 0) score += 5;
   if (formData.covaCost > 0) score += 5;
 
   // Collateral section (max 30 points)

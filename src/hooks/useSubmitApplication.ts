@@ -57,9 +57,11 @@ export function useSubmitApplication() {
         );
       }
 
-      if (formData.drugImage) {
+      // Upload drug images (multiple)
+      if (formData.drugImages && formData.drugImages.length > 0) {
+        // Upload first image as the main drug_image_url for backward compatibility
         uploadPromises.push(
-          uploadFile(formData.drugImage, userId, "drugs").then((url) => ({
+          uploadFile(formData.drugImages[0], userId, "drugs").then((url) => ({
             key: "drug_image_url",
             url,
           }))

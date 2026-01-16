@@ -25,7 +25,7 @@ export interface FormData {
   age: string;
   // Medical data
   medicalPrescription: File | null;
-  drugImage: File | null;
+  drugImages: File[];
   retailCost: number;
   covaCost: number;
   // Collateral data
@@ -76,7 +76,7 @@ const Apply = () => {
     sex: "",
     age: "",
     medicalPrescription: null,
-    drugImage: null,
+    drugImages: [],
     retailCost: 0,
     covaCost: 0,
     selectedCollateral: [],

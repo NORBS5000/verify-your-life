@@ -31,7 +31,7 @@ export const StepFive = ({ formData, prevStep, handleSubmit, isSubmitting = fals
       title: "Medical Assessment",
       items: [
         { label: "Prescription", value: formData.medicalPrescription?.name || "Not uploaded" },
-        { label: "Medication Photo", value: formData.drugImage?.name || "Not uploaded" },
+        { label: "Medication Photos", value: formData.drugImages.length > 0 ? `${formData.drugImages.length} photo(s) uploaded` : "Not uploaded" },
         { label: "Retail Cost", value: formData.retailCost ? `KES ${formData.retailCost.toLocaleString()}` : "" },
         { label: "COVA Credit Amount", value: formData.covaCost ? `KES ${formData.covaCost.toLocaleString()}` : "" },
       ],

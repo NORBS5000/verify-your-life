@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { FormData } from "@/pages/Apply";
 import { ArrowLeft, ArrowRight, Pill, Loader2, Stethoscope, Save } from "lucide-react";
-import { FileUploadCard } from "./FileUploadCard";
+import { MultiFileUploadCard } from "./MultiFileUploadCard";
 import { PriceComparison } from "./PriceComparison";
 import { StepHeader } from "./StepHeader";
 import { MedicationList, MedicationItem } from "./MedicationList";
@@ -37,8 +37,8 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
   const [predictedConditions, setPredictedConditions] = useState<string[]>([]);
 
   const handleAnalyze = async () => {
-    if (!formData.drugImage) {
-      toast.error("Please upload a medication photo");
+    if (!formData.drugImages || formData.drugImages.length === 0) {
+      toast.error("Please upload at least one medication photo");
       return;
     }
 
@@ -46,7 +46,10 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("files", formData.drugImage);
+      // Append all drug images
+      formData.drugImages.forEach((file) => {
+        formDataToSend.append("files", file);
+      });
 
       const response = await fetch("https://orionapisalpha.onrender.com/medical_needs/predict", {
         method: "POST",
@@ -95,10 +98,10 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
   const handleNext = () => {
     if (showPricing) {
       nextStep();
-    } else if (formData.drugImage) {
+    } else if (formData.drugImages && formData.drugImages.length > 0) {
       handleAnalyze();
     } else {
-      toast.error("Please upload a medication photo");
+      toast.error("Please upload at least one medication photo");
     }
   };
 
@@ -114,20 +117,21 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       {/* Upload Cards */}
       <Card className="border-0 bg-card p-6 shadow-elegant">
         <div className="space-y-4">
-          <FileUploadCard
-            label="Medication Photo"
-            description="Photo of prescribed medications"
-            helpText="Upload a clear photo of your medications for AI analysis"
+          <MultiFileUploadCard
+            label="Medication Photos"
+            description="Photos of prescribed medications"
+            helpText="Upload clear photos of your medications for AI analysis. You can add multiple photos."
             icon={<Pill className="h-6 w-6" />}
-            file={formData.drugImage}
-            onFileChange={(file) => {
-              updateFormData({ drugImage: file });
+            files={formData.drugImages}
+            onFilesChange={(files) => {
+              updateFormData({ drugImages: files });
               setShowPricing(false);
               setExtractedItems([]);
               setPredictedConditions([]);
             }}
             accept="image/*"
             required
+            maxFiles={5}
           />
         </div>
       </Card>
