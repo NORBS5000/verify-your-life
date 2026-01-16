@@ -24,18 +24,48 @@ interface StepThreeProps {
 const getRequiredDocument = (objectName: string): { type: string; label: string; icon: React.ReactNode } | null => {
   const lowerName = objectName.toLowerCase();
   
+  // Common car brand names and vehicle types
+  const vehicleKeywords = [
+    'car', 'vehicle', 'truck', 'motorcycle', 'motorbike', 'suv', 'sedan', 'van', 'bus', 'lorry',
+    // Common brands
+    'toyota', 'honda', 'nissan', 'mazda', 'mitsubishi', 'suzuki', 'subaru', 'isuzu', 'daihatsu',
+    'mercedes', 'bmw', 'audi', 'volkswagen', 'vw', 'porsche', 'ford', 'chevrolet', 'chevy',
+    'jeep', 'dodge', 'chrysler', 'gmc', 'cadillac', 'lincoln', 'buick', 'tesla',
+    'hyundai', 'kia', 'daewoo', 'ssangyong', 'lexus', 'infiniti', 'acura',
+    'land rover', 'range rover', 'jaguar', 'volvo', 'saab', 'peugeot', 'renault', 'citroen',
+    'fiat', 'alfa romeo', 'ferrari', 'lamborghini', 'maserati', 'bentley', 'rolls royce',
+    // Common model names that indicate vehicles
+    'rav4', 'corolla', 'camry', 'hilux', 'fortuner', 'prado', 'land cruiser',
+    'civic', 'accord', 'cr-v', 'pilot', 'fit', 'jazz',
+    'altima', 'sentra', 'maxima', 'pathfinder', 'patrol', 'x-trail',
+    'cx-5', 'cx-3', 'mazda3', 'mazda6',
+    'outlander', 'pajero', 'triton', 'lancer',
+    'swift', 'vitara', 'jimny',
+    'forester', 'outback', 'impreza',
+    'd-max', 'mu-x',
+  ];
+  
   // Vehicles - require logbook
-  if (lowerName.includes('car') || lowerName.includes('vehicle') || lowerName.includes('truck') || lowerName.includes('motorcycle') || lowerName.includes('motorbike')) {
+  if (vehicleKeywords.some(keyword => lowerName.includes(keyword))) {
     return { type: 'logbook', label: 'Vehicle Logbook', icon: <Car className="h-4 w-4" /> };
   }
   
   // Land and buildings - require title deed
-  if (lowerName.includes('land') || lowerName.includes('property') || lowerName.includes('house') || lowerName.includes('apartment') || lowerName.includes('building') || lowerName.includes('plot')) {
+  const propertyKeywords = [
+    'land', 'property', 'house', 'apartment', 'building', 'plot', 'estate', 'flat',
+    'residential', 'commercial', 'bungalow', 'duplex', 'villa', 'mansion', 'cottage',
+    'warehouse', 'factory', 'office', 'shop', 'store', 'mall', 'plaza'
+  ];
+  if (propertyKeywords.some(keyword => lowerName.includes(keyword))) {
     return { type: 'title_deed', label: 'Title Deed', icon: <Home className="h-4 w-4" /> };
   }
   
   // Machinery - require ownership declaration
-  if (lowerName.includes('machinery') || lowerName.includes('machine') || lowerName.includes('equipment') || lowerName.includes('tractor') || lowerName.includes('generator')) {
+  const machineryKeywords = [
+    'machinery', 'machine', 'equipment', 'tractor', 'generator', 'excavator', 'bulldozer',
+    'crane', 'forklift', 'loader', 'compressor', 'pump', 'drill', 'lathe', 'welder'
+  ];
+  if (machineryKeywords.some(keyword => lowerName.includes(keyword))) {
     return { type: 'ownership_declaration', label: 'Ownership Declaration', icon: <FileText className="h-4 w-4" /> };
   }
   
