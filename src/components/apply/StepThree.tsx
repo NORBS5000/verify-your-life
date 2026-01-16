@@ -161,6 +161,10 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
         const scoreResult = await calculateCreditScore(userId, loanId);
         if (scoreResult) {
           toast.success(`Credit Score: ${scoreResult.credit_score}/${scoreResult.max_score} (${scoreResult.risk_level})`);
+          // Save the API credit score to formData immediately
+          updateFormData({
+            assetValuationScore: scoreResult.credit_score,
+          });
         }
       } else {
         // Show specific message about what's missing
@@ -227,6 +231,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
         title="Asset Declaration"
         description="Upload photos of your assets to strengthen your loan application"
         formData={formData}
+        apiCreditScore={creditScoreResult?.credit_score ?? null}
       />
 
       {/* Hidden File Input - removed capture attribute for better desktop compatibility */}
