@@ -102,7 +102,8 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
     submitProofOfOwnership,
     getTotalEstimatedValue,
     getAllDetectedAssets,
-    clearResults 
+    clearResults,
+    clearCreditScore 
   } = useAssetProcessing();
 
   // Get assets that require proof of ownership
@@ -247,6 +248,12 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
     // Remove the file
     const updatedFiles = assetFiles.filter((_, i) => i !== fileIndex);
     setAssetFiles(updatedFiles);
+    
+    // If no assets left, clear the credit score
+    if (updatedFiles.length === 0) {
+      clearCreditScore();
+      updateFormData({ assetValuationScore: null });
+    }
     
     // Update formData
     updateFormData({ 
