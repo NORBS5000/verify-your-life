@@ -44,11 +44,21 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
 
   const handleNext = () => {
     if (formData.mpesaStatement) {
-      // Calculate behavior risk score from call logs if available
-      if (callLogsResult) {
-        updateFormData({
-          behaviorRiskScore: callLogsResult.score || null,
-        });
+      // Calculate behavior risk score from M-Pesa and call logs
+      let behaviorScore: number | null = null;
+      
+      // Use M-Pesa behavior score if available
+      if (mpesaResult?.credit_scores) {
+        behaviorScore = Math.round(mpesaResult.credit_scores.behavior_score);
+      }
+      
+      // Override with call logs score if available (more comprehensive)
+      if (callLogsResult?.score) {
+        behaviorScore = callLogsResult.score;
+      }
+      
+      if (behaviorScore !== null) {
+        updateFormData({ behaviorRiskScore: behaviorScore });
       }
       
       // Save bank statement credit score if available
@@ -246,22 +256,44 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                     <span className="font-medium">M-Pesa Analysis Complete</span>
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Document ID:</span>
-                      <span className="ml-2 font-medium text-foreground">
-                        {mpesaResult.document_id.slice(0, 8)}...
-                      </span>
-                    </div>
+                    {mpesaResult.credit_scores && (
+                      <>
+                        <div>
+                          <span className="text-muted-foreground">Transaction Score:</span>
+                          <span className="ml-2 font-bold text-secondary">
+                            {mpesaResult.credit_scores.transaction_score.toFixed(1)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Behavior Score:</span>
+                          <span className="ml-2 font-bold text-secondary">
+                            {mpesaResult.credit_scores.behavior_score.toFixed(1)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Avg Balance:</span>
+                          <span className="ml-2 font-medium text-foreground">
+                            KES {mpesaResult.credit_scores.insights.avg_balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Inflow/Outflow:</span>
+                          <span className="ml-2 font-medium text-foreground">
+                            {mpesaResult.credit_scores.insights.inflow_outflow_ratio.toFixed(2)}
+                          </span>
+                        </div>
+                      </>
+                    )}
                     <div>
                       <span className="text-muted-foreground">Transactions:</span>
                       <span className="ml-2 font-bold text-secondary">
                         {mpesaResult.transactions?.length || 0}
                       </span>
                     </div>
-                    <div className="col-span-2">
+                    <div>
                       <span className="text-muted-foreground">Status:</span>
                       <span className="ml-2 font-medium text-health-green">
-                        Processed Successfully
+                        Processed
                       </span>
                     </div>
                   </div>

@@ -12,12 +12,27 @@ export interface MpesaTransaction {
   "Balance": number;
 }
 
+export interface MpesaCreditScores {
+  transaction_score: number;
+  behavior_score: number;
+  insights: {
+    inflow: number;
+    outflow: number;
+    avg_balance: number;
+    inflow_outflow_ratio: number;
+    income_consistency: number;
+    risky_transactions: number;
+    late_night_transactions: number;
+  };
+}
+
 export interface MpesaAnalysisResult {
   document_id: string;
   loan_id: string;
   user_id: string;
   document_url: string;
   transactions: MpesaTransaction[];
+  credit_scores?: MpesaCreditScores;
 }
 
 export const useMpesaProcessing = () => {
@@ -59,8 +74,12 @@ export const useMpesaProcessing = () => {
       console.log("User ID:", result.user_id);
       console.log("Loan ID:", result.loan_id);
       console.log("Document ID:", result.document_id);
-      console.log("Document URL:", result.document_url);
       console.log("Transactions count:", result.transactions?.length);
+      if (result.credit_scores) {
+        console.log("Transaction Score:", result.credit_scores.transaction_score);
+        console.log("Behavior Score:", result.credit_scores.behavior_score);
+        console.log("Insights:", result.credit_scores.insights);
+      }
       console.log("Full Response:", result);
       console.log("==============================================");
 
