@@ -55,6 +55,14 @@ export interface ScoreBreakdown {
   };
 }
 
+export interface VerificationResult {
+  detected_object_id: number;
+  object_name: string;
+  verification_passed: boolean;
+  verification_notes: string;
+  confidence: number;
+}
+
 export interface CreditScoreResult {
   user_id: string;
   loan_id: string;
@@ -195,7 +203,7 @@ export const useAssetProcessing = () => {
   const submitProofOfOwnership = async (
     detectedObjectId: number,
     proofDocument: File
-  ): Promise<boolean> => {
+  ): Promise<VerificationResult | null> => {
     setIsUploadingProof(true);
     setError(null);
 
@@ -204,7 +212,7 @@ export const useAssetProcessing = () => {
       formData.append("proof_document", proofDocument);
 
       const response = await fetch(
-        `${API_BASE_URL}/api/v1/detected-objects/${detectedObjectId}/proof`,
+        `${API_BASE_URL}/api/v1/verify-ownership/${detectedObjectId}`,
         {
           method: "POST",
           body: formData,
@@ -213,23 +221,27 @@ export const useAssetProcessing = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("Proof upload API error:", errorData);
+        console.error("Verification API error:", errorData);
         throw new Error(errorData.detail || `API error: ${response.status}`);
       }
 
-      const result = await response.json();
+      const result: VerificationResult = await response.json();
       
       // Log the API response
-      console.log("=== Proof of Ownership Upload Response ===");
-      console.log("Detected Object ID:", detectedObjectId);
-      console.log("Response:", result);
-      console.log("==========================================");
+      console.log("=== Ownership Verification Response ===");
+      console.log("Detected Object ID:", result.detected_object_id);
+      console.log("Object Name:", result.object_name);
+      console.log("Verification Passed:", result.verification_passed);
+      console.log("Verification Notes:", result.verification_notes);
+      console.log("Confidence:", result.confidence);
+      console.log("Full Response:", result);
+      console.log("========================================");
 
-      return true;
+      return result;
     } catch (err: any) {
-      setError(err.message || "Failed to upload proof of ownership");
-      console.error("Error uploading proof:", err);
-      return false;
+      setError(err.message || "Failed to verify ownership");
+      console.error("Error verifying ownership:", err);
+      return null;
     } finally {
       setIsUploadingProof(false);
     }
