@@ -101,7 +101,8 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
     calculateCreditScore,
     submitProofOfOwnership,
     getTotalEstimatedValue,
-    getAllDetectedAssets 
+    getAllDetectedAssets,
+    clearResults 
   } = useAssetProcessing();
 
   // Get assets that require proof of ownership
@@ -176,8 +177,10 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
       if (userId && loanId) {
         toast.info(`Analyzing ${newFiles.length} asset(s) with AI...`);
         
-        for (const file of newFiles) {
-          const result = await processAssetImage(userId, loanId, file, `asset-${Date.now()}`);
+        for (let i = 0; i < newFiles.length; i++) {
+          const file = newFiles[i];
+          const fileIndex = assetFiles.length + i; // Index in the combined array
+          const result = await processAssetImage(userId, loanId, file, `asset-${fileIndex}`);
           if (result) {
             const detectedCount = result.assets_detected.length;
             const totalValue = result.estimated_value;
@@ -219,6 +222,29 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
   };
 
   const removeAsset = (fileIndex: number) => {
+    // Get assets from this image before removing
+    const assetKey = `asset-${fileIndex}`;
+    const resultsForImage = processingResults[assetKey];
+    
+    // Clear proof documents for assets from this image
+    if (resultsForImage) {
+      const assetIds = resultsForImage.flatMap(r => r.assets_detected.map(a => a.detected_object_id));
+      setProofDocuments(prev => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach(key => {
+          const docAssetId = parseInt(key.split('-')[0]);
+          if (assetIds.includes(docAssetId)) {
+            delete updated[key];
+          }
+        });
+        return updated;
+      });
+    }
+    
+    // Clear processing results for this image
+    clearResults(assetKey);
+    
+    // Remove the file
     const updatedFiles = assetFiles.filter((_, i) => i !== fileIndex);
     setAssetFiles(updatedFiles);
     
@@ -227,6 +253,8 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
       indoorAssetPictures: [],
       outdoorAssetPictures: updatedFiles,
     });
+    
+    toast.info("Asset and its analysis removed");
   };
 
   const handleNext = () => {
