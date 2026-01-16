@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight, Pill, Loader2, Stethoscope, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Pill, Loader2, Stethoscope, Save, FileText } from "lucide-react";
+import { FileUploadCard } from "./FileUploadCard";
 import { MultiFileUploadCard } from "./MultiFileUploadCard";
 import { PriceComparison } from "./PriceComparison";
 import { StepHeader } from "./StepHeader";
@@ -126,6 +127,18 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       {/* Upload Cards */}
       <Card className="border-0 bg-card p-6 shadow-elegant">
         <div className="space-y-4">
+          {/* Prescription Upload */}
+          <FileUploadCard
+            label="Medical Prescription"
+            description="Upload your doctor's prescription"
+            helpText="A clear photo or scan of your prescription from a licensed healthcare provider"
+            icon={<FileText className="h-6 w-6" />}
+            file={formData.medicalPrescription}
+            onFileChange={(file) => updateFormData({ medicalPrescription: file })}
+            accept="image/*,.pdf"
+          />
+
+          {/* Medication Photos */}
           <MultiFileUploadCard
             label="Medication Photos"
             description="Photos of prescribed medications"
