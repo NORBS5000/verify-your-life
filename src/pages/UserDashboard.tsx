@@ -42,16 +42,37 @@ const UserDashboard = () => {
     if (!phone) return;
     
     setLoading(true);
-    const { data, error } = await supabase
-      .from("loan_applications")
-      .select("*")
-      .eq("phone_number", phone)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    
+    // Normalize phone - strip special chars for comparison
+    const normalizedPhone = phone.replace(/[\s\-\(\)\+]/g, '');
+    
+    // Try multiple phone formats to find the application
+    const phoneVariants = [
+      phone,
+      normalizedPhone,
+      `+${normalizedPhone}`,
+    ];
+    
+    let foundData = null;
+    
+    for (const variant of phoneVariants) {
+      const { data, error } = await supabase
+        .from("loan_applications")
+        .select("*")
+        .eq("phone_number", variant)
+        .eq("status", "pending") // Only fetch submitted applications
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (data && !error) {
+        foundData = data;
+        break;
+      }
+    }
 
-    if (data && !error) {
-      setApplication(data);
+    if (foundData) {
+      setApplication(foundData);
       setShowPhoneInput(false);
     } else {
       setApplication(null);
