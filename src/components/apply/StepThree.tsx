@@ -219,13 +219,12 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
         formData={formData}
       />
 
-      {/* Hidden File Input */}
+      {/* Hidden File Input - removed capture attribute for better desktop compatibility */}
       <input
         ref={assetInputRef}
         type="file"
         accept="image/*"
         multiple
-        capture="environment"
         onChange={handleAssetUpload}
         className="hidden"
       />
