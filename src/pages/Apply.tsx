@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, User, Stethoscope, Landmark, Shield, ArrowLeft, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { StepOne } from "@/components/apply/StepOne";
 import { StepTwo } from "@/components/apply/StepTwo";
 import { StepThree } from "@/components/apply/StepThree";
@@ -11,7 +10,6 @@ import { StepSix } from "@/components/apply/StepSix";
 import { ProgressBar } from "@/components/apply/ProgressBar";
 
 import { WhatsAppNotification } from "@/components/apply/WhatsAppNotification";
-import { useAuth } from "@/hooks/useAuth";
 import { useSubmitApplication } from "@/hooks/useSubmitApplication";
 import { useLoanApplication } from "@/hooks/useLoanApplication";
 
@@ -69,7 +67,6 @@ const steps = [
 
 const Apply = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
   const { submitApplication, isSubmitting, error: submitError } = useSubmitApplication();
   const { loanId, isCreating, createLoanApplication } = useLoanApplication();
   const [currentStep, setCurrentStep] = useState(1);
@@ -115,18 +112,13 @@ const Apply = () => {
     totalAssetValue: null,
   });
 
-  // Redirect to auth if not logged in
-  useEffect(() => {
-    if (!authLoading && !user) {
-      triggerNotification("Please sign in to continue your application");
-      setTimeout(() => navigate("/auth"), 1500);
-    }
-  }, [user, authLoading, navigate]);
-
-  // Loan application is now auto-created by useLoanApplication hook
-
   const updateFormData = (data: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
+    
+    // Auto-create loan application when phone number is entered
+    if (data.phoneNumber && data.phoneNumber.length >= 10 && !loanId && !isCreating) {
+      createLoanApplication(data.phoneNumber);
+    }
   };
 
   const triggerNotification = (message: string) => {
@@ -153,8 +145,8 @@ const Apply = () => {
     const success = await submitApplication(formData);
     
     if (success) {
-      triggerNotification("🎉 Application submitted successfully! Redirecting to your dashboard...");
-      setTimeout(() => navigate("/my-dashboard"), 2000);
+      triggerNotification("🎉 Application submitted successfully!");
+      setTimeout(() => navigate("/"), 2000);
     } else {
       triggerNotification(submitError || "Failed to submit application. Please try again.");
     }
@@ -208,11 +200,11 @@ const Apply = () => {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-6 sm:py-8">
-        {/* User & Loan Info */}
-        {user && loanId && (
+        {/* Phone & Loan Info */}
+        {formData.phoneNumber && loanId && (
           <div className="mb-4 flex items-center justify-between rounded-lg bg-muted/50 px-4 py-2 text-sm">
             <span className="text-muted-foreground">
-              User: <span className="font-medium text-foreground">{user.email}</span>
+              Phone: <span className="font-medium text-foreground">{formData.phoneNumber}</span>
             </span>
             <span className="text-muted-foreground">
               Loan ID: <span className="font-mono font-medium text-primary">{loanId.slice(0, 8).toUpperCase()}</span>
@@ -260,7 +252,7 @@ const Apply = () => {
               nextStep={nextStep}
               prevStep={prevStep}
               onSaveDraft={handleSaveDraft}
-              userId={user?.id || null}
+              userId={formData.phoneNumber || null}
               loanId={loanId}
             />
           )}
@@ -271,7 +263,7 @@ const Apply = () => {
               nextStep={nextStep}
               prevStep={prevStep}
               onSaveDraft={handleSaveDraft}
-              userId={user?.id || null}
+              userId={formData.phoneNumber || null}
               loanId={loanId}
             />
           )}

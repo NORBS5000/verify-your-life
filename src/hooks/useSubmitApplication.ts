@@ -33,11 +33,13 @@ export function useSubmitApplication() {
 
   const uploadFile = async (
     file: File,
-    userId: string,
+    phoneNumber: string,
     folder: string
   ): Promise<string | null> => {
+    // Use phone number as folder identifier (sanitize it)
+    const sanitizedPhone = phoneNumber.replace(/[^0-9]/g, '');
     const fileExt = file.name.split(".").pop();
-    const fileName = `${userId}/${folder}/${Date.now()}.${fileExt}`;
+    const fileName = `${sanitizedPhone}/${folder}/${Date.now()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from("loan-documents")
@@ -60,23 +62,21 @@ export function useSubmitApplication() {
     setError(null);
 
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        setError("Please sign in to submit your application");
+      // Validate phone number is present (used as user identifier)
+      if (!formData.phoneNumber) {
+        setError("Phone number is required");
         setIsSubmitting(false);
         return false;
       }
 
-      const userId = user.id;
+      const phoneNumber = formData.phoneNumber;
 
       // Upload all files in parallel
       const uploadPromises: Promise<{ key: string; url: string | null }>[] = [];
 
       if (formData.medicalPrescription) {
         uploadPromises.push(
-          uploadFile(formData.medicalPrescription, userId, "prescriptions").then(
+          uploadFile(formData.medicalPrescription, phoneNumber, "prescriptions").then(
             (url) => ({ key: "medical_prescription_url", url })
           )
         );
@@ -86,7 +86,7 @@ export function useSubmitApplication() {
       if (formData.drugImages && formData.drugImages.length > 0) {
         // Upload first image as the main drug_image_url for backward compatibility
         uploadPromises.push(
-          uploadFile(formData.drugImages[0], userId, "drugs").then((url) => ({
+          uploadFile(formData.drugImages[0], phoneNumber, "drugs").then((url) => ({
             key: "drug_image_url",
             url,
           }))
@@ -95,7 +95,7 @@ export function useSubmitApplication() {
 
       if (formData.mpesaStatement) {
         uploadPromises.push(
-          uploadFile(formData.mpesaStatement, userId, "mpesa").then((url) => ({
+          uploadFile(formData.mpesaStatement, phoneNumber, "mpesa").then((url) => ({
             key: "mpesa_statement_url",
             url,
           }))
@@ -104,7 +104,7 @@ export function useSubmitApplication() {
 
       if (formData.bankStatement) {
         uploadPromises.push(
-          uploadFile(formData.bankStatement, userId, "bank").then((url) => ({
+          uploadFile(formData.bankStatement, phoneNumber, "bank").then((url) => ({
             key: "bank_statement_url",
             url,
           }))
@@ -113,7 +113,7 @@ export function useSubmitApplication() {
 
       if (formData.homePhoto) {
         uploadPromises.push(
-          uploadFile(formData.homePhoto, userId, "home").then((url) => ({
+          uploadFile(formData.homePhoto, phoneNumber, "home").then((url) => ({
             key: "home_photo_url",
             url,
           }))
@@ -122,7 +122,7 @@ export function useSubmitApplication() {
 
       if (formData.businessPhoto) {
         uploadPromises.push(
-          uploadFile(formData.businessPhoto, userId, "business").then((url) => ({
+          uploadFile(formData.businessPhoto, phoneNumber, "business").then((url) => ({
             key: "business_photo_url",
             url,
           }))
@@ -131,7 +131,7 @@ export function useSubmitApplication() {
 
       if (formData.logbook) {
         uploadPromises.push(
-          uploadFile(formData.logbook, userId, "logbook").then((url) => ({
+          uploadFile(formData.logbook, phoneNumber, "logbook").then((url) => ({
             key: "logbook_url",
             url,
           }))
@@ -140,7 +140,7 @@ export function useSubmitApplication() {
 
       if (formData.titleDeed) {
         uploadPromises.push(
-          uploadFile(formData.titleDeed, userId, "title-deed").then((url) => ({
+          uploadFile(formData.titleDeed, phoneNumber, "title-deed").then((url) => ({
             key: "title_deed_url",
             url,
           }))
@@ -149,7 +149,7 @@ export function useSubmitApplication() {
 
       if (formData.guarantor1Id) {
         uploadPromises.push(
-          uploadFile(formData.guarantor1Id, userId, "guarantor1").then((url) => ({
+          uploadFile(formData.guarantor1Id, phoneNumber, "guarantor1").then((url) => ({
             key: "guarantor1_id_url",
             url,
           }))
@@ -158,7 +158,7 @@ export function useSubmitApplication() {
 
       if (formData.guarantor2Id) {
         uploadPromises.push(
-          uploadFile(formData.guarantor2Id, userId, "guarantor2").then((url) => ({
+          uploadFile(formData.guarantor2Id, phoneNumber, "guarantor2").then((url) => ({
             key: "guarantor2_id_url",
             url,
           }))
@@ -172,16 +172,15 @@ export function useSubmitApplication() {
         ...(formData.outdoorAssetPictures || []),
       ];
       for (const assetFile of allAssets) {
-        const url = await uploadFile(assetFile, userId, "assets");
+        const url = await uploadFile(assetFile, phoneNumber, "assets");
         if (url) assetUrls.push(url);
       }
 
       // Wait for all uploads
       const uploadResults = await Promise.all(uploadPromises);
 
-      // Build the application record
+      // Build the application record (no user_id, phone number is the identifier)
       const applicationData: Record<string, unknown> = {
-        user_id: userId,
         full_name: formData.fullName,
         id_number: formData.idNumber,
         date_of_birth: formData.dateOfBirth || null,

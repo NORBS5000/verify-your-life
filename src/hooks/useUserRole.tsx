@@ -1,43 +1,19 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "./useAuth";
+import { useState } from "react";
 
+// Simplified hook - admin check is now based on a simple PIN/password system
+// Since we removed authentication, admin access can be controlled differently
 export function useUserRole() {
-  const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading] = useState(false);
 
-  useEffect(() => {
-    async function checkRole() {
-      if (!user) {
-        setIsAdmin(false);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "admin")
-          .single();
-
-        if (error && error.code !== "PGRST116") {
-          console.error("Error checking role:", error);
-        }
-
-        setIsAdmin(!!data);
-      } catch (error) {
-        console.error("Error checking role:", error);
-        setIsAdmin(false);
-      } finally {
-        setLoading(false);
-      }
+  const checkAdminAccess = (pin: string) => {
+    // Simple PIN-based admin access (you can change this PIN)
+    if (pin === "admin1234") {
+      setIsAdmin(true);
+      return true;
     }
+    return false;
+  };
 
-    checkRole();
-  }, [user]);
-
-  return { isAdmin, loading };
+  return { isAdmin, loading, checkAdminAccess };
 }

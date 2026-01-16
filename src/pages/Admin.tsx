@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -16,7 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut, Loader2, Lock } from "lucide-react";
 
 interface LoanApplication {
   id: string;
@@ -31,25 +31,31 @@ interface LoanApplication {
 
 const Admin = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { isAdmin, loading: roleLoading } = useUserRole();
+  const { isAdmin, checkAdminAccess } = useUserRole();
   const [applications, setApplications] = useState<LoanApplication[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!roleLoading && !isAdmin) {
-      toast.error("Access denied. Admin privileges required.");
-      navigate("/");
-    }
-  }, [isAdmin, roleLoading, navigate]);
+  const [loading, setLoading] = useState(false);
+  const [adminPin, setAdminPin] = useState("");
+  const [showPinInput, setShowPinInput] = useState(true);
 
   useEffect(() => {
     if (isAdmin) {
+      setShowPinInput(false);
       fetchApplications();
     }
   }, [isAdmin]);
 
+  const handlePinSubmit = () => {
+    if (checkAdminAccess(adminPin)) {
+      toast.success("Admin access granted");
+      setShowPinInput(false);
+      fetchApplications();
+    } else {
+      toast.error("Invalid admin PIN");
+    }
+  };
+
   const fetchApplications = async () => {
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from("loan_applications")
@@ -67,9 +73,8 @@ const Admin = () => {
     }
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
+  const handleSignOut = () => {
+    navigate("/");
   };
 
   const getStatusBadge = (status: string | null) => {
@@ -86,16 +91,46 @@ const Admin = () => {
     );
   };
 
-  if (roleLoading || loading) {
+  // Show PIN input if not authenticated as admin
+  if (showPinInput) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background/95 to-primary/5">
+        <Card className="w-full max-w-md mx-4">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <Lock className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle>Admin Access</CardTitle>
+            <CardDescription>Enter admin PIN to continue</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Input
+              type="password"
+              placeholder="Enter admin PIN"
+              value={adminPin}
+              onChange={(e) => setAdminPin(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handlePinSubmit()}
+            />
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => navigate("/")}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handlePinSubmit}>
+                Access
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
-  }
-
-  if (!isAdmin) {
-    return null;
   }
 
   return (
@@ -110,7 +145,7 @@ const Admin = () => {
           </div>
           <Button variant="outline" onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
+            Exit
           </Button>
         </div>
 
