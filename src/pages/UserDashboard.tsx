@@ -297,7 +297,7 @@ const UserDashboard = () => {
                     </div>
                     
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Total Assets: KSh 850,000</span>
+                      <span>Asset Score</span>
                       <span className="font-semibold" style={{ color: getScoreColor(assetScore) }}>{assetScore}/100</span>
                     </div>
                   </div>
@@ -335,7 +335,7 @@ const UserDashboard = () => {
                     </div>
                     
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Payment History: 96%</span>
+                      <span>Behavior Score</span>
                       <span className="font-semibold" style={{ color: getScoreColor(behaviorScore) }}>{behaviorScore}/100</span>
                     </div>
                   </div>
