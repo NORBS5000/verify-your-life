@@ -7,7 +7,6 @@ interface StepHeaderProps {
   title: string;
   description: string;
   formData: FormData;
-  apiCreditScore?: number | null; // Optional credit score from external API (0-100)
 }
 
 // Calculate form completion score (0-100)
@@ -46,7 +45,7 @@ const calculateFormCompletionScore = (formData: FormData): number => {
 };
 
 // Calculate blended credit score: 40% form completion + 60% API scores
-const calculateBlendedScore = (formData: FormData, apiCreditScore?: number | null): number => {
+const calculateBlendedScore = (formData: FormData): number => {
   const formScore = calculateFormCompletionScore(formData);
   
   // Collect available API scores from formData
@@ -55,7 +54,6 @@ const calculateBlendedScore = (formData: FormData, apiCreditScore?: number | nul
   if (formData.assetValuationScore !== null) apiScores.push(formData.assetValuationScore);
   if (formData.behaviorRiskScore !== null) apiScores.push(formData.behaviorRiskScore);
   if (formData.bankStatementCreditScore !== null) apiScores.push(formData.bankStatementCreditScore);
-  if (apiCreditScore !== null && apiCreditScore !== undefined) apiScores.push(apiCreditScore);
   
   // If no API scores available, return form score only
   if (apiScores.length === 0) {
@@ -77,8 +75,8 @@ const getScoreColor = (score: number): string => {
   return "hsl(var(--coral-500))";
 };
 
-export const StepHeader = ({ icon, title, description, formData, apiCreditScore }: StepHeaderProps) => {
-  const score = calculateBlendedScore(formData, apiCreditScore);
+export const StepHeader = ({ icon, title, description, formData }: StepHeaderProps) => {
+  const score = calculateBlendedScore(formData);
   const color = getScoreColor(score);
 
   return (
