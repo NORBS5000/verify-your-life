@@ -9,64 +9,77 @@ interface StepHeaderProps {
   formData: FormData;
 }
 
-// Calculate form completion score (0-100)
-const calculateFormCompletionScore = (formData: FormData): number => {
+// Calculate progressive credit score that increases as user completes each step
+// Total max: 100 points
+// - Form completion: max 40 points (fills as user progresses through steps)
+// - API scores: max 60 points (15 points each from 4 API analyses)
+
+const calculateProgressiveScore = (formData: FormData): number => {
   let score = 0;
 
-  // Profile section (max 20 points)
-  if (formData.fullName) score += 4;
-  if (formData.idNumber) score += 4;
-  if (formData.phoneNumber) score += 4;
-  if (formData.occupation) score += 4;
-  if (formData.sex && formData.age) score += 4;
+  // ===== FORM COMPLETION SECTION (max 40 points) =====
+  
+  // Step 1 - Profile section (max 10 points)
+  if (formData.fullName) score += 2;
+  if (formData.idNumber) score += 2;
+  if (formData.phoneNumber) score += 2;
+  if (formData.occupation) score += 2;
+  if (formData.sex && formData.age) score += 2;
 
-  // Medical section (max 20 points)
-  if (formData.medicalPrescription) score += 10;
-  if (formData.drugImages?.length > 0) score += 5;
-  if (formData.covaCost > 0) score += 5;
+  // Step 2 - Medical section (max 6 points for uploads)
+  if (formData.medicalPrescription) score += 3;
+  if (formData.drugImages?.length > 0) score += 3;
 
-  // Collateral section (max 30 points)
-  const collateralCount = formData.selectedCollateral?.length || 0;
-  score += Math.min(collateralCount * 7, 14); // Up to 14 points for selections
-  if (formData.logbook) score += 4;
-  if (formData.titleDeed) score += 4;
-  if (formData.homePhoto) score += 4;
-  if (formData.businessPhoto) score += 4;
+  // Step 3 - Collateral section (max 8 points for uploads)
+  const hasAssets = formData.indoorAssetPictures?.length > 0 || formData.outdoorAssetPictures?.length > 0;
+  if (hasAssets) score += 4;
+  if (formData.logbook || formData.titleDeed) score += 2;
+  if (formData.homePhoto || formData.businessPhoto) score += 2;
 
-  // Verification section (max 30 points)
-  if (formData.mpesaStatement) score += 10;
-  if (formData.bankStatement) score += 5;
-  if (formData.guarantor1Phone) score += 8;
-  if (formData.guarantor1Id) score += 3;
+  // Step 4 - Verification section (max 8 points for uploads)
+  if (formData.mpesaStatement) score += 4;
+  if (formData.bankStatement) score += 2;
+  if (formData.callLogHistory) score += 2;
+
+  // Step 5 - Guarantors section (max 8 points)
+  if (formData.guarantor1Phone) score += 2;
+  if (formData.guarantor1Id) score += 2;
   if (formData.guarantor2Phone) score += 2;
   if (formData.guarantor2Id) score += 2;
 
-  return Math.min(score, 100);
-};
+  // Cap form completion at 40 points
+  const formScore = Math.min(score, 40);
 
-// Calculate blended credit score: 40% form completion + 60% API scores
-const calculateBlendedScore = (formData: FormData): number => {
-  const formScore = calculateFormCompletionScore(formData);
+  // ===== API SCORE SECTION (max 60 points) =====
+  // Each API analysis contributes up to 15 points (scaled from 0-100 API score)
   
-  // Collect available API scores from formData
-  const apiScores: number[] = [];
-  if (formData.medicalNeedsScore !== null) apiScores.push(formData.medicalNeedsScore);
-  if (formData.assetValuationScore !== null) apiScores.push(formData.assetValuationScore);
-  if (formData.behaviorRiskScore !== null) apiScores.push(formData.behaviorRiskScore);
-  if (formData.bankStatementCreditScore !== null) apiScores.push(formData.bankStatementCreditScore);
+  let apiScore = 0;
   
-  // If no API scores available, return form score only
-  if (apiScores.length === 0) {
-    return formScore;
+  // Medical needs score (from Step 2 prescription/medication analysis)
+  if (formData.medicalNeedsScore !== null) {
+    apiScore += Math.round((formData.medicalNeedsScore / 100) * 15);
   }
   
-  // Average of available API scores
-  const avgApiScore = apiScores.reduce((sum, s) => sum + s, 0) / apiScores.length;
+  // Asset valuation score (from Step 3 asset credit scoring API)
+  if (formData.assetValuationScore !== null) {
+    apiScore += Math.round((formData.assetValuationScore / 100) * 15);
+  }
   
-  // Blend: 40% form completion + 60% API scores
-  const blendedScore = Math.round(formScore * 0.4 + avgApiScore * 0.6);
+  // Behavior risk score (from Step 4 M-Pesa/call logs analysis)
+  if (formData.behaviorRiskScore !== null) {
+    apiScore += Math.round((formData.behaviorRiskScore / 100) * 15);
+  }
   
-  return Math.min(blendedScore, 100);
+  // Bank statement credit score (from Step 4 bank statement analysis)
+  if (formData.bankStatementCreditScore !== null) {
+    apiScore += Math.round((formData.bankStatementCreditScore / 100) * 15);
+  }
+
+  // Cap API score at 60 points
+  const cappedApiScore = Math.min(apiScore, 60);
+
+  // Total progressive score
+  return Math.min(formScore + cappedApiScore, 100);
 };
 
 const getScoreColor = (score: number): string => {
@@ -76,7 +89,7 @@ const getScoreColor = (score: number): string => {
 };
 
 export const StepHeader = ({ icon, title, description, formData }: StepHeaderProps) => {
-  const score = calculateBlendedScore(formData);
+  const score = calculateProgressiveScore(formData);
   const color = getScoreColor(score);
 
   return (
