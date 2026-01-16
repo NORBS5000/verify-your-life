@@ -27,7 +27,7 @@ export const ProgressBar = ({ currentStep, totalSteps, steps }: ProgressBarProps
             return (
               <div key={index} className="flex flex-col items-center">
                 <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300 ${
+                  className={`flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full border-2 transition-all duration-300 ${
                     isCompleted
                       ? "border-health-green bg-health-green text-white"
                       : isCurrent
@@ -36,13 +36,13 @@ export const ProgressBar = ({ currentStep, totalSteps, steps }: ProgressBarProps
                   }`}
                 >
                   {isCompleted ? (
-                    <Check className="h-5 w-5" />
+                    <Check className="h-4 w-4 sm:h-5 sm:w-5" />
                   ) : (
-                    step.icon
+                    <span className="[&>svg]:h-4 [&>svg]:w-4 sm:[&>svg]:h-5 sm:[&>svg]:w-5">{step.icon}</span>
                   )}
                 </div>
                 <span
-                  className={`mt-2 text-xs font-medium transition-colors ${
+                  className={`mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium transition-colors text-center max-w-[50px] sm:max-w-none ${
                     isCompleted || isCurrent
                       ? "text-secondary"
                       : "text-muted-foreground"
