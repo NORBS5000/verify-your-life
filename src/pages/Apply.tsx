@@ -119,10 +119,12 @@ const Apply = () => {
   // Auto-create loan application when phone number is available
   useEffect(() => {
     const phoneNumber = formData.phoneNumber;
-    const cleanPhone = phoneNumber?.replace(/[\s\-\(\)]/g, '') || '';
+    const cleanPhone = phoneNumber?.replace(/[\s\-\(\)\+]/g, '') || '';
     
-    // Only create if we have a valid phone, no loanId yet, and not already creating
-    if (cleanPhone.length >= 9 && !loanId && !isCreating) {
+    console.log('Apply useEffect check - cleanPhone:', cleanPhone, 'loanId:', loanId, 'isCreating:', isCreating);
+    
+    // Only create if we have a valid phone (6+ digits), no loanId yet, and not already creating
+    if (cleanPhone.length >= 6 && !loanId && !isCreating) {
       console.log('Apply useEffect: Triggering loan creation for phone:', cleanPhone);
       createLoanApplication(phoneNumber);
     }

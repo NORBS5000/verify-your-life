@@ -16,13 +16,19 @@ export const useLoanApplication = () => {
 
   // Create a draft loan application when user starts the form
   const createLoanApplication = useCallback(async (phoneNumber: string) => {
-    // Normalize phone number - strip spaces, dashes, parentheses
-    const normalizedPhone = phoneNumber?.replace(/[\s\-\(\)]/g, '') || '';
+    // Normalize phone number - strip spaces, dashes, parentheses, plus sign
+    const normalizedPhone = phoneNumber?.replace(/[\s\-\(\)\+]/g, '') || '';
     
-    if (!normalizedPhone || normalizedPhone.length < 9) {
+    if (!normalizedPhone || normalizedPhone.length < 6) {
       console.log('useLoanApplication: Phone number too short:', normalizedPhone.length);
       setError("Valid phone number is required");
       return null;
+    }
+
+    // If we already have a loanId, return it
+    if (loanId) {
+      console.log('useLoanApplication: Already have loanId:', loanId);
+      return loanId;
     }
 
     // Prevent duplicate calls using ref (more reliable than state)
@@ -85,7 +91,7 @@ export const useLoanApplication = () => {
       isCreatingRef.current = false;
       setIsCreating(false);
     }
-  }, []); // Empty dependency array - stable reference
+  }, [loanId]); // Added loanId to prevent unnecessary calls
 
   // Update loan application with partial data
   const updateLoanApplication = useCallback(async (data: Record<string, any>) => {
