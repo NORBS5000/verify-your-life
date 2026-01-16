@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { Camera, Scan, CheckCircle, User, AlertCircle } from "lucide-react";
+import { Camera, Scan, CheckCircle, User, AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 interface IDScannerProps {
@@ -72,9 +73,28 @@ export const IDScanner = ({ onScanComplete }: IDScannerProps) => {
     }
   };
 
+  const handleRecapture = () => {
+    setCompleted(false);
+    setCapturedImage(null);
+    setError(null);
+    // Reset the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   if (completed) {
     return (
       <div className="relative overflow-hidden rounded-2xl border-2 border-health-green bg-teal-50 p-4 transition-all duration-500">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        
         <div className="flex flex-col items-center gap-4">
           {/* ID Image Display */}
           <div className="relative h-40 w-full max-w-xs overflow-hidden rounded-xl border-2 border-health-green shadow-lg">
@@ -101,6 +121,18 @@ export const IDScanner = ({ onScanComplete }: IDScannerProps) => {
             <p className="text-lg font-semibold text-secondary">ID Verified</p>
             <p className="text-sm text-muted-foreground">Your details have been extracted</p>
           </div>
+
+          {/* Recapture Button */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleRecapture}
+            className="gap-2 border-health-green text-health-green hover:bg-health-green hover:text-white"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Recapture ID
+          </Button>
         </div>
       </div>
     );
