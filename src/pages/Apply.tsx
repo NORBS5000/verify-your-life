@@ -6,7 +6,8 @@ import { StepOne } from "@/components/apply/StepOne";
 import { StepTwo } from "@/components/apply/StepTwo";
 import { StepThree } from "@/components/apply/StepThree";
 import { StepFour } from "@/components/apply/StepFour";
-import { StepFive } from "@/components/apply/StepFive";
+import { StepFiveGuarantors } from "@/components/apply/StepFiveGuarantors";
+import { StepSix } from "@/components/apply/StepSix";
 import { ProgressBar } from "@/components/apply/ProgressBar";
 
 import { WhatsAppNotification } from "@/components/apply/WhatsAppNotification";
@@ -56,6 +57,7 @@ const steps = [
   { label: "Medical", icon: <Stethoscope className="h-5 w-5" /> },
   { label: "Collateral", icon: <Landmark className="h-5 w-5" /> },
   { label: "Verify", icon: <Shield className="h-5 w-5" /> },
+  { label: "Guarantors", icon: <User className="h-5 w-5" /> },
 ];
 
 const Apply = () => {
@@ -121,7 +123,7 @@ const Apply = () => {
   };
 
   const nextStep = () => {
-    if (currentStep < 5) {
+    if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -214,8 +216,8 @@ const Apply = () => {
         )}
 
         {/* Progress Bar */}
-        {currentStep < 5 && (
-          <ProgressBar currentStep={currentStep} totalSteps={4} steps={steps} />
+        {currentStep < 6 && (
+          <ProgressBar currentStep={currentStep} totalSteps={5} steps={steps} />
         )}
 
 
@@ -263,7 +265,16 @@ const Apply = () => {
             />
           )}
           {currentStep === 5 && (
-            <StepFive formData={formData} prevStep={prevStep} handleSubmit={handleSubmit} isSubmitting={isSubmitting} onSaveDraft={handleSaveDraft} />
+            <StepFiveGuarantors
+              formData={formData}
+              updateFormData={updateFormData}
+              nextStep={nextStep}
+              prevStep={prevStep}
+              onSaveDraft={handleSaveDraft}
+            />
+          )}
+          {currentStep === 6 && (
+            <StepSix formData={formData} prevStep={prevStep} handleSubmit={handleSubmit} isSubmitting={isSubmitting} onSaveDraft={handleSaveDraft} />
           )}
         </div>
       </main>
