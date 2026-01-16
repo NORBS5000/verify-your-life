@@ -250,49 +250,49 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
               )}
 
               {hasAnalyzedMpesa && mpesaResult && (
-                <div className="rounded-lg border border-health-green/30 bg-health-green/10 p-4 space-y-3">
+                <div className="rounded-lg border border-health-green/30 bg-health-green/10 p-3 sm:p-4 space-y-3">
                   <div className="flex items-center gap-2 text-health-green">
-                    <CheckCircle className="h-5 w-5" />
-                    <span className="font-medium">M-Pesa Analysis Complete</span>
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                    <span className="font-medium text-sm sm:text-base">M-Pesa Analysis Complete</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                     {mpesaResult.credit_scores && (
                       <>
-                        <div>
+                        <div className="flex justify-between sm:block">
                           <span className="text-muted-foreground">Transaction Score:</span>
-                          <span className="ml-2 font-bold text-secondary">
+                          <span className="sm:ml-2 font-bold text-secondary">
                             {mpesaResult.credit_scores.transaction_score.toFixed(1)}
                           </span>
                         </div>
-                        <div>
+                        <div className="flex justify-between sm:block">
                           <span className="text-muted-foreground">Behavior Score:</span>
-                          <span className="ml-2 font-bold text-secondary">
+                          <span className="sm:ml-2 font-bold text-secondary">
                             {mpesaResult.credit_scores.behavior_score.toFixed(1)}
                           </span>
                         </div>
-                        <div>
+                        <div className="flex justify-between sm:block">
                           <span className="text-muted-foreground">Avg Balance:</span>
-                          <span className="ml-2 font-medium text-foreground">
+                          <span className="sm:ml-2 font-medium text-foreground truncate">
                             KES {mpesaResult.credit_scores.insights.avg_balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                           </span>
                         </div>
-                        <div>
+                        <div className="flex justify-between sm:block">
                           <span className="text-muted-foreground">Inflow/Outflow:</span>
-                          <span className="ml-2 font-medium text-foreground">
+                          <span className="sm:ml-2 font-medium text-foreground">
                             {mpesaResult.credit_scores.insights.inflow_outflow_ratio.toFixed(2)}
                           </span>
                         </div>
                       </>
                     )}
-                    <div>
+                    <div className="flex justify-between sm:block">
                       <span className="text-muted-foreground">Transactions:</span>
-                      <span className="ml-2 font-bold text-secondary">
+                      <span className="sm:ml-2 font-bold text-secondary">
                         {mpesaResult.transactions?.length || 0}
                       </span>
                     </div>
-                    <div>
+                    <div className="flex justify-between sm:block">
                       <span className="text-muted-foreground">Status:</span>
-                      <span className="ml-2 font-medium text-health-green">
+                      <span className="sm:ml-2 font-medium text-health-green">
                         Processed
                       </span>
                     </div>
@@ -362,21 +362,21 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
               )}
 
               {hasAnalyzed && analysisResult && (
-                <div className="rounded-lg border border-health-green/30 bg-health-green/10 p-4 space-y-3">
+                <div className="rounded-lg border border-health-green/30 bg-health-green/10 p-3 sm:p-4 space-y-3">
                   <div className="flex items-center gap-2 text-health-green">
-                    <CheckCircle className="h-5 w-5" />
-                    <span className="font-medium">Analysis Complete</span>
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                    <span className="font-medium text-sm sm:text-base">Analysis Complete</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
+                    <div className="flex justify-between sm:block">
                       <span className="text-muted-foreground">Credit Score:</span>
-                      <span className="ml-2 font-bold text-secondary">
+                      <span className="sm:ml-2 font-bold text-secondary">
                         {analysisResult.output_from_credit_score_engine.bank_statement_credit_score}
                       </span>
                     </div>
-                    <div>
+                    <div className="flex justify-between sm:block">
                       <span className="text-muted-foreground">Recommendation:</span>
-                      <span className={`ml-2 font-medium ${
+                      <span className={`sm:ml-2 font-medium ${
                         analysisResult.output_from_credit_score_engine.recommendation === "Eligible" 
                           ? "text-health-green" 
                           : "text-amber-600"
@@ -384,15 +384,15 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                         {analysisResult.output_from_credit_score_engine.recommendation}
                       </span>
                     </div>
-                    <div>
+                    <div className="flex justify-between sm:block">
                       <span className="text-muted-foreground">Bank:</span>
-                      <span className="ml-2 text-foreground">
+                      <span className="sm:ml-2 text-foreground truncate max-w-[120px] sm:max-w-none">
                         {analysisResult.credit_score_ready_values.features.other_features?.bank_name || "N/A"}
                       </span>
                     </div>
-                    <div>
+                    <div className="flex justify-between sm:block">
                       <span className="text-muted-foreground">Avg Balance:</span>
-                      <span className="ml-2 text-foreground">
+                      <span className="sm:ml-2 text-foreground truncate">
                         {analysisResult.credit_score_ready_values.features.other_features?.currency || ""}
                         {" "}
                         {analysisResult.credit_score_ready_values.features.average_balance?.toLocaleString() || "N/A"}
