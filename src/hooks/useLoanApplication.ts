@@ -1,10 +1,13 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useLoanApplication = () => {
   const [loanId, setLoanId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Use a ref to prevent duplicate calls
+  const isCreatingRef = useRef(false);
 
   // Create a draft loan application when user starts the form
   const createLoanApplication = useCallback(async (phoneNumber: string) => {
@@ -12,16 +15,18 @@ export const useLoanApplication = () => {
     const normalizedPhone = phoneNumber?.replace(/[\s\-\(\)]/g, '') || '';
     
     if (!normalizedPhone || normalizedPhone.length < 9) {
+      console.log('Phone number too short:', normalizedPhone.length);
       setError("Valid phone number is required");
       return null;
     }
 
-    // Prevent duplicate calls
-    if (isCreating) {
+    // Prevent duplicate calls using ref (more reliable than state)
+    if (isCreatingRef.current) {
       console.log('Already creating loan application, skipping...');
       return null;
     }
 
+    isCreatingRef.current = true;
     setIsCreating(true);
     setError(null);
 
@@ -72,12 +77,13 @@ export const useLoanApplication = () => {
       console.error("Error creating loan application:", err);
       return null;
     } finally {
+      isCreatingRef.current = false;
       setIsCreating(false);
     }
-  }, [isCreating]);
+  }, []); // Empty dependency array - stable reference
 
   // Update loan application with partial data
-  const updateLoanApplication = async (data: Record<string, any>) => {
+  const updateLoanApplication = useCallback(async (data: Record<string, any>) => {
     if (!loanId) {
       setError("No loan application to update");
       return false;
@@ -99,7 +105,7 @@ export const useLoanApplication = () => {
       console.error("Error updating loan application:", err);
       return false;
     }
-  };
+  }, [loanId]);
 
   return {
     loanId,

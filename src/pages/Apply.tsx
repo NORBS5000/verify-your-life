@@ -122,10 +122,10 @@ const Apply = () => {
     const cleanPhone = phoneNumber?.replace(/[\s\-\(\)]/g, '') || '';
     
     if (cleanPhone.length >= 9 && !loanId && !isCreating) {
-      console.log('Creating loan application for phone:', phoneNumber);
+      console.log('useEffect: Creating loan application for phone:', phoneNumber);
       createLoanApplication(phoneNumber);
     }
-  }, [formData.phoneNumber, loanId, isCreating, createLoanApplication]);
+  }, [formData.phoneNumber, loanId, isCreating]); // Removed createLoanApplication - it's now stable
 
   const triggerNotification = (message: string) => {
     setNotificationMessage(message);
