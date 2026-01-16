@@ -233,33 +233,21 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <span className="text-muted-foreground">Credit Score:</span>
+                      <span className="text-muted-foreground">Document ID:</span>
+                      <span className="ml-2 font-medium text-foreground">
+                        {mpesaResult.document_id.slice(0, 8)}...
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Transactions:</span>
                       <span className="ml-2 font-bold text-secondary">
-                        {mpesaResult.output_from_credit_score_engine.bank_statement_credit_score}
+                        {mpesaResult.transactions?.length || 0}
                       </span>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground">Recommendation:</span>
-                      <span className={`ml-2 font-medium ${
-                        mpesaResult.output_from_credit_score_engine.recommendation === "Eligible" 
-                          ? "text-health-green" 
-                          : "text-amber-600"
-                      }`}>
-                        {mpesaResult.output_from_credit_score_engine.recommendation}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Avg Balance:</span>
-                      <span className="ml-2 text-foreground">
-                        {mpesaResult.credit_score_ready_values.features.other_features?.currency || "KES"}
-                        {" "}
-                        {mpesaResult.credit_score_ready_values.features.average_balance?.toLocaleString() || "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Total Deposits:</span>
-                      <span className="ml-2 text-foreground">
-                        {mpesaResult.credit_score_ready_values.features.count_deposits || "N/A"}
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Status:</span>
+                      <span className="ml-2 font-medium text-health-green">
+                        Processed Successfully
                       </span>
                     </div>
                   </div>
