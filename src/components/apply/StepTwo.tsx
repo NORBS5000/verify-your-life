@@ -142,8 +142,10 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
   };
 
   // Analyze medication photos using the /medical_needs/predict endpoint
-  const handleMedicationAnalyze = async () => {
-    if (!formData.drugImages || formData.drugImages.length === 0) {
+  const handleMedicationAnalyze = async (files?: File[]) => {
+    const filesToAnalyze = files || formData.drugImages;
+    
+    if (!filesToAnalyze || filesToAnalyze.length === 0) {
       toast.error("Please upload at least one medication photo");
       return;
     }
@@ -152,7 +154,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
 
     try {
       const formDataToSend = new FormData();
-      formData.drugImages.forEach((file) => {
+      filesToAnalyze.forEach((file) => {
         formDataToSend.append("files", file);
       });
 
@@ -321,29 +323,25 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
                   if (!prescriptionAnalyzed) {
                     setShowPricing(false);
                   }
+                } else {
+                  // Auto-analyze when files are uploaded
+                  handleMedicationAnalyze(files);
                 }
               }}
               accept="image/*"
               maxFiles={5}
             />
+            {isAnalyzing && (
+              <div className="mt-2 flex items-center gap-2 text-primary text-sm">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Analyzing medications...</span>
+              </div>
+            )}
             {medicationsAnalyzed && !isAnalyzing && (
               <div className="mt-2 flex items-center gap-2 text-health-green text-sm">
                 <CheckCircle className="h-4 w-4" />
                 <span>Medications analyzed - {medicationItems.length} items found</span>
               </div>
-            )}
-            {/* Show analyze button if photos uploaded but not analyzed yet */}
-            {formData.drugImages && formData.drugImages.length > 0 && !medicationsAnalyzed && !isAnalyzing && (
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={handleMedicationAnalyze}
-                className="mt-2 gap-2"
-              >
-                <Pill className="h-4 w-4" />
-                Analyze Medications
-              </Button>
             )}
           </div>
         </div>
