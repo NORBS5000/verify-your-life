@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, Shield, Phone, FileText, Lock, Save, Loader2, Ch
 import { FileUploadCard } from "./FileUploadCard";
 import { StepHeader } from "./StepHeader";
 import { useBankStatementProcessing } from "@/hooks/useBankStatementProcessing";
+import { useMpesaProcessing } from "@/hooks/useMpesaProcessing";
 import { useCallLogsProcessing } from "@/hooks/useCallLogsProcessing";
 import { toast } from "sonner";
 
@@ -27,9 +28,9 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
     isAnalyzing: isAnalyzingMpesa, 
     analysisResult: mpesaResult, 
     error: mpesaError, 
-    analyzeBankStatement: analyzeMpesaStatement, 
+    analyzeMpesaStatement, 
     clearAnalysisResult: clearMpesaResult 
-  } = useBankStatementProcessing();
+  } = useMpesaProcessing();
   const { 
     isAnalyzing: isAnalyzingCallLogs, 
     analysisResult: callLogsResult, 
