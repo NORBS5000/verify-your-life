@@ -85,7 +85,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
   const [uploading, setUploading] = useState(false);
   const [assetFiles, setAssetFiles] = useState<File[]>([]);
   const [proofDocuments, setProofDocuments] = useState<Record<string, File>>({});
-
+  const [uploadingProofFor, setUploadingProofFor] = useState<string | null>(null);
   // Check if ready to upload
   const isReady = !!(userId && loanId && !isCreatingLoan);
 
@@ -121,8 +121,14 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
   const handleProofUpload = async (assetId: number, docType: string, file: File) => {
     const key = `${assetId}-${docType}`;
     
+    // Set loading state for this specific asset
+    setUploadingProofFor(key);
+    
     // Submit to API for verification
     const result = await submitProofOfOwnership(assetId, file);
+    
+    // Clear loading state
+    setUploadingProofFor(null);
     
     if (result) {
       if (result.verification_passed) {
@@ -746,10 +752,10 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                           <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
                           <span className="text-xs sm:text-sm font-medium text-green-700">Uploaded</span>
                         </div>
-                      ) : isUploadingProof ? (
+                      ) : uploadingProofFor === docKey ? (
                         <div className="flex items-center gap-1.5 sm:gap-2 rounded-lg bg-primary/80 px-3 sm:px-4 py-1.5 sm:py-2 text-white">
                           <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
-                          <span className="text-xs sm:text-sm font-medium">Uploading...</span>
+                          <span className="text-xs sm:text-sm font-medium">Verifying...</span>
                         </div>
                       ) : (
                         <label className="cursor-pointer">
@@ -757,7 +763,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                             type="file"
                             accept="image/*,.pdf"
                             className="hidden"
-                            disabled={isUploadingProof}
+                            disabled={uploadingProofFor !== null}
                             onChange={(e) => {
                               if (e.target.files?.[0]) {
                                 handleProofUpload(
@@ -765,6 +771,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                                   asset.requiredDoc!.type,
                                   e.target.files[0]
                                 );
+                                e.target.value = '';
                               }
                             }}
                           />
