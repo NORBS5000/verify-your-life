@@ -17,6 +17,7 @@ interface StepThreeProps {
   onSaveDraft: () => void;
   userId: string | null;
   loanId: string | null;
+  isCreatingLoan?: boolean;
 }
 
 // Mapping of asset types to required documents
@@ -49,7 +50,7 @@ interface ProofDocument {
   file: File | null;
 }
 
-export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft, userId, loanId }: StepThreeProps) => {
+export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft, userId, loanId, isCreatingLoan }: StepThreeProps) => {
   const assetInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [assetFiles, setAssetFiles] = useState<File[]>([]);
@@ -243,18 +244,30 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
         {/* Upload Area */}
         <button
           onClick={handleUploadClick}
-          disabled={uploading || isProcessing || !userId || !loanId}
+          disabled={uploading || isProcessing || !userId || !loanId || isCreatingLoan}
           className="group relative flex w-full flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-border bg-muted/30 p-8 transition-all hover:border-primary hover:bg-primary/5 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {!userId || !loanId ? (
+          {!userId ? (
             <>
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
-                <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
+                <AlertTriangle className="h-8 w-8 text-amber-600" />
+              </div>
+              <div className="text-center">
+                <p className="font-medium text-secondary">Phone number required</p>
+                <p className="text-sm text-muted-foreground">
+                  Please go back to Step 1 and enter your phone number
+                </p>
+              </div>
+            </>
+          ) : isCreatingLoan || !loanId ? (
+            <>
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
               <div className="text-center">
                 <p className="font-medium text-secondary">Setting up your application...</p>
                 <p className="text-sm text-muted-foreground">
-                  {!userId ? "Please complete Step 1 first" : "Creating your loan application"}
+                  Please wait a moment
                 </p>
               </div>
             </>

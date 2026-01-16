@@ -115,9 +115,11 @@ const Apply = () => {
   const updateFormData = (data: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
     
-    // Auto-create loan application when phone number is entered
-    if (data.phoneNumber && data.phoneNumber.length >= 10 && !loanId && !isCreating) {
-      createLoanApplication(data.phoneNumber);
+    // Auto-create loan application when phone number is entered (strip spaces/dashes for validation)
+    const phoneNumber = data.phoneNumber || formData.phoneNumber;
+    const cleanPhone = phoneNumber?.replace(/[\s\-\(\)]/g, '') || '';
+    if (cleanPhone.length >= 9 && !loanId && !isCreating) {
+      createLoanApplication(phoneNumber);
     }
   };
 
@@ -254,6 +256,7 @@ const Apply = () => {
               onSaveDraft={handleSaveDraft}
               userId={formData.phoneNumber || null}
               loanId={loanId}
+              isCreatingLoan={isCreating}
             />
           )}
           {currentStep === 4 && (
