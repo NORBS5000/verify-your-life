@@ -447,28 +447,28 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
 
             {/* Call Logs Analysis Status */}
             {isAnalyzingCallLogs && (
-              <div className="ml-16 flex items-center gap-2 rounded-lg bg-primary/10 p-3 text-sm text-primary">
-                <Loader2 className="h-4 w-4 animate-spin" />
+              <div className="ml-12 sm:ml-16 flex items-center gap-2 rounded-lg bg-primary/10 p-2 sm:p-3 text-xs sm:text-sm text-primary">
+                <Loader2 className="h-4 w-4 animate-spin shrink-0" />
                 <span>Analyzing call logs...</span>
               </div>
             )}
 
             {hasAnalyzedCallLogs && callLogsResult && (
-              <div className="ml-16 rounded-lg border border-health-green/30 bg-health-green/10 p-4 space-y-3">
+              <div className="ml-12 sm:ml-16 rounded-lg border border-health-green/30 bg-health-green/10 p-3 sm:p-4 space-y-2 sm:space-y-3">
                 <div className="flex items-center gap-2 text-health-green">
-                  <CheckCircle className="h-5 w-5" />
-                  <span className="font-medium">Call Logs Analysis Complete</span>
+                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                  <span className="font-medium text-sm sm:text-base">Call Logs Analysis Complete</span>
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-3 text-xs sm:text-sm">
+                  <div className="flex justify-between sm:block">
                     <span className="text-muted-foreground">Behavior Score:</span>
-                    <span className="ml-2 font-bold text-secondary">
+                    <span className="sm:ml-2 font-bold text-secondary">
                       {callLogsResult.score.toFixed(1)}
                     </span>
                   </div>
-                  <div>
+                  <div className="flex justify-between sm:block">
                     <span className="text-muted-foreground">Decision:</span>
-                    <span className={`ml-2 font-medium ${
+                    <span className={`sm:ml-2 font-medium ${
                       callLogsResult.decision === "APPROVE" 
                         ? "text-health-green" 
                         : callLogsResult.decision === "REVIEW"
@@ -478,27 +478,27 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                       {callLogsResult.decision}
                     </span>
                   </div>
-                  <div>
+                  <div className="flex justify-between sm:block">
                     <span className="text-muted-foreground">Total Calls:</span>
-                    <span className="ml-2 text-foreground">
+                    <span className="sm:ml-2 text-foreground">
                       {callLogsResult.details.total_all.toLocaleString()}
                     </span>
                   </div>
-                  <div>
+                  <div className="flex justify-between sm:block">
                     <span className="text-muted-foreground">Observed Days:</span>
-                    <span className="ml-2 text-foreground">
+                    <span className="sm:ml-2 text-foreground">
                       {callLogsResult.details.observed_days}
                     </span>
                   </div>
-                  <div>
+                  <div className="flex justify-between sm:block">
                     <span className="text-muted-foreground">Avg Calls/Day:</span>
-                    <span className="ml-2 text-foreground">
+                    <span className="sm:ml-2 text-foreground">
                       {callLogsResult.details.calls_per_day.toFixed(1)}
                     </span>
                   </div>
-                  <div>
+                  <div className="flex justify-between sm:block">
                     <span className="text-muted-foreground">Stable Contacts:</span>
-                    <span className="ml-2 text-foreground">
+                    <span className="sm:ml-2 text-foreground">
                       {(callLogsResult.details.stable_contact_ratio * 100).toFixed(1)}%
                     </span>
                   </div>
@@ -507,8 +507,8 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
             )}
 
             {hasAnalyzedCallLogs && callLogsError && (
-              <div className="ml-16 flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-                <AlertCircle className="h-4 w-4" />
+              <div className="ml-12 sm:ml-16 flex items-center gap-2 rounded-lg bg-destructive/10 p-2 sm:p-3 text-xs sm:text-sm text-destructive">
+                <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>{callLogsError}</span>
               </div>
             )}
