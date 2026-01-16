@@ -53,26 +53,18 @@ const UserDashboard = () => {
       `+${normalizedPhone}`,
     ];
     
-    let foundData = null;
-    
-    for (const variant of phoneVariants) {
-      const { data, error } = await supabase
-        .from("loan_applications")
-        .select("*")
-        .eq("phone_number", variant)
-        .eq("status", "pending") // Only fetch submitted applications
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      
-      if (data && !error) {
-        foundData = data;
-        break;
-      }
-    }
+    // Use ilike with OR to match any variant with pending status
+    const { data, error } = await supabase
+      .from("loan_applications")
+      .select("*")
+      .eq("status", "pending")
+      .or(phoneVariants.map(v => `phone_number.eq.${v}`).join(','))
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (foundData) {
-      setApplication(foundData);
+    if (data && !error) {
+      setApplication(data);
       setShowPhoneInput(false);
     } else {
       setApplication(null);
