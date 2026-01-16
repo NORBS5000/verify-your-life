@@ -363,60 +363,62 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
             {getAllDetectedAssets().map((asset, idx) => (
               <div
                 key={`${asset.detected_object_id}-${idx}`}
-                className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-3"
+                className="flex items-start gap-2 sm:gap-3 rounded-lg border border-border bg-muted/30 p-2 sm:p-3"
               >
-                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                <div className={`flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg ${
                   asset.estimated_value > 0 ? 'bg-green-100' : 'bg-gray-100'
                 }`}>
-                  <DollarSign className={`h-4 w-4 ${
+                  <DollarSign className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${
                     asset.estimated_value > 0 ? 'text-green-600' : 'text-gray-400'
                   }`} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-secondary text-sm">
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="flex items-start sm:items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <span className="font-medium text-secondary text-xs sm:text-sm break-words">
                       {asset.object_name}
                     </span>
-                    <Badge 
-                      variant={asset.confidence >= 0.8 ? "default" : "secondary"}
-                      className="text-xs"
-                    >
-                      {Math.round(asset.confidence * 100)}% confident
-                    </Badge>
-                    <Badge 
-                      variant="outline" 
-                      className={`text-xs ${
-                        asset.condition === 'good' ? 'border-green-300 text-green-700' :
-                        asset.condition === 'fair' ? 'border-yellow-300 text-yellow-700' :
-                        'border-gray-300 text-gray-700'
-                      }`}
-                    >
-                      {asset.condition}
-                    </Badge>
+                    <div className="flex flex-wrap gap-1">
+                      <Badge 
+                        variant={asset.confidence >= 0.8 ? "default" : "secondary"}
+                        className="text-[10px] sm:text-xs px-1.5 py-0"
+                      >
+                        {Math.round(asset.confidence * 100)}%
+                      </Badge>
+                      <Badge 
+                        variant="outline" 
+                        className={`text-[10px] sm:text-xs px-1.5 py-0 ${
+                          asset.condition === 'good' ? 'border-green-300 text-green-700' :
+                          asset.condition === 'fair' ? 'border-yellow-300 text-yellow-700' :
+                          'border-gray-300 text-gray-700'
+                        }`}
+                      >
+                        {asset.condition}
+                      </Badge>
+                    </div>
                   </div>
                   {asset.estimated_value > 0 && (
-                    <p className="text-sm font-semibold text-green-600 mt-1">
-                      Estimated: ${asset.estimated_value.toLocaleString()}
+                    <p className="text-xs sm:text-sm font-semibold text-green-600 mt-1">
+                      Est: ${asset.estimated_value.toLocaleString()}
                     </p>
                   )}
                   {asset.reasoning && (
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 line-clamp-2 break-words">
                       {asset.reasoning}
                     </p>
                   )}
                   {asset.exif_location && (
                     <div className="flex items-center gap-1 mt-1">
-                      <MapPin className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">
+                      <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-muted-foreground shrink-0" />
+                      <span className="text-[10px] sm:text-xs text-muted-foreground truncate">
                         {asset.exif_location}
                       </span>
                     </div>
                   )}
                   {asset.requires_proof_of_ownership && (
-                    <div className="flex items-center gap-1 mt-2">
-                      <AlertTriangle className="h-3 w-3 text-amber-500" />
-                      <span className="text-xs text-amber-600 font-medium">
-                        Proof of ownership required - upload document below
+                    <div className="flex items-start sm:items-center gap-1 mt-2">
+                      <AlertTriangle className="h-3 w-3 text-amber-500 shrink-0 mt-0.5 sm:mt-0" />
+                      <span className="text-[10px] sm:text-xs text-amber-600 font-medium leading-tight">
+                        Proof of ownership required
                       </span>
                     </div>
                   )}
