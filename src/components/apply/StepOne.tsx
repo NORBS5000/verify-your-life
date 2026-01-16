@@ -37,6 +37,17 @@ export const StepOne = ({ formData, updateFormData, nextStep, triggerNotificatio
     triggerNotification("🎉 Welcome! Your profile is now active.");
   };
 
+  const handleIDClear = () => {
+    updateFormData({
+      fullName: "",
+      idNumber: "",
+      dateOfBirth: "",
+      sex: "",
+      age: "",
+    });
+    setIdScanned(false);
+  };
+
   const calculateAge = (dob: string): number => {
     const today = new Date();
     const birthDate = new Date(dob);
@@ -72,7 +83,7 @@ export const StepOne = ({ formData, updateFormData, nextStep, triggerNotificatio
       </div>
 
       {/* ID Scanner */}
-      <IDScanner onScanComplete={handleIDScan} />
+      <IDScanner onScanComplete={handleIDScan} onClear={handleIDClear} />
 
       {/* Auto-filled Form */}
       {idScanned && (

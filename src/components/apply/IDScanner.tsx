@@ -10,9 +10,10 @@ interface IDScannerProps {
     dateOfBirth: string;
     sex: string;
   }) => void;
+  onClear?: () => void;
 }
 
-export const IDScanner = ({ onScanComplete }: IDScannerProps) => {
+export const IDScanner = ({ onScanComplete, onClear }: IDScannerProps) => {
   const [scanning, setScanning] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +82,8 @@ export const IDScanner = ({ onScanComplete }: IDScannerProps) => {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+    // Clear the extracted data
+    onClear?.();
   };
 
   if (completed) {
