@@ -116,16 +116,24 @@ const Apply = () => {
     setFormData((prev) => ({ ...prev, ...data }));
   }, []);
 
-  // Auto-create loan application when phone number is available
+  // Auto-create loan application when phone number is available OR when reaching step 3+
   useEffect(() => {
     const phoneNumber = formData.phoneNumber;
     const cleanPhone = phoneNumber?.replace(/[\s\-\(\)]/g, '') || '';
     
+    // Create loan when we have a valid phone and don't have a loanId yet
+    // Also trigger when reaching step 3+ (where loanId is needed for uploads)
+    const needsLoanForStep = currentStep >= 3;
+    
     if (cleanPhone.length >= 9 && !loanId && !isCreating) {
-      console.log('useEffect: Creating loan application for phone:', phoneNumber);
+      console.log('useEffect: Creating loan application for phone:', phoneNumber, 'step:', currentStep);
+      createLoanApplication(phoneNumber);
+    } else if (needsLoanForStep && !loanId && !isCreating && cleanPhone.length >= 9) {
+      // Force retry for step 3+
+      console.log('useEffect: Force retry loan creation for step:', currentStep);
       createLoanApplication(phoneNumber);
     }
-  }, [formData.phoneNumber, loanId, isCreating]); // Removed createLoanApplication - it's now stable
+  }, [formData.phoneNumber, loanId, isCreating, currentStep, createLoanApplication]);
 
   const triggerNotification = (message: string) => {
     setNotificationMessage(message);

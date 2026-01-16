@@ -56,6 +56,9 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
   const [assetFiles, setAssetFiles] = useState<File[]>([]);
   const [proofDocuments, setProofDocuments] = useState<Record<string, File>>({});
 
+  // Check if ready to upload
+  const isReady = !!(userId && loanId && !isCreatingLoan);
+
   // Asset processing hook
   const { 
     isProcessing, 
@@ -244,7 +247,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
         {/* Upload Area */}
         <button
           onClick={handleUploadClick}
-          disabled={uploading || isProcessing || !userId || !loanId || isCreatingLoan}
+          disabled={uploading || isProcessing || !isReady}
           className="group relative flex w-full flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-border bg-muted/30 p-8 transition-all hover:border-primary hover:bg-primary/5 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {!userId ? (
@@ -259,7 +262,17 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                 </p>
               </div>
             </>
-          ) : isCreatingLoan || !loanId ? (
+          ) : uploading || isProcessing ? (
+            <>
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+              <div className="text-center">
+                <p className="font-medium text-secondary">Processing...</p>
+                <p className="text-sm text-muted-foreground">AI is analyzing your assets</p>
+              </div>
+            </>
+          ) : !isReady ? (
             <>
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -269,16 +282,6 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
                 <p className="text-sm text-muted-foreground">
                   Please wait a moment
                 </p>
-              </div>
-            </>
-          ) : uploading || isProcessing ? (
-            <>
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-              <div className="text-center">
-                <p className="font-medium text-secondary">Processing...</p>
-                <p className="text-sm text-muted-foreground">AI is analyzing your assets</p>
               </div>
             </>
           ) : (
