@@ -163,21 +163,23 @@ export const StepOne = ({ formData, updateFormData, nextStep, triggerNotificatio
 
       {/* Navigation */}
       {idScanned && (
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
           <Button
             variant="outline"
             onClick={onSaveDraft}
-            className="gap-2"
+            className="gap-2 order-2 sm:order-1"
           >
             <Save className="h-4 w-4" />
+            <span className="sm:hidden">Save Draft</span>
             <span className="hidden sm:inline">Save Draft</span>
           </Button>
           <Button
             onClick={handleNext}
-            className="flex-1 gap-2 bg-gradient-to-r from-primary to-coral-600 py-6 text-lg font-semibold shadow-coral-glow transition-all hover:shadow-coral-glow-hover"
+            className="flex-1 gap-2 bg-gradient-to-r from-primary to-coral-600 py-4 sm:py-6 text-base sm:text-lg font-semibold shadow-coral-glow transition-all hover:shadow-coral-glow-hover order-1 sm:order-2"
           >
-            Continue to Medical Assessment
-            <ArrowRight className="h-5 w-5" />
+            <span className="sm:hidden">Continue</span>
+            <span className="hidden sm:inline">Continue to Medical Assessment</span>
+            <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
       )}

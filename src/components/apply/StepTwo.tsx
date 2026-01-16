@@ -191,30 +191,32 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       />
 
       {/* Navigation */}
-      <div className="flex gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={prevStep}
-          className="gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onSaveDraft}
-          className="gap-2"
-        >
-          <Save className="h-4 w-4" />
-          <span className="hidden sm:inline">Save</span>
-        </Button>
+      <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+        <div className="flex gap-2 sm:gap-4 order-2 sm:order-1">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={prevStep}
+            className="gap-1.5 sm:gap-2 flex-1 sm:flex-none"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back</span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onSaveDraft}
+            className="gap-1.5 sm:gap-2 flex-1 sm:flex-none"
+          >
+            <Save className="h-4 w-4" />
+            <span>Save</span>
+          </Button>
+        </div>
         <Button
           type="button"
           onClick={handleNext}
           disabled={isAnalyzing}
-          className={`flex-1 gap-2 ${
+          className={`flex-1 gap-2 py-4 sm:py-2 order-1 sm:order-2 ${
             showPricing
               ? "bg-health-green hover:bg-health-green/90"
               : "bg-gradient-to-r from-primary to-coral-600"
@@ -223,16 +225,18 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
           {isAnalyzing ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Analyzing...
+              <span>Analyzing...</span>
             </>
           ) : showPricing ? (
             <>
-              Continue to Collateral
+              <span className="sm:hidden">Continue</span>
+              <span className="hidden sm:inline">Continue to Collateral</span>
               <ArrowRight className="h-4 w-4" />
             </>
           ) : (
             <>
-              Analyze Documents
+              <span className="sm:hidden">Analyze</span>
+              <span className="hidden sm:inline">Analyze Documents</span>
               <ArrowRight className="h-4 w-4" />
             </>
           )}
