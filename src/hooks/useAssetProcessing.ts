@@ -27,10 +27,62 @@ export interface AssetProcessingResult {
   created_at: string;
 }
 
+export interface ScoreBreakdown {
+  verification_integrity: {
+    score: number;
+    max: number;
+    details: string;
+  };
+  asset_value: {
+    score: number;
+    max: number;
+    details: string;
+  };
+  asset_condition: {
+    score: number;
+    max: number;
+    details: string;
+  };
+  detection_confidence: {
+    score: number;
+    max: number;
+    details: string;
+  };
+  portfolio_diversity: {
+    score: number;
+    max: number;
+    details: string;
+  };
+}
+
+export interface CreditScoreResult {
+  user_id: string;
+  loan_id: string;
+  batch_id: number;
+  credit_score: number;
+  max_score: number;
+  risk_level: string;
+  recommendation: string;
+  score_breakdown: ScoreBreakdown;
+  summary: {
+    verified_collateral_value: number;
+    total_assets: number;
+    verification_rate: string;
+    currency: string;
+  };
+  penalties_applied: string[];
+  flags: string[];
+  is_provisional: boolean;
+  algorithm_version: string;
+  calculated_at: string;
+}
+
 export const useAssetProcessing = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isUploadingProof, setIsUploadingProof] = useState(false);
+  const [isCalculatingScore, setIsCalculatingScore] = useState(false);
   const [processingResults, setProcessingResults] = useState<Record<string, AssetProcessingResult[]>>({});
+  const [creditScoreResult, setCreditScoreResult] = useState<CreditScoreResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const processAssetImage = async (
@@ -87,6 +139,56 @@ export const useAssetProcessing = () => {
       return null;
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const calculateCreditScore = async (
+    userId: string,
+    loanId: string,
+    forceRecalculate: boolean = false
+  ): Promise<CreditScoreResult | null> => {
+    setIsCalculatingScore(true);
+    setError(null);
+
+    try {
+      const url = new URL(`${API_BASE_URL}/api/v1/credit-score/${userId}/${loanId}`);
+      url.searchParams.set("force_recalculate", forceRecalculate.toString());
+
+      const response = await fetch(url.toString(), {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Credit score API error:", errorData);
+        throw new Error(errorData.detail || `API error: ${response.status}`);
+      }
+
+      const result: CreditScoreResult = await response.json();
+      
+      // Log the API response
+      console.log("=== Credit Score API Response ===");
+      console.log("User ID:", result.user_id);
+      console.log("Loan ID:", result.loan_id);
+      console.log("Credit Score:", result.credit_score, "/", result.max_score);
+      console.log("Risk Level:", result.risk_level);
+      console.log("Recommendation:", result.recommendation);
+      console.log("Score Breakdown:", result.score_breakdown);
+      console.log("Summary:", result.summary);
+      console.log("Penalties:", result.penalties_applied);
+      console.log("Flags:", result.flags);
+      console.log("Is Provisional:", result.is_provisional);
+      console.log("Full Response:", result);
+      console.log("=================================");
+
+      setCreditScoreResult(result);
+      return result;
+    } catch (err: any) {
+      setError(err.message || "Failed to calculate credit score");
+      console.error("Error calculating credit score:", err);
+      return null;
+    } finally {
+      setIsCalculatingScore(false);
     }
   };
 
@@ -165,9 +267,12 @@ export const useAssetProcessing = () => {
   return {
     isProcessing,
     isUploadingProof,
+    isCalculatingScore,
     processingResults,
+    creditScoreResult,
     error,
     processAssetImage,
+    calculateCreditScore,
     submitProofOfOwnership,
     removeProcessingResult,
     clearResults,
