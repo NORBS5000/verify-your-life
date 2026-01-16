@@ -58,6 +58,7 @@ const steps = [
   { label: "Collateral", icon: <Landmark className="h-5 w-5" /> },
   { label: "Verify", icon: <Shield className="h-5 w-5" /> },
   { label: "Guarantors", icon: <User className="h-5 w-5" /> },
+  { label: "Review", icon: <Heart className="h-5 w-5" /> },
 ];
 
 const Apply = () => {
@@ -216,9 +217,7 @@ const Apply = () => {
         )}
 
         {/* Progress Bar */}
-        {currentStep < 6 && (
-          <ProgressBar currentStep={currentStep} totalSteps={5} steps={steps} />
-        )}
+        <ProgressBar currentStep={currentStep} totalSteps={6} steps={steps} />
 
 
         {/* Step Content */}
