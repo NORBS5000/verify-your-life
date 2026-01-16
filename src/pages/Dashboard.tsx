@@ -9,11 +9,9 @@ import {
   X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showSectorModal, setShowSectorModal] = useState(false);
 
@@ -39,20 +37,9 @@ const Dashboard = () => {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-4">
-              {user ? (
-                <Button variant="outline" onClick={() => navigate("/admin")}>
-                  Dashboard
-                </Button>
-              ) : (
-                <>
-                  <Button variant="ghost" onClick={() => navigate("/auth")}>
-                    Sign In
-                  </Button>
-                  <Button onClick={() => setShowSectorModal(true)}>
-                    Enroll Now
-                  </Button>
-                </>
-              )}
+              <Button onClick={() => setShowSectorModal(true)}>
+                Enroll Now
+              </Button>
             </nav>
 
             {/* Mobile Menu Button */}
@@ -68,40 +55,15 @@ const Dashboard = () => {
           {showMobileMenu && (
             <div className="md:hidden bg-card border-t border-border">
               <div className="px-4 py-4 space-y-3">
-                {user ? (
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => {
-                      navigate("/admin");
-                      setShowMobileMenu(false);
-                    }}
-                  >
-                    Dashboard
-                  </Button>
-                ) : (
-                  <>
-                    <Button
-                      variant="ghost"
-                      className="w-full"
-                      onClick={() => {
-                        navigate("/auth");
-                        setShowMobileMenu(false);
-                      }}
-                    >
-                      Sign In
-                    </Button>
-                    <Button
-                      className="w-full"
-                      onClick={() => {
-                        setShowSectorModal(true);
-                        setShowMobileMenu(false);
-                      }}
-                    >
-                      Enroll Now
-                    </Button>
-                  </>
-                )}
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    setShowSectorModal(true);
+                    setShowMobileMenu(false);
+                  }}
+                >
+                  Enroll Now
+                </Button>
               </div>
             </div>
           )}
@@ -111,28 +73,16 @@ const Dashboard = () => {
       {/* Hero Section */}
       <section className="py-12 sm:py-20 lg:py-32 animate-fade-in">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {user ? (
-            /* Authenticated User View */
-            <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-              <h1 className="text-2xl sm:text-4xl lg:text-6xl font-bold text-foreground mb-3 sm:mb-4 lg:mb-6">
-                Welcome back, <span className="text-primary">{user.email?.split('@')[0]}</span>
-              </h1>
-              <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto px-2">
-                Ready to access your health benefits?
-              </p>
-            </div>
-          ) : (
-            /* Public Hero */
-            <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-              <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold text-foreground mb-4 sm:mb-6 lg:mb-8 leading-tight">
-                Africa's 1st<br />
-                <span className="text-foreground">Health Benefits<br />Trading Platform</span>
-              </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-2">
-                COVA is ensuring timely and accessible medical care for millions across the continent so they don't have to postpone care until it is too late.
-              </p>
-            </div>
-          )}
+          {/* Public Hero */}
+          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+            <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold text-foreground mb-4 sm:mb-6 lg:mb-8 leading-tight">
+              Africa's 1st<br />
+              <span className="text-foreground">Health Benefits<br />Trading Platform</span>
+            </h1>
+            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-2">
+              COVA is ensuring timely and accessible medical care for millions across the continent so they don't have to postpone care until it is too late.
+            </p>
+          </div>
 
           {/* Action Buttons */}
           <div className="mb-8 sm:mb-12 lg:mb-20 px-4">
@@ -176,41 +126,39 @@ const Dashboard = () => {
       </section>
 
       {/* Features Section */}
-      {!user && (
-        <section className="py-12 sm:py-16 lg:py-20 bg-secondary/20">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-8 sm:mb-12">
-              <p className="text-primary text-sm font-semibold uppercase tracking-wide mb-2">WHY CHOOSE COVA</p>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
-                Experience Medical care<br />like never before
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              <Card className="p-6 sm:p-8">
-                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-3">What is CheckUps COVA?</h3>
-                <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-                  CheckUps COVA is a flexible health plan that gives you up to 4x the value of what you invest. It is designed for everyday Kenyans to access real and quality care without the need for insurance.
-                </p>
-              </Card>
-
-              <Card className="p-6 sm:p-8">
-                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-3">How does it differ?</h3>
-                <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-                  Unlike traditional insurance, CheckUps COVA works instantly, skips the paperwork, gives you access to fair credit, and brings African-style coverage — you can share your benefits with your family.
-                </p>
-              </Card>
-
-              <Card className="p-6 sm:p-8 sm:col-span-2 lg:col-span-1">
-                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-3">How to enroll?</h3>
-                <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-                  Enrolling takes just a few minutes and a few clicks. Everything happens online — it is easy, flexible, and made for you. Just choose how much you want to invest.
-                </p>
-              </Card>
-            </div>
+      <section className="py-12 sm:py-16 lg:py-20 bg-secondary/20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <p className="text-primary text-sm font-semibold uppercase tracking-wide mb-2">WHY CHOOSE COVA</p>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+              Experience Medical care<br />like never before
+            </h2>
           </div>
-        </section>
-      )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <Card className="p-6 sm:p-8">
+              <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-3">What is CheckUps COVA?</h3>
+              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+                CheckUps COVA is a flexible health plan that gives you up to 4x the value of what you invest. It is designed for everyday Kenyans to access real and quality care without the need for insurance.
+              </p>
+            </Card>
+
+            <Card className="p-6 sm:p-8">
+              <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-3">How does it differ?</h3>
+              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+                Unlike traditional insurance, CheckUps COVA works instantly, skips the paperwork, gives you access to fair credit, and brings African-style coverage — you can share your benefits with your family.
+              </p>
+            </Card>
+
+            <Card className="p-6 sm:p-8 sm:col-span-2 lg:col-span-1">
+              <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-3">How to enroll?</h3>
+              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+                Enrolling takes just a few minutes and a few clicks. Everything happens online — it is easy, flexible, and made for you. Just choose how much you want to invest.
+              </p>
+            </Card>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="bg-card border-t border-border py-8 sm:py-12">

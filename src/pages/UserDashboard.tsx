@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Heart, RefreshCw, FileDown, ArrowLeft, Pill, Building, BarChart3, TrendingUp, Shield, Clock, ChevronRight } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Heart, RefreshCw, FileDown, ArrowLeft, Pill, Building, BarChart3, TrendingUp, Shield, Clock, ChevronRight, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useAuth } from "@/hooks/useAuth";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { GradientCircularProgress } from "@/components/GradientCircularProgress";
 
 interface ApplicationData {
   id: string;
   full_name: string | null;
+  phone_number: string | null;
   composite_score: number | null;
   medical_needs_score: number | null;
   asset_valuation_score: number | null;
@@ -23,41 +24,51 @@ interface ApplicationData {
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const [searchParams] = useSearchParams();
   const [application, setApplication] = useState<ApplicationData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState(searchParams.get("phone") || "");
+  const [showPhoneInput, setShowPhoneInput] = useState(!searchParams.get("phone"));
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-      return;
+    const phoneFromUrl = searchParams.get("phone");
+    if (phoneFromUrl) {
+      setPhoneNumber(phoneFromUrl);
+      fetchApplication(phoneFromUrl);
     }
+  }, [searchParams]);
 
-    if (user) {
-      fetchApplication();
-    }
-  }, [user, authLoading, navigate]);
-
-  const fetchApplication = async () => {
-    if (!user) return;
+  const fetchApplication = async (phone: string) => {
+    if (!phone) return;
     
+    setLoading(true);
     const { data, error } = await supabase
       .from("loan_applications")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("phone_number", phone)
       .order("created_at", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (data && !error) {
       setApplication(data);
+      setShowPhoneInput(false);
+    } else {
+      setApplication(null);
     }
     setLoading(false);
   };
 
+  const handlePhoneSubmit = () => {
+    if (phoneNumber.length >= 10) {
+      fetchApplication(phoneNumber);
+    }
+  };
+
   const handleRefresh = () => {
-    setLoading(true);
-    fetchApplication();
+    if (phoneNumber) {
+      fetchApplication(phoneNumber);
+    }
   };
 
   // Calculate composite score from individual scores
@@ -116,7 +127,70 @@ const UserDashboard = () => {
 
   const riskLevel = getRiskLevel(compositeScore);
 
-  if (loading || authLoading) {
+  // Show phone input if no application loaded
+  if (showPhoneInput || !application) {
+    return (
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
+          <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
+            <button
+              onClick={() => navigate("/")}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-white"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                <Heart className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-serif text-lg font-bold text-secondary">COVA Credit</span>
+            </div>
+            
+            <div className="w-10" />
+          </div>
+        </header>
+
+        <main className="mx-auto max-w-md px-4 py-12">
+          <Card className="p-6">
+            <div className="text-center mb-6">
+              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                <Phone className="h-6 w-6 text-primary" />
+              </div>
+              <h1 className="text-xl font-bold text-secondary mb-2">View Your Application</h1>
+              <p className="text-muted-foreground text-sm">Enter your phone number to view your application status</p>
+            </div>
+            
+            <div className="space-y-4">
+              <Input
+                type="tel"
+                placeholder="Enter your phone number"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handlePhoneSubmit()}
+              />
+              <Button 
+                className="w-full" 
+                onClick={handlePhoneSubmit}
+                disabled={loading || phoneNumber.length < 10}
+              >
+                {loading ? "Loading..." : "View Application"}
+              </Button>
+              
+              {!loading && phoneNumber.length >= 10 && !application && (
+                <p className="text-center text-sm text-muted-foreground">
+                  No application found for this phone number.
+                </p>
+              )}
+            </div>
+          </Card>
+        </main>
+      </div>
+    );
+  }
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
