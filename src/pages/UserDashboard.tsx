@@ -452,10 +452,10 @@ const UserDashboard = () => {
           <Button 
             className="flex-1 gap-2 h-12 border-2" 
             variant="outline" 
-            onClick={handleRefresh}
+            onClick={() => navigate("/")}
           >
-            <RefreshCw className="h-5 w-5" />
-            Refresh
+            <ArrowLeft className="h-5 w-5" />
+            Back to Home
           </Button>
         </div>
 
@@ -463,18 +463,6 @@ const UserDashboard = () => {
         <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground animate-slide-up" style={{ animationDelay: '0.6s' }}>
           <Clock className="h-4 w-4" />
           <span>Last updated: {new Date(application?.updated_at ?? Date.now()).toLocaleString()}</span>
-        </div>
-
-        {/* Back to Home Button */}
-        <div className="mt-8 animate-slide-up" style={{ animationDelay: '0.7s' }}>
-          <Button 
-            className="w-full gap-2 h-12" 
-            variant="outline"
-            onClick={() => navigate("/")}
-          >
-            <ArrowLeft className="h-5 w-5" />
-            Back to Home
-          </Button>
         </div>
       </main>
     </div>
