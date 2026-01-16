@@ -2,7 +2,7 @@ import { useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight, Landmark, Save, X, Plus, CheckCircle, Loader2, Camera, DollarSign, MapPin, AlertTriangle, Eye, Image, FileText, Upload, Car, Home } from "lucide-react";
+import { ArrowLeft, ArrowRight, Landmark, Save, X, Plus, CheckCircle, Loader2, Camera, DollarSign, MapPin, AlertTriangle, Eye, Image, FileText, Upload, Car, Home, Shield } from "lucide-react";
 import { FileUploadCard } from "./FileUploadCard";
 import { StepHeader } from "./StepHeader";
 import { toast } from "sonner";
@@ -63,9 +63,12 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
   const { 
     isProcessing, 
     isUploadingProof,
+    isCalculatingScore,
     processingResults, 
+    creditScoreResult,
     error: processingError,
     processAssetImage,
+    calculateCreditScore,
     submitProofOfOwnership,
     getTotalEstimatedValue,
     getAllDetectedAssets 
@@ -151,6 +154,13 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
               toast.warning("No assets detected in this image. Try uploading a clearer photo.");
             }
           }
+        }
+        
+        // Calculate credit score after processing all assets
+        toast.info("Calculating your credit score...");
+        const scoreResult = await calculateCreditScore(userId, loanId);
+        if (scoreResult) {
+          toast.success(`Credit Score: ${scoreResult.credit_score}/${scoreResult.max_score} (${scoreResult.risk_level})`);
         }
       } else {
         // Show specific message about what's missing
@@ -463,6 +473,199 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
             <div className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">
               <AlertTriangle className="mr-2 inline h-4 w-4" />
               {processingError}
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Credit Score Calculation Status */}
+      {isCalculatingScore && (
+        <Card className="border-0 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                <Shield className="h-5 w-5 text-blue-600" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 h-4 w-4">
+                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium text-secondary">Calculating Credit Score</h4>
+              <p className="text-sm text-muted-foreground">
+                Analyzing your collateral portfolio...
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Credit Score Results */}
+      {creditScoreResult && (
+        <Card className="animate-slide-up border-0 bg-card p-6 shadow-elegant">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                creditScoreResult.risk_level === 'low' ? 'bg-green-100' :
+                creditScoreResult.risk_level === 'medium' ? 'bg-yellow-100' :
+                'bg-red-100'
+              }`}>
+                <Shield className={`h-5 w-5 ${
+                  creditScoreResult.risk_level === 'low' ? 'text-green-600' :
+                  creditScoreResult.risk_level === 'medium' ? 'text-yellow-600' :
+                  'text-red-600'
+                }`} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-secondary">Credit Score</h3>
+                <p className="text-xs text-muted-foreground">
+                  Based on your collateral analysis
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={`text-2xl font-bold ${
+                creditScoreResult.risk_level === 'low' ? 'text-green-600' :
+                creditScoreResult.risk_level === 'medium' ? 'text-yellow-600' :
+                'text-red-600'
+              }`}>
+                {creditScoreResult.credit_score}/{creditScoreResult.max_score}
+              </div>
+              <Badge 
+                variant="outline" 
+                className={`mt-1 ${
+                  creditScoreResult.risk_level === 'low' ? 'border-green-300 text-green-700 bg-green-50' :
+                  creditScoreResult.risk_level === 'medium' ? 'border-yellow-300 text-yellow-700 bg-yellow-50' :
+                  'border-red-300 text-red-700 bg-red-50'
+                }`}
+              >
+                {creditScoreResult.risk_level.toUpperCase()} RISK
+              </Badge>
+            </div>
+          </div>
+
+          {/* Score Breakdown */}
+          <div className="space-y-3 mt-4">
+            <h4 className="text-sm font-medium text-muted-foreground">Score Breakdown</h4>
+            
+            <div className="grid gap-2">
+              {/* Verification Integrity */}
+              <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                <span className="text-sm text-secondary">Verification</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-primary h-2 rounded-full" 
+                      style={{ width: `${(creditScoreResult.score_breakdown.verification_integrity.score / creditScoreResult.score_breakdown.verification_integrity.max) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-medium text-muted-foreground w-12 text-right">
+                    {creditScoreResult.score_breakdown.verification_integrity.score}/{creditScoreResult.score_breakdown.verification_integrity.max}
+                  </span>
+                </div>
+              </div>
+
+              {/* Asset Value */}
+              <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                <span className="text-sm text-secondary">Asset Value</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-green-500 h-2 rounded-full" 
+                      style={{ width: `${(creditScoreResult.score_breakdown.asset_value.score / creditScoreResult.score_breakdown.asset_value.max) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-medium text-muted-foreground w-12 text-right">
+                    {creditScoreResult.score_breakdown.asset_value.score}/{creditScoreResult.score_breakdown.asset_value.max}
+                  </span>
+                </div>
+              </div>
+
+              {/* Asset Condition */}
+              <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                <span className="text-sm text-secondary">Condition</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-500 h-2 rounded-full" 
+                      style={{ width: `${(creditScoreResult.score_breakdown.asset_condition.score / creditScoreResult.score_breakdown.asset_condition.max) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-medium text-muted-foreground w-12 text-right">
+                    {Math.round(creditScoreResult.score_breakdown.asset_condition.score)}/{creditScoreResult.score_breakdown.asset_condition.max}
+                  </span>
+                </div>
+              </div>
+
+              {/* Detection Confidence */}
+              <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                <span className="text-sm text-secondary">Confidence</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-purple-500 h-2 rounded-full" 
+                      style={{ width: `${(creditScoreResult.score_breakdown.detection_confidence.score / creditScoreResult.score_breakdown.detection_confidence.max) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-medium text-muted-foreground w-12 text-right">
+                    {Math.round(creditScoreResult.score_breakdown.detection_confidence.score)}/{creditScoreResult.score_breakdown.detection_confidence.max}
+                  </span>
+                </div>
+              </div>
+
+              {/* Portfolio Diversity */}
+              <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                <span className="text-sm text-secondary">Diversity</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-orange-500 h-2 rounded-full" 
+                      style={{ width: `${(creditScoreResult.score_breakdown.portfolio_diversity.score / creditScoreResult.score_breakdown.portfolio_diversity.max) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-medium text-muted-foreground w-12 text-right">
+                    {creditScoreResult.score_breakdown.portfolio_diversity.score}/{creditScoreResult.score_breakdown.portfolio_diversity.max}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Summary */}
+          <div className="mt-4 p-3 rounded-lg bg-muted/50">
+            <div className="flex flex-wrap gap-4 text-sm">
+              <div>
+                <span className="text-muted-foreground">Total Assets:</span>{' '}
+                <span className="font-medium">{creditScoreResult.summary.total_assets}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Verified Value:</span>{' '}
+                <span className="font-medium">${creditScoreResult.summary.verified_collateral_value.toLocaleString()}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Verification Rate:</span>{' '}
+                <span className="font-medium">{creditScoreResult.summary.verification_rate}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Flags and Penalties */}
+          {(creditScoreResult.flags.length > 0 || creditScoreResult.penalties_applied.length > 0) && (
+            <div className="mt-4 space-y-2">
+              {creditScoreResult.flags.map((flag, idx) => (
+                <div key={idx} className="flex items-center gap-2 text-amber-600 text-sm">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span>{flag.replace(/_/g, ' ')}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {creditScoreResult.is_provisional && (
+            <div className="mt-4 p-2 rounded-lg bg-blue-50 border border-blue-200">
+              <p className="text-xs text-blue-700">
+                ⓘ This is a provisional score. Upload ownership documents to improve your rating.
+              </p>
             </div>
           )}
         </Card>
