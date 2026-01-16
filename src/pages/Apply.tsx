@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, User, Stethoscope, Landmark, Shield, ArrowLeft, Loader2 } from "lucide-react";
 import { StepOne } from "@/components/apply/StepOne";
@@ -112,16 +112,20 @@ const Apply = () => {
     totalAssetValue: null,
   });
 
-  const updateFormData = (data: Partial<FormData>) => {
+  const updateFormData = useCallback((data: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
-    
-    // Auto-create loan application when phone number is entered (strip spaces/dashes for validation)
-    const phoneNumber = data.phoneNumber || formData.phoneNumber;
+  }, []);
+
+  // Auto-create loan application when phone number is available
+  useEffect(() => {
+    const phoneNumber = formData.phoneNumber;
     const cleanPhone = phoneNumber?.replace(/[\s\-\(\)]/g, '') || '';
+    
     if (cleanPhone.length >= 9 && !loanId && !isCreating) {
+      console.log('Creating loan application for phone:', phoneNumber);
       createLoanApplication(phoneNumber);
     }
-  };
+  }, [formData.phoneNumber, loanId, isCreating, createLoanApplication]);
 
   const triggerNotification = (message: string) => {
     setNotificationMessage(message);
