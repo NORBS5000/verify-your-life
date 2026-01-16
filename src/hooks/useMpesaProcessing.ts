@@ -2,46 +2,22 @@ import { useState } from "react";
 
 const API_BASE_URL = "https://orionapisalpha.onrender.com";
 
+export interface MpesaTransaction {
+  "Receipt No": string;
+  "Completion Time": string;
+  "Details": string;
+  "Transaction Status": string | null;
+  "Paid In": number;
+  "Withdrawn": number;
+  "Balance": number;
+}
+
 export interface MpesaAnalysisResult {
-  credit_score_ready_values: {
-    success: boolean;
-    user_id: string;
-    loan_id: string;
-    features: {
-      opening_balance: number;
-      closing_balance: number;
-      average_balance: number;
-      total_deposits: number;
-      total_withdrawals: number;
-      count_deposits: number;
-      count_withdrawals: number;
-      avg_deposit: number;
-      max_deposit: number;
-      min_deposit: number;
-      avg_withdrawal: number;
-      max_withdrawal: number;
-      min_withdrawal: number;
-      balance_volatility: number;
-      active_days: number;
-      other_features?: {
-        currency?: string;
-        phone_number?: string;
-        customer_name?: string;
-      };
-    };
-    timings?: {
-      decrypt?: number;
-      extract?: number;
-      total?: number;
-    };
-  };
-  output_from_credit_score_engine: {
-    user_id: string;
-    loan_id: string;
-    bank_statement_credit_score: number;
-    loan_amount_requested: number;
-    recommendation: string;
-  };
+  document_id: string;
+  loan_id: string;
+  user_id: string;
+  document_url: string;
+  transactions: MpesaTransaction[];
 }
 
 export const useMpesaProcessing = () => {
@@ -80,12 +56,11 @@ export const useMpesaProcessing = () => {
 
       // Log the API response
       console.log("=== M-Pesa Statement Analysis API Response ===");
-      console.log("User ID:", result.credit_score_ready_values.user_id);
-      console.log("Loan ID:", result.credit_score_ready_values.loan_id);
-      console.log("Success:", result.credit_score_ready_values.success);
-      console.log("Features:", result.credit_score_ready_values.features);
-      console.log("Credit Score:", result.output_from_credit_score_engine.bank_statement_credit_score);
-      console.log("Recommendation:", result.output_from_credit_score_engine.recommendation);
+      console.log("User ID:", result.user_id);
+      console.log("Loan ID:", result.loan_id);
+      console.log("Document ID:", result.document_id);
+      console.log("Document URL:", result.document_url);
+      console.log("Transactions count:", result.transactions?.length);
       console.log("Full Response:", result);
       console.log("==============================================");
 
