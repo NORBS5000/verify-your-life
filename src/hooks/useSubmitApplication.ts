@@ -217,14 +217,15 @@ export function useSubmitApplication() {
         }
       }
 
-      // Insert the application
-      const { error: insertError } = await supabase
+      // Update the existing draft application instead of inserting a new one
+      const { error: updateError } = await supabase
         .from("loan_applications")
-        .insert(applicationData);
+        .update(applicationData)
+        .eq("phone_number", phoneNumber);
 
-      if (insertError) {
-        console.error("Insert error:", insertError);
-        setError(insertError.message);
+      if (updateError) {
+        console.error("Update error:", updateError);
+        setError(updateError.message);
         setIsSubmitting(false);
         return false;
       }
