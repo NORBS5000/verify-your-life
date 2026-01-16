@@ -24,6 +24,13 @@ interface StepFourProps {
 export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft, userId, loanId }: StepFourProps) => {
   const { isAnalyzing, analysisResult, error, analyzeBankStatement, clearAnalysisResult } = useBankStatementProcessing();
   const { 
+    isAnalyzing: isAnalyzingMpesa, 
+    analysisResult: mpesaResult, 
+    error: mpesaError, 
+    analyzeBankStatement: analyzeMpesaStatement, 
+    clearAnalysisResult: clearMpesaResult 
+  } = useBankStatementProcessing();
+  const { 
     isAnalyzing: isAnalyzingCallLogs, 
     analysisResult: callLogsResult, 
     error: callLogsError, 
@@ -31,6 +38,7 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
     clearAnalysisResult: clearCallLogsResult 
   } = useCallLogsProcessing();
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
+  const [hasAnalyzedMpesa, setHasAnalyzedMpesa] = useState(false);
   const [hasAnalyzedCallLogs, setHasAnalyzedCallLogs] = useState(false);
 
   const handleNext = () => {
@@ -38,6 +46,44 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
       nextStep();
     } else {
       toast.error("Please provide M-Pesa statement");
+    }
+  };
+
+  // Auto-analyze M-Pesa statement when file is uploaded
+  const handleMpesaUpload = async (file: File | null) => {
+    updateFormData({ mpesaStatement: file });
+    clearMpesaResult();
+    setHasAnalyzedMpesa(false);
+    
+    if (file && userId && loanId) {
+      toast.info("Analyzing M-Pesa statement...", { duration: 3000 });
+      const result = await analyzeMpesaStatement(userId, loanId, file, formData.mpesaStatementPassword || undefined);
+      setHasAnalyzedMpesa(true);
+      
+      if (result) {
+        toast.success("M-Pesa statement analyzed successfully!");
+      } else {
+        toast.error("Failed to analyze M-Pesa statement. Please try again.");
+      }
+    }
+  };
+
+  // Re-analyze M-Pesa when password changes
+  const handleMpesaPasswordChange = (password: string) => {
+    updateFormData({ mpesaStatementPassword: password });
+  };
+
+  const handleAnalyzeMpesaWithPassword = async () => {
+    if (formData.mpesaStatement && userId && loanId) {
+      toast.info("Re-analyzing M-Pesa with password...", { duration: 3000 });
+      const result = await analyzeMpesaStatement(userId, loanId, formData.mpesaStatement, formData.mpesaStatementPassword || undefined);
+      setHasAnalyzedMpesa(true);
+      
+      if (result) {
+        toast.success("M-Pesa statement analyzed successfully!");
+      } else {
+        toast.error("Failed to analyze. Check if password is correct.");
+      }
     }
   };
 
@@ -132,23 +178,99 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
               description="Last 6 months M-Pesa statement"
               helpText="Shows your transaction history and financial behavior"
               file={formData.mpesaStatement}
-              onFileChange={(file) => updateFormData({ mpesaStatement: file })}
+              onFileChange={handleMpesaUpload}
               accept=".pdf,image/*"
               required
             />
-            <div className="ml-16">
-              <Label htmlFor="mpesaPassword" className="flex items-center gap-2 text-sm">
-                <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                PDF Password (if protected)
-              </Label>
-              <Input
-                id="mpesaPassword"
-                type="password"
-                placeholder="Enter password if document is protected"
-                value={formData.mpesaStatementPassword}
-                onChange={(e) => updateFormData({ mpesaStatementPassword: e.target.value })}
-                className="mt-1.5"
-              />
+            <div className="ml-16 space-y-3">
+              <div>
+                <Label htmlFor="mpesaPassword" className="flex items-center gap-2 text-sm">
+                  <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                  PDF Password (if protected)
+                </Label>
+                <div className="flex gap-2 mt-1.5">
+                  <Input
+                    id="mpesaPassword"
+                    type="password"
+                    placeholder="Enter password if document is protected"
+                    value={formData.mpesaStatementPassword}
+                    onChange={(e) => handleMpesaPasswordChange(e.target.value)}
+                    className="flex-1"
+                  />
+                  {formData.mpesaStatement && formData.mpesaStatementPassword && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAnalyzeMpesaWithPassword}
+                      disabled={isAnalyzingMpesa}
+                      className="shrink-0"
+                    >
+                      {isAnalyzingMpesa ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Unlock & Analyze"
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* M-Pesa Analysis Status */}
+              {isAnalyzingMpesa && (
+                <div className="flex items-center gap-2 rounded-lg bg-primary/10 p-3 text-sm text-primary">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Analyzing M-Pesa statement...</span>
+                </div>
+              )}
+
+              {hasAnalyzedMpesa && mpesaResult && (
+                <div className="rounded-lg border border-health-green/30 bg-health-green/10 p-4 space-y-3">
+                  <div className="flex items-center gap-2 text-health-green">
+                    <CheckCircle className="h-5 w-5" />
+                    <span className="font-medium">M-Pesa Analysis Complete</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Credit Score:</span>
+                      <span className="ml-2 font-bold text-secondary">
+                        {mpesaResult.output_from_credit_score_engine.bank_statement_credit_score}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Recommendation:</span>
+                      <span className={`ml-2 font-medium ${
+                        mpesaResult.output_from_credit_score_engine.recommendation === "Eligible" 
+                          ? "text-health-green" 
+                          : "text-amber-600"
+                      }`}>
+                        {mpesaResult.output_from_credit_score_engine.recommendation}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Avg Balance:</span>
+                      <span className="ml-2 text-foreground">
+                        {mpesaResult.credit_score_ready_values.features.other_features?.currency || "KES"}
+                        {" "}
+                        {mpesaResult.credit_score_ready_values.features.average_balance?.toLocaleString() || "N/A"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Total Deposits:</span>
+                      <span className="ml-2 text-foreground">
+                        {mpesaResult.credit_score_ready_values.features.count_deposits || "N/A"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {hasAnalyzedMpesa && mpesaError && (
+                <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>{mpesaError}</span>
+                </div>
+              )}
             </div>
           </div>
 
