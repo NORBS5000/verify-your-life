@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { FormData } from "@/pages/Apply";
-import { ArrowLeft, ArrowRight, Shield, Phone, FileText, Users, Lock, Save, Loader2, CheckCircle, AlertCircle, User } from "lucide-react";
+import { ArrowLeft, ArrowRight, Shield, Phone, FileText, Users, Lock, Save, Loader2, CheckCircle, AlertCircle, User, History, ExternalLink } from "lucide-react";
 import { FileUploadCard } from "./FileUploadCard";
 import { StepHeader } from "./StepHeader";
 import { useBankStatementProcessing, BankStatementAnalysisResult } from "@/hooks/useBankStatementProcessing";
@@ -271,6 +271,41 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Call Logs History */}
+          <div className="space-y-3 border-t border-border pt-6">
+            <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <History className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="font-medium text-amber-800">Download Your Call Logs History</p>
+                  <p className="text-sm text-amber-700 mt-1">
+                    Before uploading, download your call logs (at least 6 months) using this app:
+                  </p>
+                  <a
+                    href="https://play.google.com/store/apps/details?id=com.loopvector.allinonebackup.calllogsbackup"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 mt-2 text-sm font-medium text-primary hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Download "All in One Backup" from Play Store
+                  </a>
+                </div>
+              </div>
+            </div>
+            
+            <FileUploadCard
+              label="Call Logs History"
+              description="Upload exported call logs file (at least 6 months)"
+              helpText="This helps us understand your communication patterns for credit assessment"
+              icon={<Phone className="h-6 w-6" />}
+              file={formData.callLogHistory}
+              onFileChange={(file) => updateFormData({ callLogHistory: file })}
+              accept=".csv,.json,.xml,.txt,application/vnd.ms-excel"
+            />
           </div>
         </div>
       </Card>
