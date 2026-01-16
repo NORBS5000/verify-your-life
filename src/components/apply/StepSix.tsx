@@ -4,7 +4,7 @@ import { FormData } from "@/pages/Apply";
 import { ArrowLeft, CheckCircle2, User, Stethoscope, Landmark, Shield, Sparkles, Send, Loader2, Save } from "lucide-react";
 import { StepHeader } from "./StepHeader";
 
-interface StepFiveProps {
+interface StepSixProps {
   formData: FormData;
   prevStep: () => void;
   handleSubmit: () => void;
@@ -12,7 +12,7 @@ interface StepFiveProps {
   onSaveDraft: () => void;
 }
 
-export const StepFive = ({ formData, prevStep, handleSubmit, isSubmitting = false, onSaveDraft }: StepFiveProps) => {
+export const StepSix = ({ formData, prevStep, handleSubmit, isSubmitting = false, onSaveDraft }: StepSixProps) => {
   const sections = [
     {
       icon: <User className="h-5 w-5" />,
