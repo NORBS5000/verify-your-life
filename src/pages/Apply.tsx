@@ -157,7 +157,7 @@ const Apply = () => {
       triggerNotification("🎉 Application submitted successfully!");
       // Redirect to dashboard with phone number to show scores
       const cleanPhone = formData.phoneNumber?.replace(/[\s\-\(\)\+]/g, '') || '';
-      setTimeout(() => navigate(`/user-dashboard?phone=${encodeURIComponent(cleanPhone)}`), 1500);
+      setTimeout(() => navigate(`/my-dashboard?phone=${encodeURIComponent(cleanPhone)}`), 1500);
     } else {
       triggerNotification(submitError || "Failed to submit application. Please try again.");
     }
