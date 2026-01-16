@@ -779,7 +779,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
             <div className="mt-4 flex items-center gap-2 rounded-lg bg-amber-100 p-3">
               <AlertTriangle className="h-4 w-4 text-amber-600" />
               <p className="text-sm text-amber-700">
-                {assetsRequiringProof.length - Object.keys(proofDocuments).length} document(s) still required
+                {assetsRequiringProof.filter(asset => !proofDocuments[`${asset.detected_object_id}-${asset.requiredDoc!.type}`]).length} of {assetsRequiringProof.length} document(s) still required
               </p>
             </div>
           )}
