@@ -8,8 +8,17 @@ export const useLoanApplication = () => {
 
   // Create a draft loan application when user starts the form
   const createLoanApplication = useCallback(async (phoneNumber: string) => {
-    if (!phoneNumber) {
-      setError("Phone number is required");
+    // Normalize phone number - strip spaces, dashes, parentheses
+    const normalizedPhone = phoneNumber?.replace(/[\s\-\(\)]/g, '') || '';
+    
+    if (!normalizedPhone || normalizedPhone.length < 9) {
+      setError("Valid phone number is required");
+      return null;
+    }
+
+    // Prevent duplicate calls
+    if (isCreating) {
+      console.log('Already creating loan application, skipping...');
       return null;
     }
 
@@ -17,38 +26,45 @@ export const useLoanApplication = () => {
     setError(null);
 
     try {
-      // Check if user already has a pending/draft application with this phone number
+      console.log('Creating/fetching loan application for phone:', normalizedPhone);
+      
+      // Check if user already has a draft application with this phone number
       const { data: existingApp, error: fetchError } = await supabase
         .from("loan_applications")
-        .select("id")
-        .eq("phone_number", phoneNumber)
+        .select("id, phone_number")
+        .eq("phone_number", normalizedPhone)
         .eq("status", "draft")
         .maybeSingle();
 
       if (fetchError) {
+        console.error('Error fetching existing app:', fetchError);
         throw fetchError;
       }
 
-      // If draft exists, use that
+      // If draft exists with this phone, use it
       if (existingApp) {
+        console.log('Found existing draft application:', existingApp.id);
         setLoanId(existingApp.id);
         return existingApp.id;
       }
 
-      // Create new draft application with phone number
+      // Create new draft application with normalized phone number
+      console.log('Creating new draft application...');
       const { data: newApp, error: insertError } = await supabase
         .from("loan_applications")
         .insert({
-          phone_number: phoneNumber,
+          phone_number: normalizedPhone,
           status: "draft",
         })
         .select("id")
         .single();
 
       if (insertError) {
+        console.error('Error inserting new app:', insertError);
         throw insertError;
       }
 
+      console.log('Created new application:', newApp.id);
       setLoanId(newApp.id);
       return newApp.id;
     } catch (err: any) {
@@ -58,7 +74,7 @@ export const useLoanApplication = () => {
     } finally {
       setIsCreating(false);
     }
-  }, []);
+  }, [isCreating]);
 
   // Update loan application with partial data
   const updateLoanApplication = async (data: Record<string, any>) => {
