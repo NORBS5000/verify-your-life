@@ -264,6 +264,10 @@ export const useAssetProcessing = () => {
     });
   };
 
+  const clearCreditScore = () => {
+    setCreditScoreResult(null);
+  };
+
   const getTotalEstimatedValue = () => {
     return Object.values(processingResults)
       .flat()
@@ -288,6 +292,7 @@ export const useAssetProcessing = () => {
     submitProofOfOwnership,
     removeProcessingResult,
     clearResults,
+    clearCreditScore,
     getTotalEstimatedValue,
     getAllDetectedAssets,
   };
