@@ -71,15 +71,19 @@ const UserDashboard = () => {
     }
   };
 
-  // Calculate composite score out of 100 from individual scores
-  const compositeScore = application?.composite_score ?? 
-    Math.round(((application?.medical_needs_score ?? 60) + 
-    (application?.asset_valuation_score ?? 70) + 
-    (application?.behavior_risk_score ?? 75)) / 3);
+  // Get scores from database - from each form step:
+  // Medical Needs: score from medical step (Step 2)
+  // Asset Valuation: score from collateral step (Step 4)
+  // Behavioral Risk: score from verify step (Step 5)
+  const medicalScore = application?.medical_needs_score ?? 0;
+  const assetScore = application?.asset_valuation_score ?? 0;
+  const behaviorScore = application?.behavior_risk_score ?? 0;
 
-  const medicalScore = application?.medical_needs_score ?? 58;
-  const assetScore = application?.asset_valuation_score ?? 78;
-  const behaviorScore = application?.behavior_risk_score ?? 82;
+  // Calculate composite score from individual scores or use stored value
+  const compositeScore = application?.composite_score ?? 
+    (medicalScore + assetScore + behaviorScore > 0 
+      ? Math.round((medicalScore + assetScore + behaviorScore) / 3)
+      : 0);
 
   // Credit limit from retail_cost (estimated medical value)
   const creditLimit = application?.retail_cost ?? 0;
