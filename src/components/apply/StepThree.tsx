@@ -231,7 +231,6 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
         title="Asset Declaration"
         description="Upload photos of your assets to strengthen your loan application"
         formData={formData}
-        apiCreditScore={creditScoreResult?.credit_score ?? null}
       />
 
       {/* Hidden File Input - removed capture attribute for better desktop compatibility */}
