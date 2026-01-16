@@ -121,17 +121,16 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
   const handleProofUpload = async (assetId: number, docType: string, file: File) => {
     const key = `${assetId}-${docType}`;
     
-    // Submit to API
-    const success = await submitProofOfOwnership(assetId, file);
+    // Submit to API for verification
+    const result = await submitProofOfOwnership(assetId, file);
     
-    if (success) {
-      setProofDocuments(prev => ({ ...prev, [key]: file }));
-      const docLabels: Record<string, string> = {
-        'logbook': 'Logbook',
-        'title_deed': 'Title Deed',
-        'ownership_declaration': 'Ownership Declaration'
-      };
-      toast.success(`${docLabels[docType] || 'Document'} uploaded and verified successfully`);
+    if (result) {
+      if (result.verification_passed) {
+        setProofDocuments(prev => ({ ...prev, [key]: file }));
+        toast.success(`${result.object_name}: Ownership verified successfully!`);
+      } else {
+        toast.error(`Verification failed: ${result.verification_notes}`);
+      }
     } else {
       toast.error("Failed to upload document. Please try again.");
     }
