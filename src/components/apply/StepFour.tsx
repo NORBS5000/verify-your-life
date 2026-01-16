@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, Shield, Phone, FileText, Lock, Save, Loader2, Ch
 import { FileUploadCard } from "./FileUploadCard";
 import { StepHeader } from "./StepHeader";
 import { useBankStatementProcessing } from "@/hooks/useBankStatementProcessing";
+import { useCallLogsProcessing } from "@/hooks/useCallLogsProcessing";
 import { toast } from "sonner";
 
 interface StepFourProps {
@@ -22,7 +23,15 @@ interface StepFourProps {
 
 export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft, userId, loanId }: StepFourProps) => {
   const { isAnalyzing, analysisResult, error, analyzeBankStatement, clearAnalysisResult } = useBankStatementProcessing();
+  const { 
+    isAnalyzing: isAnalyzingCallLogs, 
+    analysisResult: callLogsResult, 
+    error: callLogsError, 
+    analyzeCallLogs, 
+    clearAnalysisResult: clearCallLogsResult 
+  } = useCallLogsProcessing();
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
+  const [hasAnalyzedCallLogs, setHasAnalyzedCallLogs] = useState(false);
 
   const handleNext = () => {
     if (formData.mpesaStatement) {
@@ -66,6 +75,25 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
         toast.success("Bank statement analyzed successfully!");
       } else {
         toast.error("Failed to analyze. Check if password is correct.");
+      }
+    }
+  };
+
+  // Auto-analyze call logs when file is uploaded
+  const handleCallLogsUpload = async (file: File | null) => {
+    updateFormData({ callLogHistory: file });
+    clearCallLogsResult();
+    setHasAnalyzedCallLogs(false);
+    
+    if (file && userId && loanId) {
+      toast.info("Analyzing call logs...", { duration: 3000 });
+      const result = await analyzeCallLogs(userId, loanId, file);
+      setHasAnalyzedCallLogs(true);
+      
+      if (result) {
+        toast.success("Call logs analyzed successfully!");
+      } else {
+        toast.error("Failed to analyze call logs. Please try again.");
       }
     }
   };
@@ -256,9 +284,77 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
               helpText="This helps us understand your communication patterns for credit assessment"
               icon={<Phone className="h-6 w-6" />}
               file={formData.callLogHistory}
-              onFileChange={(file) => updateFormData({ callLogHistory: file })}
+              onFileChange={handleCallLogsUpload}
               accept=".csv,.json,.xml,.txt,application/vnd.ms-excel"
             />
+
+            {/* Call Logs Analysis Status */}
+            {isAnalyzingCallLogs && (
+              <div className="ml-16 flex items-center gap-2 rounded-lg bg-primary/10 p-3 text-sm text-primary">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Analyzing call logs...</span>
+              </div>
+            )}
+
+            {hasAnalyzedCallLogs && callLogsResult && (
+              <div className="ml-16 rounded-lg border border-health-green/30 bg-health-green/10 p-4 space-y-3">
+                <div className="flex items-center gap-2 text-health-green">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="font-medium">Call Logs Analysis Complete</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Behavior Score:</span>
+                    <span className="ml-2 font-bold text-secondary">
+                      {callLogsResult.score.toFixed(1)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Decision:</span>
+                    <span className={`ml-2 font-medium ${
+                      callLogsResult.decision === "APPROVE" 
+                        ? "text-health-green" 
+                        : callLogsResult.decision === "REVIEW"
+                        ? "text-amber-600"
+                        : "text-destructive"
+                    }`}>
+                      {callLogsResult.decision}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Total Calls:</span>
+                    <span className="ml-2 text-foreground">
+                      {callLogsResult.details.total_all.toLocaleString()}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Observed Days:</span>
+                    <span className="ml-2 text-foreground">
+                      {callLogsResult.details.observed_days}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Avg Calls/Day:</span>
+                    <span className="ml-2 text-foreground">
+                      {callLogsResult.details.calls_per_day.toFixed(1)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Stable Contacts:</span>
+                    <span className="ml-2 text-foreground">
+                      {(callLogsResult.details.stable_contact_ratio * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {hasAnalyzedCallLogs && callLogsError && (
+              <div className="ml-16 flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+                <AlertCircle className="h-4 w-4" />
+                <span>{callLogsError}</span>
+              </div>
+            )}
           </div>
         </div>
       </Card>
