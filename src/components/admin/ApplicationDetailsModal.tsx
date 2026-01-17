@@ -113,7 +113,7 @@ const ScoreCard = ({ title, score, id }: { title: string; score: number | null; 
         gradientId={id}
         gradientColors={getScoreGradient(score)}
       >
-        <span className="text-lg font-bold">{score}</span>
+        <span className="text-lg font-bold">{score}%</span>
       </GradientCircularProgress>
       <span className="text-sm font-medium text-center">{title}</span>
     </div>
