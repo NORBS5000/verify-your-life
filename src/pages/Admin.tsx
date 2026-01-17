@@ -5,38 +5,71 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { LogOut, Loader2, Lock } from "lucide-react";
+import { LogOut, Loader2, Lock, Search, RefreshCw, Filter } from "lucide-react";
 import SecurityFooter from "@/components/SecurityFooter";
+import { ApplicationsTable } from "@/components/admin/ApplicationsTable";
+import { ApplicationDetailsModal } from "@/components/admin/ApplicationDetailsModal";
+import { StatsCards } from "@/components/admin/StatsCards";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface LoanApplication {
   id: string;
+  full_name: string | null;
   phone_number: string | null;
   profession: string | null;
   sex: string | null;
   age: number | null;
+  date_of_birth: string | null;
+  id_number: string | null;
+  tin_number: string | null;
+  has_business: boolean | null;
   composite_score: number | null;
+  medical_needs_score: number | null;
+  asset_valuation_score: number | null;
+  behavior_risk_score: number | null;
+  retail_cost: number | null;
+  cova_cost: number | null;
   status: string | null;
   created_at: string;
+  updated_at: string;
+  // Documents
+  medical_prescription_url: string | null;
+  drug_image_url: string | null;
+  bank_statement_url: string | null;
+  mpesa_statement_url: string | null;
+  call_log_url: string | null;
+  home_photo_url: string | null;
+  business_photo_url: string | null;
+  logbook_url: string | null;
+  title_deed_url: string | null;
+  asset_pictures_urls: string[] | null;
+  guarantor1_phone: string | null;
+  guarantor1_id_url: string | null;
+  guarantor2_phone: string | null;
+  guarantor2_id_url: string | null;
+  selected_collateral: string[] | null;
 }
 
 const Admin = () => {
   const navigate = useNavigate();
   const { isAdmin, checkAdminAccess } = useUserRole();
   const [applications, setApplications] = useState<LoanApplication[]>([]);
+  const [filteredApplications, setFilteredApplications] = useState<LoanApplication[]>([]);
   const [loading, setLoading] = useState(false);
   const [adminPin, setAdminPin] = useState("");
   const [showPinInput, setShowPinInput] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedApplication, setSelectedApplication] = useState<LoanApplication | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     if (isAdmin) {
@@ -44,6 +77,10 @@ const Admin = () => {
       fetchApplications();
     }
   }, [isAdmin]);
+
+  useEffect(() => {
+    filterApplications();
+  }, [applications, searchQuery, statusFilter]);
 
   const handlePinSubmit = () => {
     if (checkAdminAccess(adminPin)) {
@@ -74,23 +111,65 @@ const Admin = () => {
     }
   };
 
+  const filterApplications = () => {
+    let filtered = [...applications];
+
+    // Filter by status
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(app => app.status === statusFilter);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(app => 
+        app.full_name?.toLowerCase().includes(query) ||
+        app.phone_number?.toLowerCase().includes(query) ||
+        app.profession?.toLowerCase().includes(query) ||
+        app.id_number?.toLowerCase().includes(query)
+      );
+    }
+
+    setFilteredApplications(filtered);
+  };
+
+  const handleViewApplication = (app: LoanApplication) => {
+    setSelectedApplication(app);
+    setModalOpen(true);
+  };
+
   const handleSignOut = () => {
     navigate("/");
   };
 
-  const getStatusBadge = (status: string | null) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      pending: "secondary",
-      approved: "default",
-      rejected: "destructive",
-    };
+  // Calculate stats
+  const totalApplications = applications.length;
+  const pendingCount = applications.filter(app => app.status === "pending").length;
+  const approvedCount = applications.filter(app => app.status === "approved").length;
+  const rejectedCount = applications.filter(app => app.status === "rejected").length;
+  
+  const scoresWithValues = applications.filter(app => app.composite_score !== null);
+  const averageScore = scoresWithValues.length > 0
+    ? scoresWithValues.reduce((sum, app) => sum + (app.composite_score || 0), 0) / scoresWithValues.length
+    : null;
 
-    return (
-      <Badge variant={variants[status || "pending"] || "outline"}>
-        {status || "pending"}
-      </Badge>
-    );
-  };
+  const documentsCount = applications.reduce((count, app) => {
+    const docs = [
+      app.medical_prescription_url,
+      app.drug_image_url,
+      app.bank_statement_url,
+      app.mpesa_statement_url,
+      app.call_log_url,
+      app.home_photo_url,
+      app.business_photo_url,
+      app.logbook_url,
+      app.title_deed_url,
+      app.guarantor1_id_url,
+      app.guarantor2_id_url,
+    ].filter(Boolean).length;
+    const assetPhotos = app.asset_pictures_urls?.length || 0;
+    return count + docs + assetPhotos;
+  }, 0);
 
   // Show PIN input if not authenticated as admin
   if (showPinInput) {
@@ -135,76 +214,92 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex justify-between items-center">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background/95 to-primary/5">
+      <div className="container mx-auto p-6 space-y-6 flex-1">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <h1 className="text-3xl font-bold">Financial Institution Dashboard</h1>
             <p className="text-muted-foreground mt-1">
-              Manage loan applications
+              Review loan applications, documents, and credit analysis
             </p>
           </div>
-          <Button variant="outline" onClick={handleSignOut}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Exit
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="icon" onClick={fetchApplications}>
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" onClick={handleSignOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Exit
+            </Button>
+          </div>
         </div>
 
+        {/* Stats Cards */}
+        <StatsCards
+          totalApplications={totalApplications}
+          pendingCount={pendingCount}
+          approvedCount={approvedCount}
+          rejectedCount={rejectedCount}
+          averageScore={averageScore}
+          documentsCount={documentsCount}
+        />
+
+        {/* Filters */}
         <Card>
-          <CardHeader>
-            <CardTitle>Loan Applications</CardTitle>
-            <CardDescription>
-              View and manage all loan applications submitted by users
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Profession</TableHead>
-                    <TableHead>Age</TableHead>
-                    <TableHead>Sex</TableHead>
-                    <TableHead>Score</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {applications.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground">
-                        No applications found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    applications.map((app) => (
-                      <TableRow key={app.id}>
-                        <TableCell>
-                          {format(new Date(app.created_at), "MMM d, yyyy")}
-                        </TableCell>
-                        <TableCell>{app.phone_number || "-"}</TableCell>
-                        <TableCell>{app.profession || "-"}</TableCell>
-                        <TableCell>{app.age || "-"}</TableCell>
-                        <TableCell>{app.sex || "-"}</TableCell>
-                        <TableCell>
-                          {app.composite_score ? (
-                            <span className="font-semibold">{app.composite_score}</span>
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(app.status)}</TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, phone, profession, or ID..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
+
+        {/* Applications Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Loan Applications</span>
+              <Badge variant="outline">{filteredApplications.length} results</Badge>
+            </CardTitle>
+            <CardDescription>
+              Click on any row to view full application details, documents, and analysis
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ApplicationsTable 
+              applications={filteredApplications} 
+              onViewApplication={handleViewApplication}
+            />
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Application Details Modal */}
+      <ApplicationDetailsModal
+        application={selectedApplication}
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+      />
 
       <SecurityFooter />
     </div>
