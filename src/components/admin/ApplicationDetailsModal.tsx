@@ -358,20 +358,20 @@ export const ApplicationDetailsModal = ({ application, open, onClose }: Applicat
                   <div className="p-4 rounded-lg bg-muted/50 text-center">
                     <p className="text-xs text-muted-foreground mb-1">Retail Cost</p>
                     <p className="text-2xl font-bold">
-                      {application.retail_cost ? `TZS ${application.retail_cost.toLocaleString()}` : "-"}
+                      {application.retail_cost ? `KES ${application.retail_cost.toLocaleString()}` : "-"}
                     </p>
                   </div>
                   <div className="p-4 rounded-lg bg-primary/10 text-center">
                     <p className="text-xs text-muted-foreground mb-1">COVA Cost</p>
                     <p className="text-2xl font-bold text-primary">
-                      {application.cova_cost ? `TZS ${application.cova_cost.toLocaleString()}` : "-"}
+                      {application.cova_cost ? `KES ${application.cova_cost.toLocaleString()}` : "-"}
                     </p>
                   </div>
                   {application.retail_cost && application.cova_cost && (
                     <div className="col-span-2 p-4 rounded-lg bg-green-500/10 text-center">
                       <p className="text-xs text-muted-foreground mb-1">Potential Savings</p>
                       <p className="text-2xl font-bold text-green-600">
-                        TZS {(application.retail_cost - application.cova_cost).toLocaleString()}
+                        KES {(application.retail_cost - application.cova_cost).toLocaleString()}
                       </p>
                     </div>
                   )}
