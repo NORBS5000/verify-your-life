@@ -141,7 +141,7 @@ export const ApplicationsTable = ({ applications, onViewApplication }: Applicati
                     <div className="flex items-center justify-center gap-1">
                       <BarChart3 className={`h-3 w-3 ${getScoreColor(app.composite_score)}`} />
                       <span className={`font-semibold ${getScoreColor(app.composite_score)}`}>
-                        {app.composite_score}
+                        {app.composite_score}%
                       </span>
                     </div>
                   ) : hasScores(app) ? (
