@@ -12,6 +12,7 @@ import { ProgressBar } from "@/components/apply/ProgressBar";
 import { WhatsAppNotification } from "@/components/apply/WhatsAppNotification";
 import { useSubmitApplication } from "@/hooks/useSubmitApplication";
 import { useLoanApplication } from "@/hooks/useLoanApplication";
+import SecurityFooter from "@/components/SecurityFooter";
 
 export interface FormData {
   // Profile data
@@ -293,6 +294,8 @@ const Apply = () => {
           )}
         </div>
       </main>
+
+      <SecurityFooter />
     </div>
   );
 };

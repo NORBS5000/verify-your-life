@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { LogOut, Loader2, Lock } from "lucide-react";
+import SecurityFooter from "@/components/SecurityFooter";
 
 interface LoanApplication {
   id: string;
@@ -204,6 +205,8 @@ const Admin = () => {
           </CardContent>
         </Card>
       </div>
+
+      <SecurityFooter />
     </div>
   );
 };
