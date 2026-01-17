@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { GradientCircularProgress } from "@/components/GradientCircularProgress";
+import SecurityFooter from "@/components/SecurityFooter";
 
 interface ApplicationData {
   id: string;
@@ -457,6 +458,8 @@ const UserDashboard = () => {
           <span>Last updated: {new Date(application?.updated_at ?? Date.now()).toLocaleString()}</span>
         </div>
       </main>
+
+      <SecurityFooter />
     </div>
   );
 };

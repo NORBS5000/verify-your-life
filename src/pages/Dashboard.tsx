@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import SecurityFooter from "@/components/SecurityFooter";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -256,6 +257,8 @@ const Dashboard = () => {
           </Card>
         </div>
       )}
+
+      <SecurityFooter />
     </div>
   );
 };
