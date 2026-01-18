@@ -38,6 +38,7 @@ export const IDScanner = ({ onScanComplete, onClear }: IDScannerProps) => {
       try {
         const formData = new FormData();
         formData.append("image", file);
+        formData.append("user_id", crypto.randomUUID()); // Generate a unique user_id for this upload
 
         const response = await fetch("https://orionapisalpha.onrender.com/userid/extract", {
           method: "POST",
