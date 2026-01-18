@@ -39,7 +39,7 @@ export const IDScanner = ({ onScanComplete, onClear }: IDScannerProps) => {
         const formData = new FormData();
         formData.append("image", file);
 
-        const response = await fetch("https://orionapisalpha.onrender.com/id/analyze", {
+        const response = await fetch("https://orionapisalpha.onrender.com/userid/extract", {
           method: "POST",
           body: formData,
         });
