@@ -114,15 +114,42 @@ export const StepOne = ({ formData, updateFormData, nextStep, triggerNotificatio
               </div>
               <div>
                 <Label className="text-muted-foreground">Sex</Label>
-                <div className="mt-1 rounded-lg bg-teal-50 px-4 py-3 font-medium capitalize text-secondary">
-                  {formData.sex}
-                </div>
+                {formData.sex ? (
+                  <div className="mt-1 rounded-lg bg-teal-50 px-4 py-3 font-medium capitalize text-secondary">
+                    {formData.sex}
+                  </div>
+                ) : (
+                  <Select
+                    value={formData.sex}
+                    onValueChange={(value) => updateFormData({ sex: value })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select sex" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
               <div>
                 <Label className="text-muted-foreground">Age</Label>
-                <div className="mt-1 rounded-lg bg-teal-50 px-4 py-3 font-medium text-secondary">
-                  {formData.age} years
-                </div>
+                {formData.age ? (
+                  <div className="mt-1 rounded-lg bg-teal-50 px-4 py-3 font-medium text-secondary">
+                    {formData.age} years
+                  </div>
+                ) : (
+                  <Input
+                    type="number"
+                    placeholder="Enter your age"
+                    value={formData.age}
+                    onChange={(e) => updateFormData({ age: e.target.value })}
+                    className="mt-1"
+                    min="18"
+                    max="100"
+                  />
+                )}
               </div>
             </div>
 
