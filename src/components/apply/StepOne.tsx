@@ -25,13 +25,17 @@ export const StepOne = ({ formData, updateFormData, nextStep, triggerNotificatio
     idNumber: string;
     dateOfBirth: string;
     sex: string;
+    age?: string;
   }) => {
+    // Use the age from scanner if provided, otherwise calculate it
+    const age = data.age || (data.dateOfBirth ? calculateAge(data.dateOfBirth).toString() : "");
+    
     updateFormData({
       fullName: data.fullName,
       idNumber: data.idNumber,
       dateOfBirth: data.dateOfBirth,
       sex: data.sex,
-      age: calculateAge(data.dateOfBirth).toString(),
+      age: age,
     });
     setIdScanned(true);
     triggerNotification("🎉 Welcome! Your profile is now active.");

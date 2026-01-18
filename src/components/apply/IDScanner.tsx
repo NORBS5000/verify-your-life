@@ -9,6 +9,7 @@ interface IDScannerProps {
     idNumber: string;
     dateOfBirth: string;
     sex: string;
+    age?: string;
   }) => void;
   onClear?: () => void;
 }
@@ -52,15 +53,34 @@ export const IDScanner = ({ onScanComplete, onClear }: IDScannerProps) => {
         setScanning(false);
         setCompleted(true);
 
-        // Extract data from API response
-        const fullName = data.fields?.["Full Name"] || "";
-        const idNumber = data.fields?.["ID Number"] || data.fields?.["Passport Number"] || "";
+        // Extract data from API response - handle both 'fields' and 'extracted_fields' keys
+        const fields = data.extracted_fields || data.fields || {};
+        const fullName = fields["Full Name"] || "";
+        const idNumber = fields["ID Number"] || fields["Passport Number"] || "";
+        const dateOfBirth = fields["Date of Birth"] || "";
+        const gender = fields["Gender"] || fields["Sex"] || "";
+
+        // Calculate age from date of birth
+        let age = "";
+        if (dateOfBirth) {
+          const birthDate = new Date(dateOfBirth);
+          const today = new Date();
+          const calculatedAge = today.getFullYear() - birthDate.getFullYear();
+          // Adjust if birthday hasn't occurred this year
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age = String(calculatedAge - 1);
+          } else {
+            age = String(calculatedAge);
+          }
+        }
 
         onScanComplete({
           fullName,
           idNumber,
-          dateOfBirth: "", // API doesn't return this, user can fill manually
-          sex: "", // API doesn't return this, user can fill manually
+          dateOfBirth,
+          sex: gender,
+          age,
         });
 
         toast.success("ID analyzed successfully!");
