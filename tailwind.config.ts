@@ -71,6 +71,13 @@ export default {
           900: "hsl(var(--teal-900))",
           950: "hsl(var(--teal-950))",
         },
+        navy: {
+          50: "hsl(var(--navy-50))",
+          100: "hsl(var(--navy-100))",
+          700: "hsl(var(--navy-700))",
+          900: "hsl(var(--navy-900))",
+          950: "hsl(var(--navy-950))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

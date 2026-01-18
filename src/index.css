@@ -5,7 +5,8 @@
 @tailwind utilities;
 
 /* Medical Credit Flow Design System - "Sunrise & Security" 
-   Living Coral + Deep Teal + Warm Alabaster
+   Living Coral + Navy Blue + Warm Alabaster
+   Aligned with Checkups branding
    All colors MUST be HSL.
 */
 
@@ -13,24 +14,24 @@
   :root {
     /* Warm Alabaster Background */
     --background: 36 50% 97%;
-    --foreground: 192 100% 15%;
+    --foreground: 220 40% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 192 100% 15%;
+    --card-foreground: 220 40% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 192 100% 15%;
+    --popover-foreground: 220 40% 15%;
 
     /* Living Coral - Primary Action Color */
     --primary: 6 100% 69%;
     --primary-foreground: 0 0% 100%;
 
-    /* Deep Teal - Trust & Security */
-    --secondary: 192 100% 20%;
+    /* Navy Blue - Trust & Security (aligned with Checkups) */
+    --secondary: 220 40% 15%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 36 20% 92%;
-    --muted-foreground: 192 30% 40%;
+    --muted-foreground: 220 20% 40%;
 
     /* Coral Accent */
     --accent: 6 100% 95%;
@@ -39,7 +40,7 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 36 20% 88%;
+    --border: 220 15% 90%;
     --input: 36 20% 92%;
     --ring: 6 100% 69%;
 
@@ -48,7 +49,7 @@
     /* Health Score Colors */
     --health-orange: 28 100% 50%;
     --health-yellow: 45 93% 47%;
-    --health-green: 158 64% 52%;
+    --health-green: 160 100% 38%;
     --health-red: 0 84% 60%;
     
     /* Coral Palette */
@@ -57,53 +58,61 @@
     --coral-500: 6 100% 69%;
     --coral-600: 6 85% 55%;
     
-    /* Teal Palette */
+    /* Navy Palette (replacing Teal) */
+    --navy-50: 220 40% 97%;
+    --navy-100: 220 40% 92%;
+    --navy-700: 220 40% 30%;
+    --navy-900: 220 40% 15%;
+    --navy-950: 220 45% 10%;
+    
+    /* Teal Palette (kept for compatibility) */
     --teal-50: 168 76% 97%;
     --teal-100: 168 76% 92%;
     --teal-700: 168 76% 30%;
-    --teal-900: 192 100% 20%;
-    --teal-950: 192 100% 12%;
+    --teal-900: 220 40% 15%;
+    --teal-950: 220 45% 10%;
     
     /* Gradients */
     --gradient-coral: linear-gradient(135deg, hsl(6 100% 69%) 0%, hsl(6 100% 60%) 100%);
-    --gradient-teal: linear-gradient(135deg, hsl(192 100% 20%) 0%, hsl(192 100% 28%) 100%);
+    --gradient-navy: linear-gradient(135deg, hsl(220 40% 15%) 0%, hsl(220 40% 25%) 100%);
     --gradient-sunrise: linear-gradient(135deg, hsl(6 100% 69%) 0%, hsl(28 100% 60%) 100%);
     --gradient-card: linear-gradient(to bottom, hsl(0 0% 100%) 0%, hsl(36 30% 98%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.9) 0%, hsl(0 0% 100% / 0.7) 100%);
     
     /* Shadows */
-    --shadow-sm: 0 1px 3px 0 hsl(192 30% 20% / 0.05);
-    --shadow-md: 0 4px 12px -2px hsl(192 30% 20% / 0.08);
-    --shadow-lg: 0 8px 24px -4px hsl(192 30% 20% / 0.12);
+    --shadow-sm: 0 1px 3px 0 hsl(220 30% 20% / 0.05);
+    --shadow-md: 0 4px 12px -2px hsl(220 30% 20% / 0.08);
+    --shadow-lg: 0 8px 24px -4px hsl(220 30% 20% / 0.12);
     --shadow-coral-glow: 0 10px 25px -5px hsl(6 100% 69% / 0.4);
     --shadow-coral-glow-hover: 0 20px 30px -5px hsl(6 100% 69% / 0.5);
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 192 100% 20%;
+    --sidebar-foreground: 220 40% 15%;
+    --sidebar-primary: 220 40% 15%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 6 100% 95%;
     --sidebar-accent-foreground: 6 100% 50%;
-    --sidebar-border: 36 20% 88%;
+    --sidebar-border: 220 15% 90%;
     --sidebar-ring: 6 100% 69%;
   }
 
   .dark {
-    --background: 192 30% 8%;
+    --background: 220 30% 8%;
     --foreground: 36 50% 96%;
 
-    --card: 192 25% 12%;
+    --card: 220 25% 12%;
     --card-foreground: 36 50% 96%;
 
-    --popover: 192 25% 12%;
+    --popover: 220 25% 12%;
     --popover-foreground: 36 50% 96%;
 
     --primary: 6 100% 69%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 168 50% 25%;
+    --secondary: 220 40% 20%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 192 20% 18%;
+    --muted: 220 20% 18%;
     --muted-foreground: 36 20% 60%;
 
     --accent: 6 80% 25%;
@@ -112,23 +121,24 @@
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 192 20% 20%;
-    --input: 192 20% 18%;
+    --border: 220 20% 20%;
+    --input: 220 20% 18%;
     --ring: 6 100% 69%;
     
-    --gradient-card: linear-gradient(to bottom, hsl(192 25% 12%) 0%, hsl(192 25% 15%) 100%);
+    --gradient-card: linear-gradient(to bottom, hsl(220 25% 12%) 0%, hsl(220 25% 15%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(220 25% 15% / 0.9) 0%, hsl(220 25% 12% / 0.7) 100%);
     --shadow-sm: 0 2px 4px -1px hsl(0 0% 0% / 0.3);
     --shadow-md: 0 4px 12px -2px hsl(0 0% 0% / 0.4);
     --shadow-lg: 0 8px 24px -4px hsl(0 0% 0% / 0.5);
     --shadow-coral-glow: 0 10px 25px -5px hsl(6 100% 69% / 0.3);
     
-    --sidebar-background: 192 25% 10%;
+    --sidebar-background: 220 25% 10%;
     --sidebar-foreground: 36 50% 96%;
     --sidebar-primary: 6 100% 69%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 192 20% 18%;
+    --sidebar-accent: 220 20% 18%;
     --sidebar-accent-foreground: 6 100% 80%;
-    --sidebar-border: 192 20% 20%;
+    --sidebar-border: 220 20% 20%;
     --sidebar-ring: 6 100% 69%;
   }
 }
@@ -171,8 +181,14 @@
     background: var(--gradient-coral);
   }
   
-  .bg-gradient-teal {
-    background: var(--gradient-teal);
+  .bg-gradient-navy {
+    background: var(--gradient-navy);
+  }
+  
+  .bg-gradient-glass {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
   
   .bg-gradient-sunrise {
