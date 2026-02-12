@@ -11,8 +11,8 @@
 
 @layer base {
   :root {
-    /* Pure White Background */
-    --background: 0 0% 100%;
+    /* Warm Alabaster Background */
+    --background: 36 50% 97%;
     --foreground: 191 100% 15%;
 
     --card: 0 0% 100%;
