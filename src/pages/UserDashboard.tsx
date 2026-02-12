@@ -251,7 +251,7 @@ const UserDashboard = () => {
         </div>
 
         {/* Main Score Card - Hero Section */}
-        <Card className="relative overflow-hidden mb-6 border-0 bg-gradient-to-br from-secondary via-secondary/95 to-blue-700 shadow-lg animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <Card className="relative overflow-hidden mb-6 border-0 bg-gradient-to-br from-secondary via-secondary/95 to-teal-700 shadow-lg animate-slide-up" style={{ animationDelay: '0.1s' }}>
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
           
@@ -324,7 +324,7 @@ const UserDashboard = () => {
             <Card className="overflow-hidden border border-border/50 hover:shadow-md transition-all duration-300 animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50">
+                  <div className="flex-shrink-0 flex h-14 w-14 items-center justify-center rounded-xl bg-coral-100">
                     <Pill className="h-6 w-6 text-primary" />
                   </div>
                   
@@ -362,7 +362,7 @@ const UserDashboard = () => {
             <Card className="overflow-hidden border border-border/50 hover:shadow-md transition-all duration-300 animate-slide-up" style={{ animationDelay: '0.3s' }}>
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-100">
+                  <div className="flex-shrink-0 flex h-14 w-14 items-center justify-center rounded-xl bg-teal-100">
                     <Building className="h-6 w-6 text-secondary" />
                   </div>
                   
@@ -438,7 +438,7 @@ const UserDashboard = () => {
 
         {/* Action Buttons */}
         <div className="flex gap-3 mb-6 animate-slide-up" style={{ animationDelay: '0.5s' }}>
-          <Button className="flex-1 gap-2 h-12 shadow-blue-glow hover:shadow-blue-glow-hover transition-all" variant="default">
+          <Button className="flex-1 gap-2 h-12 shadow-coral-glow hover:shadow-coral-glow-hover transition-all" variant="default">
             <FileDown className="h-5 w-5" />
             Export Report
           </Button>

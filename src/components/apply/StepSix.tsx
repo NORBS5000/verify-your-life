@@ -66,7 +66,7 @@ export const StepSix = ({ formData, prevStep, handleSubmit, isSubmitting = false
       />
 
       {/* Credit Summary Card */}
-      <Card className="overflow-hidden border-0 bg-gradient-to-r from-primary to-blue-600 p-6 text-white shadow-blue-glow">
+      <Card className="overflow-hidden border-0 bg-gradient-to-r from-primary to-coral-600 p-6 text-white shadow-coral-glow">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm opacity-80">Requested Credit Amount</p>

@@ -58,18 +58,18 @@ export default {
           green: "hsl(var(--health-green))",
           red: "hsl(var(--health-red))",
         },
-        blue: {
-          50: "hsl(var(--blue-50))",
-          100: "hsl(var(--blue-100))",
-          400: "hsl(var(--blue-400))",
-          500: "hsl(var(--blue-500))",
-          600: "hsl(var(--blue-600))",
-          700: "hsl(var(--blue-700))",
+        coral: {
+          100: "hsl(var(--coral-100))",
+          400: "hsl(var(--coral-400))",
+          500: "hsl(var(--coral-500))",
+          600: "hsl(var(--coral-600))",
         },
-        navy: {
-          800: "hsl(var(--navy-800))",
-          900: "hsl(var(--navy-900))",
-          950: "hsl(var(--navy-950))",
+        teal: {
+          50: "hsl(var(--teal-50))",
+          100: "hsl(var(--teal-100))",
+          700: "hsl(var(--teal-700))",
+          900: "hsl(var(--teal-900))",
+          950: "hsl(var(--teal-950))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
@@ -108,9 +108,9 @@ export default {
           "0%, 100%": { transform: "translateY(0)", opacity: "0.8" },
           "50%": { transform: "translateY(100%)", opacity: "0.4" },
         },
-        "pulse-blue": {
-          "0%, 100%": { boxShadow: "0 0 0 0 hsl(217 91% 60% / 0.4)" },
-          "50%": { boxShadow: "0 0 0 15px hsl(217 91% 60% / 0)" },
+        "pulse-coral": {
+          "0%, 100%": { boxShadow: "0 0 0 0 hsl(6 100% 69% / 0.4)" },
+          "50%": { boxShadow: "0 0 0 15px hsl(6 100% 69% / 0)" },
         },
         "slide-up": {
           from: { opacity: "0", transform: "translateY(20px)" },
@@ -127,15 +127,15 @@ export default {
         "fade-in": "fade-in 0.5s ease-out",
         "scale-in": "scale-in 0.3s ease-out",
         "scan": "scan 2s ease-in-out infinite",
-        "pulse-blue": "pulse-blue 2s ease-in-out infinite",
+        "pulse-coral": "pulse-coral 2s ease-in-out infinite",
         "slide-up": "slide-up 0.4s ease-out forwards",
         "notification-pop": "notification-pop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards",
       },
       boxShadow: {
         'elegant': 'var(--shadow-md)',
         'elegant-lg': 'var(--shadow-lg)',
-        'blue-glow': 'var(--shadow-blue-glow)',
-        'blue-glow-hover': 'var(--shadow-blue-glow-hover)',
+        'coral-glow': 'var(--shadow-coral-glow)',
+        'coral-glow-hover': 'var(--shadow-coral-glow-hover)',
       },
     },
   },

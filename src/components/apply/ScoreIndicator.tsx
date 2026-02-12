@@ -39,7 +39,7 @@ const getScoreLabel = (step: number): string => {
 const getScoreColor = (score: number): string => {
   if (score >= 80) return "hsl(var(--health-green))";
   if (score >= 50) return "hsl(var(--primary))";
-  return "hsl(var(--blue-500))";
+  return "hsl(var(--coral-500))";
 };
 
 export const ScoreIndicator = ({ currentStep }: ScoreIndicatorProps) => {

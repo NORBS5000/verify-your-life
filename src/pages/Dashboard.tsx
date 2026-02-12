@@ -204,7 +204,7 @@ const Dashboard = () => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <Card className="max-w-md w-full p-4 sm:p-6 lg:p-8 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="text-center mb-4 sm:mb-6 lg:mb-8">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-blue-glow">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-glow">
                 <Activity className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-primary-foreground" />
               </div>
               <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground mb-2">Choose Your Employment Type</h3>
