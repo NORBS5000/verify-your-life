@@ -186,18 +186,17 @@ const Apply = () => {
 
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-center px-4 py-3">
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-2">
-              <img src={covaLogo} alt="Cova Logo" className="h-7 w-auto rounded object-contain" />
-              <span className="font-serif text-lg font-bold text-secondary">Request Cova Credit</span>
-            </div>
+        <div className="mx-auto flex max-w-3xl items-center px-4 py-3">
+          <img src={covaLogo} alt="Cova Logo" className="h-7 w-auto rounded object-contain" />
+          <div className="flex flex-1 flex-col items-center">
+            <span className="font-serif text-lg font-bold text-secondary">Request Cova Credit</span>
             {loanId && (
               <span className="text-xs text-muted-foreground mt-1">
                 Application ID: {loanId.slice(0, 8).toUpperCase()}
               </span>
             )}
           </div>
+          <div className="w-7" />
         </div>
       </header>
 
