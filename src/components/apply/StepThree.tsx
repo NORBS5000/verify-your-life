@@ -859,7 +859,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
 
       {/* Credit Score Indicator */}
       {assetFiles.length > 0 && (
-        <div className="rounded-xl bg-gradient-to-r from-teal-50 to-coral-100/30 p-4">
+        <div className="rounded-xl bg-gradient-to-r from-blue-50 to-accent p-4">
           <div className="flex items-center justify-between">
             <div>
               <span className="text-sm font-medium text-secondary">Estimated Credit Boost</span>
@@ -901,7 +901,7 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
         <Button
           type="button"
           onClick={handleNext}
-          className="flex-1 gap-2 bg-gradient-to-r from-primary to-coral-600 shadow-coral-glow transition-all hover:shadow-coral-glow-hover text-sm sm:text-base"
+          className="flex-1 gap-2 bg-gradient-to-r from-primary to-blue-600 shadow-blue-glow transition-all hover:shadow-blue-glow-hover text-sm sm:text-base"
         >
           <span className="sm:hidden">Continue</span>
           <span className="hidden sm:inline">Continue to Verification</span>

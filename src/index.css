@@ -4,134 +4,134 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Medical Credit Flow Design System - "Sunrise & Security" 
-   Living Coral + Deep Teal + Warm Alabaster
+/* Medical Credit Flow Design System - "Clinical Blue"
+   Deep Navy + Royal Blue + Clean White
    All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Warm Alabaster Background */
-    --background: 36 50% 97%;
-    --foreground: 174 100% 15%;
+    /* Pure White Background */
+    --background: 210 40% 98%;
+    --foreground: 222 84% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 174 100% 15%;
+    --card-foreground: 222 84% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 174 100% 15%;
+    --popover-foreground: 222 84% 11%;
 
-    /* Living Coral - Primary Action Color */
-    --primary: 6 100% 69%;
+    /* Royal Blue - Primary Action Color */
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
-    /* Deep Teal - Trust & Security */
-    --secondary: 174 100% 20%;
+    /* Deep Navy - Trust & Security */
+    --secondary: 222 84% 11%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 36 20% 92%;
-    --muted-foreground: 174 30% 40%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    /* Coral Accent */
-    --accent: 6 100% 95%;
-    --accent-foreground: 6 100% 50%;
+    /* Light Sky Blue Accent */
+    --accent: 214 100% 97%;
+    --accent-foreground: 217 91% 60%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 174 15% 90%;
-    --input: 36 20% 92%;
-    --ring: 6 100% 69%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
 
     --radius: 0.75rem;
     
     /* Health Score Colors */
     --health-orange: 28 100% 50%;
     --health-yellow: 45 93% 47%;
-    --health-green: 160 100% 38%;
+    --health-green: 170 70% 35%;
     --health-red: 0 84% 60%;
     
-    /* Coral Palette */
-    --coral-100: 6 100% 94%;
-    --coral-400: 6 100% 78%;
-    --coral-500: 6 100% 69%;
-    --coral-600: 6 85% 55%;
+    /* Blue Palette */
+    --blue-50: 214 100% 97%;
+    --blue-100: 214 95% 93%;
+    --blue-400: 217 91% 70%;
+    --blue-500: 217 91% 60%;
+    --blue-600: 217 91% 50%;
+    --blue-700: 217 91% 40%;
     
-    /* Teal Palette */
-    --teal-50: 174 76% 97%;
-    --teal-100: 174 76% 92%;
-    --teal-700: 174 76% 30%;
-    --teal-900: 174 100% 20%;
-    --teal-950: 174 100% 12%;
+    /* Navy Palette */
+    --navy-800: 222 84% 15%;
+    --navy-900: 222 84% 11%;
+    --navy-950: 222 84% 7%;
     
     /* Gradients */
-    --gradient-coral: linear-gradient(135deg, hsl(6 100% 69%) 0%, hsl(6 100% 60%) 100%);
-    --gradient-teal: linear-gradient(135deg, hsl(174 100% 20%) 0%, hsl(174 100% 28%) 100%);
-    --gradient-sunrise: linear-gradient(135deg, hsl(6 100% 69%) 0%, hsl(28 100% 60%) 100%);
-    --gradient-card: linear-gradient(to bottom, hsl(0 0% 100%) 0%, hsl(36 30% 98%) 100%);
+    --gradient-blue: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(217 91% 50%) 100%);
+    --gradient-navy: linear-gradient(135deg, hsl(222 84% 11%) 0%, hsl(222 60% 20%) 100%);
+    --gradient-sky: linear-gradient(135deg, hsl(214 100% 97%) 0%, hsl(214 95% 93%) 100%);
+    --gradient-card: linear-gradient(to bottom, hsl(0 0% 100%) 0%, hsl(210 40% 98%) 100%);
     --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.9) 0%, hsl(0 0% 100% / 0.7) 100%);
     
     /* Shadows */
-    --shadow-sm: 0 1px 3px 0 hsl(174 30% 20% / 0.05);
-    --shadow-md: 0 4px 12px -2px hsl(174 30% 20% / 0.08);
-    --shadow-lg: 0 8px 24px -4px hsl(174 30% 20% / 0.12);
-    --shadow-coral-glow: 0 10px 25px -5px hsl(6 100% 69% / 0.4);
-    --shadow-coral-glow-hover: 0 20px 30px -5px hsl(6 100% 69% / 0.5);
+    --shadow-sm: 0 1px 3px 0 hsl(222 84% 11% / 0.05);
+    --shadow-md: 0 4px 12px -2px hsl(222 84% 11% / 0.08);
+    --shadow-lg: 0 8px 24px -4px hsl(222 84% 11% / 0.12);
+    --shadow-blue-glow: 0 10px 25px -5px hsl(217 91% 60% / 0.3);
+    --shadow-blue-glow-hover: 0 20px 30px -5px hsl(217 91% 60% / 0.4);
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 174 100% 15%;
-    --sidebar-primary: 174 100% 20%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 6 100% 95%;
-    --sidebar-accent-foreground: 6 100% 50%;
-    --sidebar-border: 174 15% 90%;
-    --sidebar-ring: 6 100% 69%;
+    --sidebar-foreground: 222 84% 11%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 214 100% 97%;
+    --sidebar-accent-foreground: 217 91% 60%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 217 91% 60%;
   }
 
   .dark {
-    --background: 174 30% 8%;
-    --foreground: 36 50% 96%;
+    --background: 222 84% 5%;
+    --foreground: 210 40% 96%;
 
-    --card: 174 25% 12%;
-    --card-foreground: 36 50% 96%;
+    --card: 222 60% 10%;
+    --card-foreground: 210 40% 96%;
 
-    --popover: 174 25% 12%;
-    --popover-foreground: 36 50% 96%;
+    --popover: 222 60% 10%;
+    --popover-foreground: 210 40% 96%;
 
-    --primary: 6 100% 69%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 174 50% 25%;
+    --secondary: 217 50% 25%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 174 20% 18%;
-    --muted-foreground: 36 20% 60%;
+    --muted: 222 40% 15%;
+    --muted-foreground: 215 20% 55%;
 
-    --accent: 6 80% 25%;
-    --accent-foreground: 6 100% 80%;
+    --accent: 217 60% 20%;
+    --accent-foreground: 217 91% 75%;
 
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 174 20% 20%;
-    --input: 174 20% 18%;
-    --ring: 6 100% 69%;
+    --border: 222 30% 18%;
+    --input: 222 30% 18%;
+    --ring: 217 91% 60%;
     
-    --gradient-card: linear-gradient(to bottom, hsl(174 25% 12%) 0%, hsl(174 25% 15%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(174 25% 15% / 0.9) 0%, hsl(174 25% 12% / 0.7) 100%);
+    --gradient-card: linear-gradient(to bottom, hsl(222 60% 10%) 0%, hsl(222 60% 13%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(222 60% 13% / 0.9) 0%, hsl(222 60% 10% / 0.7) 100%);
     --shadow-sm: 0 2px 4px -1px hsl(0 0% 0% / 0.3);
     --shadow-md: 0 4px 12px -2px hsl(0 0% 0% / 0.4);
     --shadow-lg: 0 8px 24px -4px hsl(0 0% 0% / 0.5);
-    --shadow-coral-glow: 0 10px 25px -5px hsl(6 100% 69% / 0.3);
+    --shadow-blue-glow: 0 10px 25px -5px hsl(217 91% 60% / 0.3);
     
-    --sidebar-background: 174 25% 10%;
-    --sidebar-foreground: 36 50% 96%;
-    --sidebar-primary: 6 100% 69%;
+    --sidebar-background: 222 60% 8%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 174 20% 18%;
-    --sidebar-accent-foreground: 6 100% 80%;
-    --sidebar-border: 174 20% 20%;
-    --sidebar-ring: 6 100% 69%;
+    --sidebar-accent: 222 40% 15%;
+    --sidebar-accent-foreground: 217 91% 75%;
+    --sidebar-border: 222 30% 18%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
@@ -161,20 +161,20 @@
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
   
-  .shadow-coral-glow {
-    box-shadow: var(--shadow-coral-glow);
+  .shadow-blue-glow {
+    box-shadow: var(--shadow-blue-glow);
   }
   
-  .shadow-coral-glow-hover {
-    box-shadow: var(--shadow-coral-glow-hover);
+  .shadow-blue-glow-hover {
+    box-shadow: var(--shadow-blue-glow-hover);
   }
   
-  .bg-gradient-coral {
-    background: var(--gradient-coral);
+  .bg-gradient-blue {
+    background: var(--gradient-blue);
   }
   
-  .bg-gradient-teal {
-    background: var(--gradient-teal);
+  .bg-gradient-navy {
+    background: var(--gradient-navy);
   }
   
   .bg-gradient-glass {
@@ -183,16 +183,16 @@
     -webkit-backdrop-filter: blur(12px);
   }
   
-  .bg-gradient-sunrise {
-    background: var(--gradient-sunrise);
+  .bg-gradient-sky {
+    background: var(--gradient-sky);
   }
   
   .animate-scan {
     animation: scan 2s ease-in-out infinite;
   }
   
-  .animate-pulse-coral {
-    animation: pulse-coral 2s ease-in-out infinite;
+  .animate-pulse-blue {
+    animation: pulse-blue 2s ease-in-out infinite;
   }
   
   .animate-slide-up {
@@ -215,12 +215,12 @@
   }
 }
 
-@keyframes pulse-coral {
+@keyframes pulse-blue {
   0%, 100% {
-    box-shadow: 0 0 0 0 hsl(6 100% 69% / 0.4);
+    box-shadow: 0 0 0 0 hsl(217 91% 60% / 0.4);
   }
   50% {
-    box-shadow: 0 0 0 15px hsl(6 100% 69% / 0);
+    box-shadow: 0 0 0 15px hsl(217 91% 60% / 0);
   }
 }
 
