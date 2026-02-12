@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, User, Stethoscope, Landmark, Shield, ArrowLeft, Loader2 } from "lucide-react";
+import { User, Stethoscope, Landmark, Shield, ArrowLeft, Loader2, Heart } from "lucide-react";
+import covaLogo from "@/assets/cova-logo.jpeg";
 import { StepOne } from "@/components/apply/StepOne";
 import { StepTwo } from "@/components/apply/StepTwo";
 import { StepThree } from "@/components/apply/StepThree";
@@ -195,9 +196,7 @@ const Apply = () => {
           
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <Heart className="h-4 w-4 text-white" />
-              </div>
+              <img src={covaLogo} alt="Cova Logo" className="h-8 w-8 rounded-lg object-cover" />
               <span className="font-serif text-lg font-bold text-secondary">Request Cova Credit</span>
             </div>
             {loanId && (
