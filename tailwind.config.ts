@@ -109,8 +109,8 @@ export default {
           "50%": { transform: "translateY(100%)", opacity: "0.4" },
         },
         "pulse-coral": {
-          "0%, 100%": { boxShadow: "0 0 0 0 hsl(6 100% 69% / 0.4)" },
-          "50%": { boxShadow: "0 0 0 15px hsl(6 100% 69% / 0)" },
+          "0%, 100%": { boxShadow: "0 0 0 0 hsl(191 100% 20% / 0.4)" },
+          "50%": { boxShadow: "0 0 0 15px hsl(191 100% 20% / 0)" },
         },
         "slide-up": {
           from: { opacity: "0", transform: "translateY(20px)" },
