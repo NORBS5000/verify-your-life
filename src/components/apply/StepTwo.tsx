@@ -349,10 +349,10 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
 
       {/* Predicted Conditions */}
       {predictedConditions.length > 0 && showPricing && (
-        <Card className="animate-slide-up border-0 bg-gradient-to-r from-teal-50 to-cyan-50 p-4 shadow-elegant">
+        <Card className="animate-slide-up border-0 bg-gradient-to-r from-blue-50 to-accent p-4 shadow-elegant">
           <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100">
-              <Stethoscope className="h-4 w-4 text-teal-600" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100">
+              <Stethoscope className="h-4 w-4 text-primary" />
             </div>
             <div>
               <h4 className="font-semibold text-secondary">Predicted Conditions</h4>
@@ -421,8 +421,8 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
           className={`flex-1 gap-2 py-4 sm:py-2 order-1 sm:order-2 ${
             showPricing
               ? "bg-health-green hover:bg-health-green/90"
-              : "bg-gradient-to-r from-primary to-coral-600"
-          } shadow-coral-glow transition-all hover:shadow-coral-glow-hover`}
+              : "bg-gradient-to-r from-primary to-blue-600"
+          } shadow-blue-glow transition-all hover:shadow-blue-glow-hover`}
         >
           {isProcessing ? (
             <>

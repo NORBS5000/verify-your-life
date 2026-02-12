@@ -109,7 +109,7 @@ export const IDScanner = ({ onScanComplete, onClear }: IDScannerProps) => {
 
   if (completed) {
     return (
-      <div className="relative overflow-hidden rounded-2xl border-2 border-health-green bg-teal-50 p-4 transition-all duration-500">
+      <div className="relative overflow-hidden rounded-2xl border-2 border-health-green bg-blue-50 p-4 transition-all duration-500">
         <input
           ref={fileInputRef}
           type="file"
@@ -129,7 +129,7 @@ export const IDScanner = ({ onScanComplete, onClear }: IDScannerProps) => {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-teal-100">
+              <div className="flex h-full w-full items-center justify-center bg-blue-100">
                 <User className="h-16 w-16 text-health-green/50" />
               </div>
             )}
@@ -164,7 +164,7 @@ export const IDScanner = ({ onScanComplete, onClear }: IDScannerProps) => {
 
   if (scanning) {
     return (
-      <div className="relative overflow-hidden rounded-2xl border-2 border-primary bg-coral-100 p-4">
+      <div className="relative overflow-hidden rounded-2xl border-2 border-primary bg-blue-50 p-4">
         <div className="flex flex-col items-center gap-4">
           {/* ID Image Display with scanning effect */}
           <div className="relative h-40 w-full max-w-xs overflow-hidden rounded-xl border-2 border-primary shadow-lg">

@@ -85,7 +85,7 @@ const calculateProgressiveScore = (formData: FormData): number => {
 const getScoreColor = (score: number): string => {
   if (score >= 70) return "hsl(var(--health-green))";
   if (score >= 40) return "hsl(var(--primary))";
-  return "hsl(var(--coral-500))";
+  return "hsl(var(--blue-500))";
 };
 
 export const StepHeader = ({ icon, title, description, formData }: StepHeaderProps) => {
@@ -113,7 +113,7 @@ export const StepHeader = ({ icon, title, description, formData }: StepHeaderPro
 
       {/* Title Section */}
       <div className="flex-1">
-        <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-secondary to-teal-700 text-white shadow-md">
+        <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-secondary to-blue-700 text-white shadow-md">
           {icon}
         </div>
         <h1 className="font-serif text-xl font-bold text-secondary sm:text-2xl">
