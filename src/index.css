@@ -11,37 +11,37 @@
 
 @layer base {
   :root {
-    /* Warm Alabaster Background */
-    --background: 36 50% 97%;
-    --foreground: 174 100% 15%;
+    /* Dark Earth Background */
+    --background: 30 15% 10%;
+    --foreground: 36 30% 92%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 174 100% 15%;
+    --card: 30 12% 14%;
+    --card-foreground: 36 30% 92%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 174 100% 15%;
+    --popover: 30 12% 14%;
+    --popover-foreground: 36 30% 92%;
 
     /* Living Coral - Primary Action Color */
-    --primary: 6 100% 69%;
+    --primary: 12 80% 55%;
     --primary-foreground: 0 0% 100%;
 
     /* Deep Teal - Trust & Security */
-    --secondary: 174 100% 20%;
+    --secondary: 174 60% 25%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 36 20% 92%;
-    --muted-foreground: 174 30% 40%;
+    --muted: 30 10% 18%;
+    --muted-foreground: 36 15% 55%;
 
     /* Coral Accent */
-    --accent: 6 100% 95%;
-    --accent-foreground: 6 100% 50%;
+    --accent: 12 60% 20%;
+    --accent-foreground: 12 80% 70%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 174 15% 90%;
-    --input: 36 20% 92%;
-    --ring: 6 100% 69%;
+    --border: 30 10% 20%;
+    --input: 30 10% 18%;
+    --ring: 12 80% 55%;
 
     --radius: 0.75rem;
     
@@ -52,86 +52,86 @@
     --health-red: 0 84% 60%;
     
     /* Coral Palette */
-    --coral-100: 6 100% 94%;
-    --coral-400: 6 100% 78%;
-    --coral-500: 6 100% 69%;
-    --coral-600: 6 85% 55%;
+    --coral-100: 12 60% 90%;
+    --coral-400: 12 80% 65%;
+    --coral-500: 12 80% 55%;
+    --coral-600: 12 70% 45%;
     
     /* Teal Palette */
-    --teal-50: 174 76% 97%;
-    --teal-100: 174 76% 92%;
-    --teal-700: 174 76% 30%;
-    --teal-900: 174 100% 20%;
-    --teal-950: 174 100% 12%;
+    --teal-50: 174 40% 92%;
+    --teal-100: 174 40% 85%;
+    --teal-700: 174 60% 30%;
+    --teal-900: 174 60% 20%;
+    --teal-950: 174 60% 12%;
     
     /* Gradients */
-    --gradient-coral: linear-gradient(135deg, hsl(6 100% 69%) 0%, hsl(6 100% 60%) 100%);
-    --gradient-teal: linear-gradient(135deg, hsl(174 100% 20%) 0%, hsl(174 100% 28%) 100%);
-    --gradient-sunrise: linear-gradient(135deg, hsl(6 100% 69%) 0%, hsl(28 100% 60%) 100%);
-    --gradient-card: linear-gradient(to bottom, hsl(0 0% 100%) 0%, hsl(36 30% 98%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.9) 0%, hsl(0 0% 100% / 0.7) 100%);
+    --gradient-coral: linear-gradient(135deg, hsl(12 80% 55%) 0%, hsl(12 70% 45%) 100%);
+    --gradient-teal: linear-gradient(135deg, hsl(174 60% 25%) 0%, hsl(174 60% 35%) 100%);
+    --gradient-sunrise: linear-gradient(135deg, hsl(12 80% 55%) 0%, hsl(30 90% 55%) 100%);
+    --gradient-card: linear-gradient(to bottom, hsl(30 12% 14%) 0%, hsl(30 12% 16%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(30 12% 16% / 0.8) 0%, hsl(30 12% 12% / 0.6) 100%);
     
     /* Shadows */
-    --shadow-sm: 0 1px 3px 0 hsl(174 30% 20% / 0.05);
-    --shadow-md: 0 4px 12px -2px hsl(174 30% 20% / 0.08);
-    --shadow-lg: 0 8px 24px -4px hsl(174 30% 20% / 0.12);
-    --shadow-coral-glow: 0 10px 25px -5px hsl(6 100% 69% / 0.4);
-    --shadow-coral-glow-hover: 0 20px 30px -5px hsl(6 100% 69% / 0.5);
+    --shadow-sm: 0 1px 3px 0 hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 12px -2px hsl(0 0% 0% / 0.3);
+    --shadow-lg: 0 8px 24px -4px hsl(0 0% 0% / 0.4);
+    --shadow-coral-glow: 0 10px 25px -5px hsl(12 80% 55% / 0.4);
+    --shadow-coral-glow-hover: 0 20px 30px -5px hsl(12 80% 55% / 0.5);
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 174 100% 15%;
-    --sidebar-primary: 174 100% 20%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 6 100% 95%;
-    --sidebar-accent-foreground: 6 100% 50%;
-    --sidebar-border: 174 15% 90%;
-    --sidebar-ring: 6 100% 69%;
+    --sidebar-background: 30 12% 12%;
+    --sidebar-foreground: 36 30% 92%;
+    --sidebar-primary: 12 80% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 10% 18%;
+    --sidebar-accent-foreground: 12 80% 70%;
+    --sidebar-border: 30 10% 20%;
+    --sidebar-ring: 12 80% 55%;
   }
 
   .dark {
-    --background: 174 30% 8%;
-    --foreground: 36 50% 96%;
+    --background: 30 15% 6%;
+    --foreground: 36 30% 95%;
 
-    --card: 174 25% 12%;
-    --card-foreground: 36 50% 96%;
+    --card: 30 12% 10%;
+    --card-foreground: 36 30% 95%;
 
-    --popover: 174 25% 12%;
-    --popover-foreground: 36 50% 96%;
+    --popover: 30 12% 10%;
+    --popover-foreground: 36 30% 95%;
 
-    --primary: 6 100% 69%;
+    --primary: 12 80% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 174 50% 25%;
+    --secondary: 174 50% 20%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 174 20% 18%;
-    --muted-foreground: 36 20% 60%;
+    --muted: 30 10% 14%;
+    --muted-foreground: 36 15% 50%;
 
-    --accent: 6 80% 25%;
-    --accent-foreground: 6 100% 80%;
+    --accent: 12 60% 18%;
+    --accent-foreground: 12 80% 75%;
 
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 174 20% 20%;
-    --input: 174 20% 18%;
-    --ring: 6 100% 69%;
+    --border: 30 10% 16%;
+    --input: 30 10% 14%;
+    --ring: 12 80% 55%;
     
-    --gradient-card: linear-gradient(to bottom, hsl(174 25% 12%) 0%, hsl(174 25% 15%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(174 25% 15% / 0.9) 0%, hsl(174 25% 12% / 0.7) 100%);
-    --shadow-sm: 0 2px 4px -1px hsl(0 0% 0% / 0.3);
-    --shadow-md: 0 4px 12px -2px hsl(0 0% 0% / 0.4);
-    --shadow-lg: 0 8px 24px -4px hsl(0 0% 0% / 0.5);
-    --shadow-coral-glow: 0 10px 25px -5px hsl(6 100% 69% / 0.3);
+    --gradient-card: linear-gradient(to bottom, hsl(30 12% 10%) 0%, hsl(30 12% 12%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(30 12% 12% / 0.8) 0%, hsl(30 12% 8% / 0.6) 100%);
+    --shadow-sm: 0 2px 4px -1px hsl(0 0% 0% / 0.4);
+    --shadow-md: 0 4px 12px -2px hsl(0 0% 0% / 0.5);
+    --shadow-lg: 0 8px 24px -4px hsl(0 0% 0% / 0.6);
+    --shadow-coral-glow: 0 10px 25px -5px hsl(12 80% 55% / 0.3);
     
-    --sidebar-background: 174 25% 10%;
-    --sidebar-foreground: 36 50% 96%;
-    --sidebar-primary: 6 100% 69%;
+    --sidebar-background: 30 12% 8%;
+    --sidebar-foreground: 36 30% 95%;
+    --sidebar-primary: 12 80% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 174 20% 18%;
-    --sidebar-accent-foreground: 6 100% 80%;
-    --sidebar-border: 174 20% 20%;
-    --sidebar-ring: 6 100% 69%;
+    --sidebar-accent: 30 10% 14%;
+    --sidebar-accent-foreground: 12 80% 75%;
+    --sidebar-border: 30 10% 16%;
+    --sidebar-ring: 12 80% 55%;
   }
 }
 
@@ -217,10 +217,10 @@
 
 @keyframes pulse-coral {
   0%, 100% {
-    box-shadow: 0 0 0 0 hsl(6 100% 69% / 0.4);
+    box-shadow: 0 0 0 0 hsl(12 80% 55% / 0.4);
   }
   50% {
-    box-shadow: 0 0 0 15px hsl(6 100% 69% / 0);
+    box-shadow: 0 0 0 15px hsl(12 80% 55% / 0);
   }
 }
 
