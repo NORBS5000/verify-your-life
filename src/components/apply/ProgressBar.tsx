@@ -43,7 +43,9 @@ export const ProgressBar = ({ currentStep, totalSteps, steps }: ProgressBarProps
                 </div>
                 <span
                   className={`mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium transition-colors text-center max-w-[50px] sm:max-w-none ${
-                    isCompleted || isCurrent
+                    isCurrent
+                      ? "text-coral-500"
+                      : isCompleted
                       ? "text-secondary"
                       : "text-muted-foreground"
                   }`}
