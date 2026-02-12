@@ -198,7 +198,7 @@ const Apply = () => {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <Heart className="h-4 w-4 text-white" />
               </div>
-              <span className="font-serif text-lg font-bold text-secondary">COVA Credit</span>
+              <span className="font-serif text-lg font-bold text-secondary">Request Cova Credit</span>
             </div>
             {loanId && (
               <span className="text-xs text-muted-foreground mt-1">
