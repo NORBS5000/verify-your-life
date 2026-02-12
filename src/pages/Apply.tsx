@@ -186,14 +186,7 @@ const Apply = () => {
 
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-          <button
-            onClick={() => navigate("/")}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-white"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          
+        <div className="mx-auto flex max-w-3xl items-center justify-center px-4 py-3">
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-2">
               <img src={covaLogo} alt="Cova Logo" className="h-7 w-auto rounded object-contain" />
@@ -205,8 +198,6 @@ const Apply = () => {
               </span>
             )}
           </div>
-          
-          <div className="w-10" /> {/* Spacer for balance */}
         </div>
       </header>
 
