@@ -196,7 +196,7 @@ const Apply = () => {
           
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-2">
-              <img src={covaLogo} alt="Cova Logo" className="h-8 w-8 rounded-lg object-cover" />
+              <img src={covaLogo} alt="Cova Logo" className="h-7 w-auto rounded object-contain" />
               <span className="font-serif text-lg font-bold text-secondary">Request Cova Credit</span>
             </div>
             {loanId && (
