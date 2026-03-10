@@ -24,6 +24,8 @@ import {
   XCircle,
   Loader2,
   Image as ImageIcon,
+  Pill,
+  Stethoscope,
 } from "lucide-react";
 import { format } from "date-fns";
 import { GradientCircularProgress } from "@/components/GradientCircularProgress";
