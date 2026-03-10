@@ -145,6 +145,12 @@ export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUp
 
   if (!application) return null;
 
+  const medicalData = application.medical_analysis_data as any;
+  const allMedItems = medicalData ? [
+    ...(medicalData.prescriptionItems || []),
+    ...(medicalData.medicationItems || []),
+  ] : [];
+
   const getStatusColor = (status: string | null) => {
     switch (status) {
       case "approved": return "default";
