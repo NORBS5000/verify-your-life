@@ -106,14 +106,9 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, onMedi
               className="text-sm"
               min={1}
             />
-            <Input
-              type="number"
-              value={editValues.unitPrice}
-              onChange={(e) => setEditValues((v) => ({ ...v, unitPrice: Number(e.target.value) || 0 }))}
-              placeholder="Unit price (KES)"
-              className="text-sm"
-              min={0}
-            />
+            <div className="flex items-center text-xs text-muted-foreground px-3">
+              Price: KES {editValues.unitPrice.toLocaleString()} (auto)
+            </div>
           </div>
           <div className="flex justify-end gap-2">
             <Button size="sm" variant="ghost" onClick={cancelEdit} className="h-7 gap-1 text-xs">
@@ -278,14 +273,9 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, onMedi
               className="text-sm"
               min={1}
             />
-            <Input
-              type="number"
-              value={newItem.unitPrice}
-              onChange={(e) => setNewItem((v) => ({ ...v, unitPrice: Number(e.target.value) || 0 }))}
-              placeholder="Unit price (KES)"
-              className="text-sm"
-              min={0}
-            />
+            <div className="flex items-center text-xs text-muted-foreground px-3">
+              Price set by analysis
+            </div>
           </div>
           <div className="flex justify-end gap-2">
             <Button size="sm" variant="ghost" onClick={() => setShowAddForm(false)} className="h-7 gap-1 text-xs">
