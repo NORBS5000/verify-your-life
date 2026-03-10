@@ -199,7 +199,7 @@ export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUp
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-3">
@@ -234,7 +234,7 @@ export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUp
           </div>
         </DialogHeader>
 
-        <Tabs defaultValue="profile" className="flex-1 min-h-0 flex flex-col">
+        <Tabs defaultValue="profile">
           <TabsList className="grid grid-cols-4 w-full">
             <TabsTrigger value="profile" className="gap-2">
               <User className="h-4 w-4" />
@@ -254,7 +254,7 @@ export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUp
             </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="flex-1 mt-4">
+          <div className="mt-4">
             {/* Profile Tab */}
             <TabsContent value="profile" className="m-0 space-y-4">
               <Card>
@@ -604,7 +604,7 @@ export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUp
                 </CardContent>
               </Card>
             </TabsContent>
-          </ScrollArea>
+          </div>
         </Tabs>
       </DialogContent>
     </Dialog>
