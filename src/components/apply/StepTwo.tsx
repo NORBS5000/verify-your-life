@@ -9,6 +9,7 @@ import { PriceComparison } from "./PriceComparison";
 import { StepHeader } from "./StepHeader";
 import { MedicationList, MedicationItem } from "./MedicationList";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface StepTwoProps {
   formData: FormData;
@@ -66,6 +67,45 @@ interface MedicalNeedsResponse {
   predicted_conditions: string[];
   medicines_info: MedicineInfo[];
 }
+
+// Helper to generate medicine images in background
+const generateMedicineImages = async (
+  medications: MedicationItem[],
+  setItems: React.Dispatch<React.SetStateAction<MedicationItem[]>>
+) => {
+  const drugItems = medications.filter((m) => m.type === "medication");
+  
+  // Generate images in parallel (max 3 at a time)
+  const results = await Promise.allSettled(
+    drugItems.map(async (item) => {
+      try {
+        const { data, error } = await supabase.functions.invoke("generate-medicine-image", {
+          body: { drugName: item.name },
+        });
+        if (error || !data?.imageUrl) return null;
+        return { name: item.name, imageUrl: data.imageUrl };
+      } catch {
+        return null;
+      }
+    })
+  );
+
+  const imageMap = new Map<string, string>();
+  results.forEach((r) => {
+    if (r.status === "fulfilled" && r.value) {
+      imageMap.set(r.value.name, r.value.imageUrl);
+    }
+  });
+
+  if (imageMap.size > 0) {
+    setItems((prev) =>
+      prev.map((item) => ({
+        ...item,
+        imageUrl: imageMap.get(item.name) || item.imageUrl,
+      }))
+    );
+  }
+};
 
 export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepTwoProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -142,6 +182,9 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       setPrescriptionItems(medications);
       setPrescriptionAnalyzed(true);
 
+      // Generate images for medications in background
+      generateMedicineImages(medications, setPrescriptionItems);
+
       // Calculate totals
       const prescriptionTotal = data.total_estimated_price_all_files;
       const existingMedicationTotal = medicationItems.reduce(
@@ -217,6 +260,9 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
 
       setMedicationItems(medications);
       setMedicationsAnalyzed(true);
+
+      // Generate images for medications in background
+      generateMedicineImages(medications, setMedicationItems);
       setPredictedConditions(data.predicted_conditions);
 
       // Calculate totals - add to existing prescription costs if any
