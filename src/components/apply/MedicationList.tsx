@@ -218,6 +218,23 @@ export const MedicationList = ({ medications, show }: MedicationListProps) => {
           </div>
         </DialogContent>
       </Dialog>
+      {/* Image Preview Dialog */}
+      <Dialog open={!!previewImage} onOpenChange={(open) => !open && setPreviewImage(null)}>
+        <DialogContent className="flex items-center justify-center sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center font-serif">{previewImage?.name}</DialogTitle>
+          </DialogHeader>
+          {previewImage && (
+            <div className="flex justify-center p-4">
+              <img
+                src={previewImage.url}
+                alt={previewImage.name}
+                className="max-h-[60vh] w-auto rounded-xl object-contain"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
