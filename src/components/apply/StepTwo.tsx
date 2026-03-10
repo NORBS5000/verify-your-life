@@ -495,7 +495,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       )}
 
       {/* Extracted Medications List */}
-      <MedicationList medications={extractedItems} show={showPricing} />
+      <MedicationList medications={extractedItems} show={showPricing} prescriptionMetadata={prescriptionMetadata} />
 
       {/* Price Comparison */}
       <PriceComparison
