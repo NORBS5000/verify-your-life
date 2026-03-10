@@ -22,14 +22,28 @@ interface StepTwoProps {
 interface PrescriptionDrug {
   drug_name: string;
   manufacturer: string;
+  dosage_instruction: string;
+  tablets_per_day: number;
+  duration_days: number;
+  estimated_price_per_tablet_ksh: number;
+  total_tablets: number;
+  estimated_total_price: number;
+}
+
+interface PrescriptionTest {
+  test_name: string;
   estimated_price: number;
 }
 
 interface PrescriptionFile {
   file_id: string;
   file_name: string;
+  patient_name: string;
+  prescription_date: string;
+  hospital_or_pharmacy_name: string;
+  doctor_or_nurse_name: string;
   drugs: PrescriptionDrug[];
-  tests: string[];
+  tests: PrescriptionTest[];
   file_total_estimated_price: number;
   file_url: string;
 }
