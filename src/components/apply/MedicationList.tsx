@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -7,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Pill, FlaskConical, CheckCircle2 } from "lucide-react";
+import { Pill, FlaskConical, CheckCircle2, Pencil, Check, X, Plus, Trash2 } from "lucide-react";
 
 export interface MedicationItem {
   name: string;
@@ -29,14 +31,147 @@ interface MedicationListProps {
   medications: MedicationItem[];
   show: boolean;
   prescriptionMetadata?: PrescriptionMetadata | null;
+  onMedicationsChange?: (medications: MedicationItem[]) => void;
 }
 
-export const MedicationList = ({ medications, show, prescriptionMetadata }: MedicationListProps) => {
+export const MedicationList = ({ medications, show, prescriptionMetadata, onMedicationsChange }: MedicationListProps) => {
   const [previewImage, setPreviewImage] = useState<{ url: string; name: string } | null>(null);
-  if (!show || medications.length === 0) return null;
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editValues, setEditValues] = useState<{ name: string; dosage: string; quantity: number; unitPrice: number }>({ name: "", dosage: "", quantity: 1, unitPrice: 0 });
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newItem, setNewItem] = useState<{ name: string; dosage: string; quantity: number; unitPrice: number; type: "medication" | "test" }>({
+    name: "", dosage: "", quantity: 1, unitPrice: 0, type: "medication",
+  });
 
+  if (!show || medications.length === 0 && !showAddForm) return null;
+
+  const editable = !!onMedicationsChange;
   const medicationItems = medications.filter((m) => m.type === "medication");
   const testItems = medications.filter((m) => m.type === "test");
+
+  const startEdit = (index: number) => {
+    const item = medications[index];
+    setEditValues({ name: item.name, dosage: item.dosage, quantity: item.quantity, unitPrice: item.unitPrice });
+    setEditingIndex(index);
+  };
+
+  const saveEdit = () => {
+    if (editingIndex === null || !onMedicationsChange) return;
+    const updated = [...medications];
+    updated[editingIndex] = { ...updated[editingIndex], ...editValues };
+    onMedicationsChange(updated);
+    setEditingIndex(null);
+  };
+
+  const cancelEdit = () => setEditingIndex(null);
+
+  const deleteItem = (index: number) => {
+    if (!onMedicationsChange) return;
+    onMedicationsChange(medications.filter((_, i) => i !== index));
+  };
+
+  const addNewItem = () => {
+    if (!onMedicationsChange || !newItem.name.trim()) return;
+    onMedicationsChange([...medications, { ...newItem, name: newItem.name.trim(), dosage: newItem.dosage.trim() }]);
+    setNewItem({ name: "", dosage: "", quantity: 1, unitPrice: 0, type: "medication" });
+    setShowAddForm(false);
+  };
+
+  const renderItem = (item: MedicationItem, index: number, globalIndex: number) => {
+    const isEditing = editingIndex === globalIndex;
+
+    if (isEditing) {
+      return (
+        <div key={globalIndex} className="rounded-lg border-2 border-primary/30 bg-primary/5 p-3 space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              value={editValues.name}
+              onChange={(e) => setEditValues((v) => ({ ...v, name: e.target.value }))}
+              placeholder="Medicine name"
+              className="text-sm"
+            />
+            <Input
+              value={editValues.dosage}
+              onChange={(e) => setEditValues((v) => ({ ...v, dosage: e.target.value }))}
+              placeholder="Dosage"
+              className="text-sm"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              type="number"
+              value={editValues.quantity}
+              onChange={(e) => setEditValues((v) => ({ ...v, quantity: Number(e.target.value) || 1 }))}
+              placeholder="Quantity"
+              className="text-sm"
+              min={1}
+            />
+            <Input
+              type="number"
+              value={editValues.unitPrice}
+              onChange={(e) => setEditValues((v) => ({ ...v, unitPrice: Number(e.target.value) || 0 }))}
+              placeholder="Unit price (KES)"
+              className="text-sm"
+              min={0}
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button size="sm" variant="ghost" onClick={cancelEdit} className="h-7 gap-1 text-xs">
+              <X className="h-3 w-3" /> Cancel
+            </Button>
+            <Button size="sm" onClick={saveEdit} className="h-7 gap-1 text-xs">
+              <Check className="h-3 w-3" /> Save
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div key={globalIndex} className="group flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
+        <div className="flex items-center gap-3">
+          {item.imageUrl ? (
+            <div
+              className="h-10 w-10 cursor-pointer overflow-hidden rounded-full bg-muted ring-2 ring-transparent transition-all hover:ring-primary"
+              onClick={() => setPreviewImage({ url: item.imageUrl!, name: item.name })}
+            >
+              <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+            </div>
+          ) : (
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+              {item.type === "test" ? <FlaskConical className="h-5 w-5 text-accent" /> : <Pill className="h-5 w-5 text-primary" />}
+            </div>
+          )}
+          <div>
+            <p className="text-sm font-medium text-secondary">{item.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {item.dosage}{item.type === "medication" && ` • Qty: ${item.quantity}`}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="text-right">
+            <p className="text-sm font-semibold text-secondary">
+              KES {(item.unitPrice * item.quantity).toLocaleString()}
+            </p>
+            {item.type === "medication" && (
+              <p className="text-xs text-muted-foreground">@ KES {item.unitPrice.toLocaleString()} each</p>
+            )}
+          </div>
+          {editable && (
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => startEdit(globalIndex)}>
+                <Pencil className="h-3 w-3" />
+              </Button>
+              <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => deleteItem(globalIndex)}>
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <Card className="animate-slide-up border-0 bg-card p-5 shadow-elegant">
@@ -94,82 +229,85 @@ export const MedicationList = ({ medications, show, prescriptionMetadata }: Medi
         </div>
       )}
 
-      {/* Medications Section */}
-      {medicationItems.length > 0 && (
-        <div>
-          <div className="mb-2 flex items-center gap-2">
-            <Pill className="h-4 w-4 text-primary" />
-            <h4 className="text-sm font-semibold text-secondary">Medications</h4>
+      {/* All items rendered in order */}
+      <div className="space-y-2">
+        {medications.map((item, index) => renderItem(item, index, index))}
+      </div>
+
+      {/* Add Medicine Form */}
+      {editable && showAddForm && (
+        <div className="mt-3 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 p-3 space-y-2">
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant={newItem.type === "medication" ? "default" : "outline"}
+              className="h-7 text-xs"
+              onClick={() => setNewItem((v) => ({ ...v, type: "medication" }))}
+            >
+              <Pill className="h-3 w-3 mr-1" /> Medicine
+            </Button>
+            <Button
+              size="sm"
+              variant={newItem.type === "test" ? "default" : "outline"}
+              className="h-7 text-xs"
+              onClick={() => setNewItem((v) => ({ ...v, type: "test" }))}
+            >
+              <FlaskConical className="h-3 w-3 mr-1" /> Test
+            </Button>
           </div>
-          <div className="space-y-2">
-            {medicationItems.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3"
-              >
-                <div className="flex items-center gap-3">
-                  {item.imageUrl ? (
-                    <div
-                      className="h-10 w-10 cursor-pointer overflow-hidden rounded-full bg-muted ring-2 ring-transparent transition-all hover:ring-primary"
-                      onClick={() => setPreviewImage({ url: item.imageUrl!, name: item.name })}
-                    >
-                      <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
-                    </div>
-                  ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                      <Pill className="h-5 w-5 text-primary" />
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm font-medium text-secondary">{item.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {item.dosage} • Qty: {item.quantity}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-secondary">
-                    KES {(item.unitPrice * item.quantity).toLocaleString()}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    @ KES {item.unitPrice.toLocaleString()} each
-                  </p>
-                </div>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              value={newItem.name}
+              onChange={(e) => setNewItem((v) => ({ ...v, name: e.target.value }))}
+              placeholder="Medicine name"
+              className="text-sm"
+            />
+            <Input
+              value={newItem.dosage}
+              onChange={(e) => setNewItem((v) => ({ ...v, dosage: e.target.value }))}
+              placeholder="Dosage"
+              className="text-sm"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              type="number"
+              value={newItem.quantity}
+              onChange={(e) => setNewItem((v) => ({ ...v, quantity: Number(e.target.value) || 1 }))}
+              placeholder="Quantity"
+              className="text-sm"
+              min={1}
+            />
+            <Input
+              type="number"
+              value={newItem.unitPrice}
+              onChange={(e) => setNewItem((v) => ({ ...v, unitPrice: Number(e.target.value) || 0 }))}
+              placeholder="Unit price (KES)"
+              className="text-sm"
+              min={0}
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button size="sm" variant="ghost" onClick={() => setShowAddForm(false)} className="h-7 gap-1 text-xs">
+              <X className="h-3 w-3" /> Cancel
+            </Button>
+            <Button size="sm" onClick={addNewItem} disabled={!newItem.name.trim()} className="h-7 gap-1 text-xs">
+              <Plus className="h-3 w-3" /> Add
+            </Button>
           </div>
         </div>
       )}
 
-      {/* Tests Section */}
-      {testItems.length > 0 && (
-        <div className="mt-4">
-          <div className="mb-2 flex items-center gap-2">
-            <FlaskConical className="h-4 w-4 text-accent" />
-            <h4 className="text-sm font-semibold text-secondary">Lab Tests</h4>
-          </div>
-          <div className="space-y-2">
-            {testItems.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
-                    <FlaskConical className="h-5 w-5 text-accent" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-secondary">{item.name}</p>
-                    <p className="text-xs text-muted-foreground">{item.dosage}</p>
-                  </div>
-                </div>
-                <p className="text-sm font-semibold text-secondary">
-                  KES {item.unitPrice.toLocaleString()}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Add Button */}
+      {editable && !showAddForm && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-3 w-full gap-1.5 border-dashed text-muted-foreground hover:text-foreground"
+          onClick={() => setShowAddForm(true)}
+        >
+          <Plus className="h-4 w-4" /> Add Medicine Manually
+        </Button>
       )}
 
       {/* Total Summary */}
