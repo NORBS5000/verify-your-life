@@ -234,7 +234,7 @@ export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUp
           </div>
         </DialogHeader>
 
-        <Tabs defaultValue="profile" className="flex-1 overflow-hidden flex flex-col">
+        <Tabs defaultValue="profile" className="flex-1 min-h-0 flex flex-col">
           <TabsList className="grid grid-cols-4 w-full">
             <TabsTrigger value="profile" className="gap-2">
               <User className="h-4 w-4" />
