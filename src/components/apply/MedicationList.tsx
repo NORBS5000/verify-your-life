@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Pill, FlaskConical, CheckCircle2, Pencil, Check, X, Plus, Trash2 } from "lucide-react";
+import { Pill, FlaskConical, CheckCircle2, Pencil, Check, X, Plus, Trash2, AlertCircle, Clock } from "lucide-react";
 
 export interface MedicationItem {
   name: string;
