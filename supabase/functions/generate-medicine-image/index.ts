@@ -44,43 +44,22 @@ Deno.serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI Gateway error:", errorText);
+      console.error("AI Gateway error:", response.status, errorText);
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limit exceeded, please try again later." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       throw new Error(`AI Gateway error: ${response.status}`);
     }
 
-    const responseText = await response.text();
-    console.log("Response keys preview:", responseText.slice(0, 200));
-    
-    const data = JSON.parse(responseText);
+    const data = await response.json();
     const choice = data.choices?.[0]?.message;
-    
-    // Log the message keys to understand structure
-    console.log("Message keys:", choice ? Object.keys(choice).join(", ") : "no choice");
-    
-    // Try multiple possible response formats
-    let imageUrl = 
-      choice?.images?.[0]?.image_url?.url ||
-      choice?.image_url?.url ||
-      null;
-    
-    // Check for inline_data in parts (Gemini format)
-    if (!imageUrl && choice?.parts) {
-      const imagePart = choice.parts.find((p: any) => p.inline_data?.mime_type?.startsWith('image/'));
-      if (imagePart) {
-        imageUrl = `data:${imagePart.inline_data.mime_type};base64,${imagePart.inline_data.data}`;
-      }
-    }
-    
-    // Check content array format
-    if (!imageUrl && Array.isArray(choice?.content)) {
-      const imgContent = choice.content.find((c: any) => c.type === 'image_url' || c.image_url);
-      if (imgContent) {
-        imageUrl = imgContent.image_url?.url || imgContent.url;
-      }
-    }
+    const imageUrl = choice?.images?.[0]?.image_url?.url;
 
     if (!imageUrl) {
-      console.error("Message structure:", JSON.stringify(choice ? Object.keys(choice) : data).slice(0, 500));
+      console.error("No image in response. Keys:", choice ? Object.keys(choice).join(", ") : "no choice");
       throw new Error("No image generated");
     }
 
