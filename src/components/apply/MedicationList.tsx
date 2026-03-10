@@ -31,7 +31,7 @@ interface MedicationListProps {
   prescriptionMetadata?: PrescriptionMetadata | null;
 }
 
-export const MedicationList = ({ medications, show }: MedicationListProps) => {
+export const MedicationList = ({ medications, show, prescriptionMetadata }: MedicationListProps) => {
   const [previewImage, setPreviewImage] = useState<{ url: string; name: string } | null>(null);
   if (!show || medications.length === 0) return null;
 
