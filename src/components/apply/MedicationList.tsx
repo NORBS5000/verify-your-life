@@ -144,10 +144,23 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
             </div>
           )}
           <div>
-            <p className="text-sm font-medium text-secondary">{item.name}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-medium text-secondary">{item.name}</p>
+              {item.isChronic !== undefined && (
+                <Badge variant={item.isChronic ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0 h-4">
+                  {item.isChronic ? "Chronic" : "Acute"}
+                </Badge>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">
               {item.dosage}{item.type === "medication" && ` • Qty: ${item.quantity}`}
+              {item.treatmentDuration && ` • ${item.treatmentDuration}`}
             </p>
+            {item.medicalConditions && item.medicalConditions.length > 0 && (
+              <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">
+                {item.medicalConditions.slice(0, 3).join(", ")}
+              </p>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
