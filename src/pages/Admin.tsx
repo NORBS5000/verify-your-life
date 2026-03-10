@@ -299,6 +299,7 @@ const Admin = () => {
         application={selectedApplication}
         open={modalOpen}
         onClose={() => setModalOpen(false)}
+        onStatusUpdate={fetchApplications}
       />
 
       <SecurityFooter />
