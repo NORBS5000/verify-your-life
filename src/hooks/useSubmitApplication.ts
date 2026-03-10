@@ -207,6 +207,33 @@ export function useSubmitApplication() {
           formData.behaviorRiskScore,
           formData.bankStatementCreditScore
         ),
+        // Store detailed analysis data as JSON
+        medical_analysis_data: {
+          prescriptionItems: (formData.prescriptionItems || []).map((item: any) => ({
+            name: item.name,
+            dosage: item.dosage,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            type: item.type,
+            medicalConditions: item.medicalConditions || [],
+            isChronic: item.isChronic || false,
+            treatmentDuration: item.treatmentDuration || null,
+          })),
+          medicationItems: (formData.medicationItems || []).map((item: any) => ({
+            name: item.name,
+            dosage: item.dosage,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            type: item.type,
+            medicalConditions: item.medicalConditions || [],
+            isChronic: item.isChronic || false,
+            treatmentDuration: item.treatmentDuration || null,
+          })),
+          predictedConditions: formData.predictedConditions || [],
+          consultationCost: formData.consultationCost || 0,
+          retailCost: formData.retailCost || 0,
+          covaCost: formData.covaCost || 0,
+        },
         status: "pending",
       };
 
