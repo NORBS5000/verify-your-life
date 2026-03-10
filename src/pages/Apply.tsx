@@ -62,6 +62,7 @@ export interface FormData {
   predictedConditions: string[];
   prescriptionAnalyzed: boolean;
   medicationsAnalyzed: boolean;
+  consultationCost: number;
 }
 
 const steps = [
