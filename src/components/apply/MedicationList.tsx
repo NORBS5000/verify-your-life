@@ -31,6 +31,7 @@ interface MedicationListProps {
   medications: MedicationItem[];
   show: boolean;
   prescriptionMetadata?: PrescriptionMetadata | null;
+  consultationCost?: number;
   onMedicationsChange?: (medications: MedicationItem[]) => void;
 }
 
