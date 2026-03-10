@@ -143,6 +143,9 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       setPrescriptionItems(medications);
       setPrescriptionAnalyzed(true);
 
+      // Generate images for medications in background
+      generateMedicineImages(medications, setPrescriptionItems);
+
       // Calculate totals
       const prescriptionTotal = data.total_estimated_price_all_files;
       const existingMedicationTotal = medicationItems.reduce(
