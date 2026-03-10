@@ -70,12 +70,24 @@ interface MedicalNeedsResponse {
 export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepTwoProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isAnalyzingPrescription, setIsAnalyzingPrescription] = useState(false);
-  const [showPricing, setShowPricing] = useState(false);
-  const [prescriptionItems, setPrescriptionItems] = useState<MedicationItem[]>([]);
-  const [medicationItems, setMedicationItems] = useState<MedicationItem[]>([]);
-  const [predictedConditions, setPredictedConditions] = useState<string[]>([]);
-  const [prescriptionAnalyzed, setPrescriptionAnalyzed] = useState(false);
-  const [medicationsAnalyzed, setMedicationsAnalyzed] = useState(false);
+  const [showPricing, setShowPricing] = useState(() => 
+    formData.prescriptionAnalyzed || formData.medicationsAnalyzed
+  );
+  const [prescriptionItems, setPrescriptionItems] = useState<MedicationItem[]>(
+    () => (formData.prescriptionItems as MedicationItem[]) || []
+  );
+  const [medicationItems, setMedicationItems] = useState<MedicationItem[]>(
+    () => (formData.medicationItems as MedicationItem[]) || []
+  );
+  const [predictedConditions, setPredictedConditions] = useState<string[]>(
+    () => formData.predictedConditions || []
+  );
+  const [prescriptionAnalyzed, setPrescriptionAnalyzed] = useState(
+    () => formData.prescriptionAnalyzed || false
+  );
+  const [medicationsAnalyzed, setMedicationsAnalyzed] = useState(
+    () => formData.medicationsAnalyzed || false
+  );
 
   // Combined extracted items from both sources
   const extractedItems = [...prescriptionItems, ...medicationItems];
