@@ -399,7 +399,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         0
       );
       const totalRetail = medicationTotal + existingPrescriptionTotal + totalConsultationCost + consultationCost;
-      const covaCost = Math.round(totalRetail * 0.8);
+      const covaCost = Math.round(totalRetail * 0.9);
 
       const medicalNeedsScore = Math.min(100, Math.round(
         (data.predicted_conditions.length * 15) + 
