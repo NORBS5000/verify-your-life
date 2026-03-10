@@ -37,6 +37,8 @@ interface LoanApplication {
   asset_pictures_urls: string[] | null;
   guarantor1_id_url: string | null;
   guarantor2_id_url: string | null;
+  medical_analysis_data: any | null;
+  asset_analysis_data: any | null;
 }
 
 interface ApplicationsTableProps {
