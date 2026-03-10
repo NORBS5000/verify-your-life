@@ -365,6 +365,12 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
                   setMedicationsAnalyzed(false);
                   setMedicationItems([]);
                   setPredictedConditions([]);
+                  updateFormData({ 
+                    drugImages: files,
+                    medicationsAnalyzed: false,
+                    medicationItems: [],
+                    predictedConditions: [],
+                  });
                   if (!prescriptionAnalyzed) {
                     setShowPricing(false);
                   }
