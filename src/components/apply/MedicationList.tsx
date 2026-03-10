@@ -18,6 +18,11 @@ export interface MedicationItem {
   unitPrice: number;
   type: "medication" | "test";
   imageUrl?: string;
+  isChronic?: boolean;
+  medicalConditions?: string[];
+  treatmentDuration?: string;
+  consultationNeeded?: boolean;
+  consultationCost?: number;
 }
 
 export interface PrescriptionMetadata {
