@@ -118,6 +118,12 @@ const Apply = () => {
     behaviorRiskScore: null,
     bankStatementCreditScore: null,
     totalAssetValue: null,
+    // Persisted analysis results for Step 2
+    prescriptionItems: [],
+    medicationItems: [],
+    predictedConditions: [],
+    prescriptionAnalyzed: false,
+    medicationsAnalyzed: false,
   });
 
   const updateFormData = useCallback((data: Partial<FormData>) => {
