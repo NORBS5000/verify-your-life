@@ -125,6 +125,12 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
   const [prescriptionAnalyzed, setPrescriptionAnalyzed] = useState(
     () => formData.prescriptionAnalyzed || false
   );
+  const [prescriptionMetadata, setPrescriptionMetadata] = useState<{
+    patientName: string;
+    prescriptionDate: string;
+    hospitalName: string;
+    doctorName: string;
+  } | null>(null);
   const [medicationsAnalyzed, setMedicationsAnalyzed] = useState(
     () => formData.medicationsAnalyzed || false
   );
