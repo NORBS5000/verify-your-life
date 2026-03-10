@@ -315,7 +315,11 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
                   // Analyze prescription when uploaded
                   handlePrescriptionAnalyze(file);
                 } else {
-                  updateFormData({ medicalPrescription: null });
+                  updateFormData({ 
+                    medicalPrescription: null,
+                    prescriptionAnalyzed: false,
+                    prescriptionItems: [],
+                  });
                   setPrescriptionAnalyzed(false);
                   setPrescriptionItems([]);
                   if (!medicationsAnalyzed) {
