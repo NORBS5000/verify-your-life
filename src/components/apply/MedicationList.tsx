@@ -32,8 +32,7 @@ export const MedicationList = ({ medications, show }: MedicationListProps) => {
 
   const medicationItems = medications.filter((m) => m.type === "medication");
   const testItems = medications.filter((m) => m.type === "test");
-  const displayItems = medications.slice(0, 3);
-  const remainingCount = medications.length - 3;
+  const displayItems = medications;
 
   return (
     <Card className="animate-slide-up border-0 bg-card p-5 shadow-elegant">
