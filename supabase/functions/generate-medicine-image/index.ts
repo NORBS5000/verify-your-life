@@ -33,6 +33,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: "google/gemini-3.1-flash-image-preview",
+        modalities: ["image", "text"],
         messages: [
           {
             role: "user",
