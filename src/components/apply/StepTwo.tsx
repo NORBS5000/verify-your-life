@@ -70,12 +70,24 @@ interface MedicalNeedsResponse {
 export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepTwoProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isAnalyzingPrescription, setIsAnalyzingPrescription] = useState(false);
-  const [showPricing, setShowPricing] = useState(false);
-  const [prescriptionItems, setPrescriptionItems] = useState<MedicationItem[]>([]);
-  const [medicationItems, setMedicationItems] = useState<MedicationItem[]>([]);
-  const [predictedConditions, setPredictedConditions] = useState<string[]>([]);
-  const [prescriptionAnalyzed, setPrescriptionAnalyzed] = useState(false);
-  const [medicationsAnalyzed, setMedicationsAnalyzed] = useState(false);
+  const [showPricing, setShowPricing] = useState(() => 
+    formData.prescriptionAnalyzed || formData.medicationsAnalyzed
+  );
+  const [prescriptionItems, setPrescriptionItems] = useState<MedicationItem[]>(
+    () => (formData.prescriptionItems as MedicationItem[]) || []
+  );
+  const [medicationItems, setMedicationItems] = useState<MedicationItem[]>(
+    () => (formData.medicationItems as MedicationItem[]) || []
+  );
+  const [predictedConditions, setPredictedConditions] = useState<string[]>(
+    () => formData.predictedConditions || []
+  );
+  const [prescriptionAnalyzed, setPrescriptionAnalyzed] = useState(
+    () => formData.prescriptionAnalyzed || false
+  );
+  const [medicationsAnalyzed, setMedicationsAnalyzed] = useState(
+    () => formData.medicationsAnalyzed || false
+  );
 
   // Combined extracted items from both sources
   const extractedItems = [...prescriptionItems, ...medicationItems];
@@ -151,6 +163,8 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         retailCost: totalRetail,
         covaCost: covaCost,
         medicalNeedsScore: medicalNeedsScore,
+        prescriptionItems: medications,
+        prescriptionAnalyzed: true,
       });
       
       setShowPricing(true);
@@ -228,6 +242,9 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         retailCost: totalRetail,
         covaCost: covaCost,
         medicalNeedsScore: medicalNeedsScore,
+        medicationItems: medications,
+        medicationsAnalyzed: true,
+        predictedConditions: data.predicted_conditions,
       });
       setShowPricing(true);
       toast.success("Medication analyzed successfully!");
@@ -298,7 +315,11 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
                   // Analyze prescription when uploaded
                   handlePrescriptionAnalyze(file);
                 } else {
-                  updateFormData({ medicalPrescription: null });
+                  updateFormData({ 
+                    medicalPrescription: null,
+                    prescriptionAnalyzed: false,
+                    prescriptionItems: [],
+                  });
                   setPrescriptionAnalyzed(false);
                   setPrescriptionItems([]);
                   if (!medicationsAnalyzed) {
@@ -344,6 +365,12 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
                   setMedicationsAnalyzed(false);
                   setMedicationItems([]);
                   setPredictedConditions([]);
+                  updateFormData({ 
+                    drugImages: files,
+                    medicationsAnalyzed: false,
+                    medicationItems: [],
+                    predictedConditions: [],
+                  });
                   if (!prescriptionAnalyzed) {
                     setShowPricing(false);
                   }

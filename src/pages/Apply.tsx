@@ -56,6 +56,12 @@ export interface FormData {
   behaviorRiskScore: number | null;
   bankStatementCreditScore: number | null;
   totalAssetValue: number | null;
+  // Persisted analysis results for Step 2
+  prescriptionItems: any[];
+  medicationItems: any[];
+  predictedConditions: string[];
+  prescriptionAnalyzed: boolean;
+  medicationsAnalyzed: boolean;
 }
 
 const steps = [
@@ -112,6 +118,12 @@ const Apply = () => {
     behaviorRiskScore: null,
     bankStatementCreditScore: null,
     totalAssetValue: null,
+    // Persisted analysis results for Step 2
+    prescriptionItems: [],
+    medicationItems: [],
+    predictedConditions: [],
+    prescriptionAnalyzed: false,
+    medicationsAnalyzed: false,
   });
 
   const updateFormData = useCallback((data: Partial<FormData>) => {
