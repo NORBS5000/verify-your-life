@@ -27,7 +27,7 @@ interface MedicationListProps {
 
 export const MedicationList = ({ medications, show }: MedicationListProps) => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const [previewImage, setPreviewImage] = useState<{ url: string; name: string } | null>(null);
   if (!show || medications.length === 0) return null;
 
   const medicationItems = medications.filter((m) => m.type === "medication");
@@ -67,7 +67,10 @@ export const MedicationList = ({ medications, show }: MedicationListProps) => {
           >
             <div className="flex items-center gap-3">
               {item.type === "medication" && item.imageUrl ? (
-                <div className="h-8 w-8 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-8 w-8 cursor-pointer overflow-hidden rounded-full bg-muted ring-2 ring-transparent transition-all hover:ring-primary"
+                  onClick={(e) => { e.stopPropagation(); setPreviewImage({ url: item.imageUrl!, name: item.name }); }}
+                >
                   <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
                 </div>
               ) : (
@@ -137,7 +140,10 @@ export const MedicationList = ({ medications, show }: MedicationListProps) => {
                   >
                       <div className="flex items-center gap-3">
                         {item.imageUrl ? (
-                          <div className="h-10 w-10 overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-10 w-10 cursor-pointer overflow-hidden rounded-full bg-muted ring-2 ring-transparent transition-all hover:ring-primary"
+                            onClick={() => setPreviewImage({ url: item.imageUrl!, name: item.name })}
+                          >
                             <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
                           </div>
                         ) : (
@@ -210,6 +216,23 @@ export const MedicationList = ({ medications, show }: MedicationListProps) => {
               </span>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+      {/* Image Preview Dialog */}
+      <Dialog open={!!previewImage} onOpenChange={(open) => !open && setPreviewImage(null)}>
+        <DialogContent className="flex items-center justify-center sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center font-serif">{previewImage?.name}</DialogTitle>
+          </DialogHeader>
+          {previewImage && (
+            <div className="flex justify-center p-4">
+              <img
+                src={previewImage.url}
+                alt={previewImage.name}
+                className="max-h-[60vh] w-auto rounded-xl object-contain"
+              />
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </Card>
