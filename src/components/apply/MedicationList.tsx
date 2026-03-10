@@ -18,9 +18,17 @@ export interface MedicationItem {
   imageUrl?: string;
 }
 
+export interface PrescriptionMetadata {
+  patientName: string;
+  prescriptionDate: string;
+  hospitalName: string;
+  doctorName: string;
+}
+
 interface MedicationListProps {
   medications: MedicationItem[];
   show: boolean;
+  prescriptionMetadata?: PrescriptionMetadata | null;
 }
 
 export const MedicationList = ({ medications, show }: MedicationListProps) => {
