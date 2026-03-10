@@ -56,6 +56,8 @@ interface LoanApplication {
   guarantor2_phone: string | null;
   guarantor2_id_url: string | null;
   selected_collateral: string[] | null;
+  medical_analysis_data: any | null;
+  asset_analysis_data: any | null;
 }
 
 const Admin = () => {
