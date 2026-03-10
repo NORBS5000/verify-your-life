@@ -67,7 +67,10 @@ export const MedicationList = ({ medications, show }: MedicationListProps) => {
           >
             <div className="flex items-center gap-3">
               {item.type === "medication" && item.imageUrl ? (
-                <div className="h-8 w-8 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-8 w-8 cursor-pointer overflow-hidden rounded-full bg-muted ring-2 ring-transparent transition-all hover:ring-primary"
+                  onClick={(e) => { e.stopPropagation(); setPreviewImage({ url: item.imageUrl!, name: item.name }); }}
+                >
                   <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
                 </div>
               ) : (
