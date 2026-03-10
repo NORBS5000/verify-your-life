@@ -32,27 +32,34 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        model: "google/gemini-3.1-flash-image-preview",
         messages: [
           {
             role: "user",
             content: `Generate a hyper-realistic, high-resolution pharmacy product photo of the real medication "${drugName}". Show the actual branded commercial packaging — the box, blister pack, bottle, or tube — exactly as it would appear on a pharmacy shelf. Include the real manufacturer's branding, logo, dosage info, and packaging colors. The image should look like a professional product photograph taken for an online pharmacy catalog. Solid white background, studio lighting, no watermarks or text overlays.`,
           },
         ],
-        modalities: ["image", "text"],
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI Gateway error:", errorText);
+      console.error("AI Gateway error:", response.status, errorText);
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limit exceeded, please try again later." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       throw new Error(`AI Gateway error: ${response.status}`);
     }
 
     const data = await response.json();
-    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    const choice = data.choices?.[0]?.message;
+    const imageUrl = choice?.images?.[0]?.image_url?.url;
 
     if (!imageUrl) {
+      console.error("No image in response. Keys:", choice ? Object.keys(choice).join(", ") : "no choice");
       throw new Error("No image generated");
     }
 
