@@ -32,14 +32,13 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        model: "google/gemini-3.1-flash-image-preview",
         messages: [
           {
             role: "user",
             content: `Generate a hyper-realistic, high-resolution pharmacy product photo of the real medication "${drugName}". Show the actual branded commercial packaging — the box, blister pack, bottle, or tube — exactly as it would appear on a pharmacy shelf. Include the real manufacturer's branding, logo, dosage info, and packaging colors. The image should look like a professional product photograph taken for an online pharmacy catalog. Solid white background, studio lighting, no watermarks or text overlays.`,
           },
         ],
-        modalities: ["image", "text"],
       }),
     });
 
