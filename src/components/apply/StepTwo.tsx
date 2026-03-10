@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import type { FormData } from "@/pages/Apply";
 import { ArrowLeft, ArrowRight, Pill, Loader2, Stethoscope, Save, FileText, CheckCircle } from "lucide-react";
 import { FileUploadCard } from "./FileUploadCard";
