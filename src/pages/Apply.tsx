@@ -62,6 +62,7 @@ export interface FormData {
   predictedConditions: string[];
   prescriptionAnalyzed: boolean;
   medicationsAnalyzed: boolean;
+  consultationCost: number;
 }
 
 const steps = [
@@ -124,6 +125,7 @@ const Apply = () => {
     predictedConditions: [],
     prescriptionAnalyzed: false,
     medicationsAnalyzed: false,
+    consultationCost: 0,
   });
 
   const updateFormData = useCallback((data: Partial<FormData>) => {

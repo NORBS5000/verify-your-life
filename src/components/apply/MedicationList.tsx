@@ -31,10 +31,11 @@ interface MedicationListProps {
   medications: MedicationItem[];
   show: boolean;
   prescriptionMetadata?: PrescriptionMetadata | null;
+  consultationCost?: number;
   onMedicationsChange?: (medications: MedicationItem[]) => void;
 }
 
-export const MedicationList = ({ medications, show, prescriptionMetadata, onMedicationsChange }: MedicationListProps) => {
+export const MedicationList = ({ medications, show, prescriptionMetadata, consultationCost = 0, onMedicationsChange }: MedicationListProps) => {
   const [previewImage, setPreviewImage] = useState<{ url: string; name: string } | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValues, setEditValues] = useState<{ name: string; dosage: string; quantity: number; unitPrice: number }>({ name: "", dosage: "", quantity: 1, unitPrice: 0 });
@@ -301,13 +302,30 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, onMedi
       )}
 
       {/* Total Summary */}
-      <div className="mt-4 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 p-4">
+      <div className="mt-4 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 p-4 space-y-2">
         <div className="flex items-center justify-between">
-          <span className="font-medium text-secondary">Total Retail Cost</span>
-          <span className="text-lg font-bold text-secondary">
+          <span className="text-sm text-muted-foreground">Medications & Tests</span>
+          <span className="text-sm font-medium text-secondary">
             KES{" "}
             {medications
               .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
+              .toLocaleString()}
+          </span>
+        </div>
+        {consultationCost > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Consultation Fee</span>
+            <span className="text-sm font-medium text-secondary">
+              KES {consultationCost.toLocaleString()}
+            </span>
+          </div>
+        )}
+        <div className="flex items-center justify-between border-t border-border pt-2">
+          <span className="font-medium text-secondary">Total Retail Cost</span>
+          <span className="text-lg font-bold text-secondary">
+            KES{" "}
+            {(medications
+              .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0) + consultationCost)
               .toLocaleString()}
           </span>
         </div>
