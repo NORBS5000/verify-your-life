@@ -179,7 +179,16 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         });
       });
 
+      // Extract prescription metadata from first file
+      const prescriptionMeta = data.files.length > 0 ? {
+        patientName: data.files[0].patient_name,
+        prescriptionDate: data.files[0].prescription_date,
+        hospitalName: data.files[0].hospital_or_pharmacy_name,
+        doctorName: data.files[0].doctor_or_nurse_name,
+      } : null;
+
       setPrescriptionItems(medications);
+      setPrescriptionMetadata(prescriptionMeta);
       setPrescriptionAnalyzed(true);
 
       // Generate images for medications in background
