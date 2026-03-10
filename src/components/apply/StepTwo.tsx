@@ -609,6 +609,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         medications={extractedItems}
         show={showPricing}
         prescriptionMetadata={prescriptionMetadata}
+        consultationCost={consultationCost}
         onMedicationsChange={(updated) => {
           // Split back into prescription and medication items
           const newPrescriptionItems = updated.slice(0, prescriptionItems.length);
@@ -617,7 +618,8 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
           setMedicationItems(newMedicationItems);
 
           // Recalculate totals
-          const totalRetail = updated.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+          const itemsTotal = updated.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+          const totalRetail = itemsTotal + consultationCost;
           const covaCost = Math.round(totalRetail * 0.8);
           const medicalNeedsScore = Math.min(100, Math.round(
             (updated.filter(i => i.type === "medication").length * 15) +
