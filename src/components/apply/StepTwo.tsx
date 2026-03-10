@@ -22,14 +22,28 @@ interface StepTwoProps {
 interface PrescriptionDrug {
   drug_name: string;
   manufacturer: string;
+  dosage_instruction: string;
+  tablets_per_day: number;
+  duration_days: number;
+  estimated_price_per_tablet_ksh: number;
+  total_tablets: number;
+  estimated_total_price: number;
+}
+
+interface PrescriptionTest {
+  test_name: string;
   estimated_price: number;
 }
 
 interface PrescriptionFile {
   file_id: string;
   file_name: string;
+  patient_name: string;
+  prescription_date: string;
+  hospital_or_pharmacy_name: string;
+  doctor_or_nurse_name: string;
   drugs: PrescriptionDrug[];
-  tests: string[];
+  tests: PrescriptionTest[];
   file_total_estimated_price: number;
   file_url: string;
 }
@@ -95,10 +109,20 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         fileData.drugs.forEach((drug) => {
           medications.push({
             name: drug.drug_name,
-            dosage: drug.manufacturer !== "N/A" ? drug.manufacturer : "",
-            quantity: 1,
-            unitPrice: drug.estimated_price,
+            dosage: drug.dosage_instruction || drug.manufacturer,
+            quantity: drug.total_tablets || 1,
+            unitPrice: drug.estimated_price_per_tablet_ksh,
             type: "medication" as const,
+          });
+        });
+
+        fileData.tests.forEach((test) => {
+          medications.push({
+            name: test.test_name,
+            dosage: "",
+            quantity: 1,
+            unitPrice: test.estimated_price,
+            type: "test" as const,
           });
         });
       });
@@ -106,7 +130,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       setPrescriptionItems(medications);
       setPrescriptionAnalyzed(true);
 
-      // Calculate totals - add to existing medication costs if any
+      // Calculate totals
       const prescriptionTotal = data.total_estimated_price_all_files;
       const existingMedicationTotal = medicationItems.reduce(
         (sum, item) => sum + (item.unitPrice * item.quantity),
