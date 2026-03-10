@@ -135,10 +135,16 @@ export const MedicationList = ({ medications, show }: MedicationListProps) => {
                     key={index}
                     className="flex items-center justify-between rounded-lg border border-border bg-card p-3"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                        <Pill className="h-5 w-5 text-primary" />
-                      </div>
+                      <div className="flex items-center gap-3">
+                        {item.imageUrl ? (
+                          <div className="h-10 w-10 overflow-hidden rounded-full bg-muted">
+                            <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                            <Pill className="h-5 w-5 text-primary" />
+                          </div>
+                        )}
                       <div>
                         <p className="font-medium text-secondary">{item.name}</p>
                         <p className="text-sm text-muted-foreground">
