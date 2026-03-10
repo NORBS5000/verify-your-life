@@ -641,6 +641,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         retailPrice={formData.retailCost}
         covaPrice={formData.covaCost}
         show={showPricing}
+        consultationCost={consultationCost}
       />
 
       {/* Navigation */}
