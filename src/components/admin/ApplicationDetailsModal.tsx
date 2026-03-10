@@ -416,6 +416,89 @@ export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUp
                 </CardContent>
               </Card>
 
+              {/* Medical Analysis - Step 2 Data */}
+              {medicalData && (
+                <>
+                  {/* Predicted Conditions */}
+                  {medicalData.predictedConditions?.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          Predicted Conditions
+                          {allMedItems.some((m: any) => m.isChronic) && (
+                            <Badge variant="destructive" className="text-xs">Chronic</Badge>
+                          )}
+                          {allMedItems.some((m: any) => m.isChronic === false) && (
+                            <Badge variant="secondary" className="text-xs">Acute</Badge>
+                          )}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2">
+                          {medicalData.predictedConditions.map((condition: string, idx: number) => (
+                            <Badge key={idx} variant="outline" className="text-sm">{condition}</Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Medications & Tests List */}
+                  {allMedItems.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">
+                          Medications & Tests ({allMedItems.length})
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {allMedItems.map((item: any, idx: number) => (
+                            <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <Pill className="h-4 w-4 text-muted-foreground" />
+                                  <span className="font-medium text-sm">{item.name}</span>
+                                  <Badge variant="outline" className="text-xs">
+                                    {item.type === "test" ? "Test" : "Drug"}
+                                  </Badge>
+                                </div>
+                                {item.dosage && (
+                                  <p className="text-xs text-muted-foreground ml-6 mt-1">{item.dosage}</p>
+                                )}
+                                {item.treatmentDuration && (
+                                  <p className="text-xs text-muted-foreground ml-6">Duration: {item.treatmentDuration}</p>
+                                )}
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-semibold">
+                                  KES {(item.unitPrice * item.quantity).toLocaleString()}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {item.quantity} × KES {item.unitPrice?.toLocaleString()}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                          {medicalData.consultationCost > 0 && (
+                            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                              <div className="flex items-center gap-2">
+                                <Stethoscope className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium text-sm">Consultation Fee</span>
+                              </div>
+                              <p className="text-sm font-semibold">
+                                KES {medicalData.consultationCost.toLocaleString()}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              )}
+
+              {/* Cost Analysis */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Cost Analysis</CardTitle>
@@ -443,6 +526,36 @@ export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUp
                   )}
                 </CardContent>
               </Card>
+
+              {/* Asset Analysis - Step 3 Data */}
+              {assetPhotos.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Asset Photos & Valuation ({assetPhotos.length})</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                      {assetPhotos.map((url, idx) => (
+                        <a
+                          key={idx}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="aspect-square rounded-lg overflow-hidden border border-border hover:border-primary transition-colors"
+                        >
+                          <img src={url} alt={`Asset ${idx + 1}`} className="w-full h-full object-cover" />
+                        </a>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {!medicalData && assetPhotos.length === 0 && !application.composite_score && (
+                <p className="text-muted-foreground text-sm text-center py-4">
+                  No detailed analysis data available. This application may have been submitted before analysis tracking was enabled.
+                </p>
+              )}
             </TabsContent>
 
             {/* Guarantors Tab */}
