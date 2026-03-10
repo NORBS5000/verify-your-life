@@ -604,7 +604,7 @@ export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUp
                 </CardContent>
               </Card>
             </TabsContent>
-          </ScrollArea>
+          </div>
         </Tabs>
       </DialogContent>
     </Dialog>
