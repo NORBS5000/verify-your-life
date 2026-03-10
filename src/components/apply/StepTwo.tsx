@@ -106,11 +106,9 @@ const fetchPricingForMedications = async (
         if (!response.ok) throw new Error("Pricing API failed");
         const data: PricingAnalysisResponse = await response.json();
 
-        // Get the medication price from the response
-        const medPrices = data.pricing_ksh.medications;
-        const priceKey = Object.keys(medPrices)[0];
-        const totalMedPrice = priceKey ? medPrices[priceKey] : item.unitPrice * item.quantity;
-        const unitPrice = item.quantity > 0 ? Math.round(totalMedPrice / item.quantity) : totalMedPrice;
+        // Use total_cost from the API as the authoritative total for this drug
+        const apiTotalCost = data.pricing_ksh.total_cost || 0;
+        const unitPrice = item.quantity > 0 ? Math.round(apiTotalCost / item.quantity) : apiTotalCost;
 
         // Update test prices if any
         const testPrices = data.pricing_ksh.tests;
