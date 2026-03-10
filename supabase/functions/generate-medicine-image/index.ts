@@ -49,9 +49,19 @@ Deno.serve(async (req) => {
     }
 
     const data = await response.json();
-    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    console.log("AI Gateway response structure:", JSON.stringify(data).slice(0, 500));
+    
+    // Try multiple possible response formats for image data
+    const choice = data.choices?.[0]?.message;
+    const imageUrl = 
+      choice?.images?.[0]?.image_url?.url ||  // images array format
+      choice?.image_url?.url ||                // direct image_url format
+      (choice?.content && typeof choice.content === 'string' && choice.content.startsWith('data:') ? choice.content : null) || // base64 in content
+      data.images?.[0]?.url ||                 // top-level images
+      null;
 
     if (!imageUrl) {
+      console.error("Could not extract image from response:", JSON.stringify(data).slice(0, 1000));
       throw new Error("No image generated");
     }
 
