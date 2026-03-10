@@ -48,20 +48,39 @@ Deno.serve(async (req) => {
       throw new Error(`AI Gateway error: ${response.status}`);
     }
 
-    const data = await response.json();
-    console.log("AI Gateway response structure:", JSON.stringify(data).slice(0, 500));
+    const responseText = await response.text();
+    console.log("Response keys preview:", responseText.slice(0, 200));
     
-    // Try multiple possible response formats for image data
+    const data = JSON.parse(responseText);
     const choice = data.choices?.[0]?.message;
-    const imageUrl = 
-      choice?.images?.[0]?.image_url?.url ||  // images array format
-      choice?.image_url?.url ||                // direct image_url format
-      (choice?.content && typeof choice.content === 'string' && choice.content.startsWith('data:') ? choice.content : null) || // base64 in content
-      data.images?.[0]?.url ||                 // top-level images
+    
+    // Log the message keys to understand structure
+    console.log("Message keys:", choice ? Object.keys(choice).join(", ") : "no choice");
+    
+    // Try multiple possible response formats
+    let imageUrl = 
+      choice?.images?.[0]?.image_url?.url ||
+      choice?.image_url?.url ||
       null;
+    
+    // Check for inline_data in parts (Gemini format)
+    if (!imageUrl && choice?.parts) {
+      const imagePart = choice.parts.find((p: any) => p.inline_data?.mime_type?.startsWith('image/'));
+      if (imagePart) {
+        imageUrl = `data:${imagePart.inline_data.mime_type};base64,${imagePart.inline_data.data}`;
+      }
+    }
+    
+    // Check content array format
+    if (!imageUrl && Array.isArray(choice?.content)) {
+      const imgContent = choice.content.find((c: any) => c.type === 'image_url' || c.image_url);
+      if (imgContent) {
+        imageUrl = imgContent.image_url?.url || imgContent.url;
+      }
+    }
 
     if (!imageUrl) {
-      console.error("Could not extract image from response:", JSON.stringify(data).slice(0, 1000));
+      console.error("Message structure:", JSON.stringify(choice ? Object.keys(choice) : data).slice(0, 500));
       throw new Error("No image generated");
     }
 
