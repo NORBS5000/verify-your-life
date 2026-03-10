@@ -35,7 +35,7 @@ interface MedicationListProps {
   onMedicationsChange?: (medications: MedicationItem[]) => void;
 }
 
-export const MedicationList = ({ medications, show, prescriptionMetadata, onMedicationsChange }: MedicationListProps) => {
+export const MedicationList = ({ medications, show, prescriptionMetadata, consultationCost = 0, onMedicationsChange }: MedicationListProps) => {
   const [previewImage, setPreviewImage] = useState<{ url: string; name: string } | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValues, setEditValues] = useState<{ name: string; dosage: string; quantity: number; unitPrice: number }>({ name: "", dosage: "", quantity: 1, unitPrice: 0 });
