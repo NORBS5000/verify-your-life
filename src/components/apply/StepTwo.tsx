@@ -384,9 +384,10 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
 
       // Fetch real pricing from the pricing API
       toast.info("Fetching medication pricing...");
-      const pricedMedications = await fetchPricingForMedications(medications);
+      const { items: pricedMedications, totalConsultationCost } = await fetchPricingForMedications(medications);
 
       setMedicationItems(pricedMedications);
+      setConsultationCost(prev => prev + totalConsultationCost);
 
       // Calculate totals with priced data
       const medicationTotal = pricedMedications.reduce(
@@ -397,7 +398,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         (sum, item) => sum + (item.unitPrice * item.quantity),
         0
       );
-      const totalRetail = medicationTotal + existingPrescriptionTotal;
+      const totalRetail = medicationTotal + existingPrescriptionTotal + totalConsultationCost + consultationCost;
       const covaCost = Math.round(totalRetail * 0.8);
 
       const medicalNeedsScore = Math.min(100, Math.round(
@@ -414,6 +415,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         medicationItems: pricedMedications,
         medicationsAnalyzed: true,
         predictedConditions: data.predicted_conditions,
+        consultationCost: consultationCost + totalConsultationCost,
       });
       setShowPricing(true);
       toast.success("Medication analyzed successfully!");
