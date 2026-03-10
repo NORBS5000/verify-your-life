@@ -108,11 +108,6 @@ export const MedicationList = ({ medications, show }: MedicationListProps) => {
           >
             <Eye className="h-4 w-4" />
             View All Details
-            {remainingCount > 0 && (
-              <Badge variant="outline" className="ml-1">
-                +{remainingCount} more
-              </Badge>
-            )}
           </Button>
         </DialogTrigger>
         <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">
