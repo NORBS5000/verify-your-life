@@ -32,8 +32,7 @@ export const MedicationList = ({ medications, show }: MedicationListProps) => {
 
   const medicationItems = medications.filter((m) => m.type === "medication");
   const testItems = medications.filter((m) => m.type === "test");
-  const displayItems = medications.slice(0, 3);
-  const remainingCount = medications.length - 3;
+  const displayItems = medications;
 
   return (
     <Card className="animate-slide-up border-0 bg-card p-5 shadow-elegant">
@@ -109,11 +108,6 @@ export const MedicationList = ({ medications, show }: MedicationListProps) => {
           >
             <Eye className="h-4 w-4" />
             View All Details
-            {remainingCount > 0 && (
-              <Badge variant="outline" className="ml-1">
-                +{remainingCount} more
-              </Badge>
-            )}
           </Button>
         </DialogTrigger>
         <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">
