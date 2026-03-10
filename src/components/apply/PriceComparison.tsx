@@ -1,16 +1,17 @@
-import { TrendingDown, Shield, Sparkles } from "lucide-react";
+import { TrendingDown, Shield, Sparkles, Stethoscope } from "lucide-react";
 
 interface PriceComparisonProps {
   retailPrice: number;
   covaPrice: number;
   show: boolean;
+  consultationCost?: number;
 }
 
-export const PriceComparison = ({ retailPrice, covaPrice, show }: PriceComparisonProps) => {
+export const PriceComparison = ({ retailPrice, covaPrice, show, consultationCost = 0 }: PriceComparisonProps) => {
   if (!show) return null;
 
   const savings = retailPrice - covaPrice;
-  const savingsPercent = Math.round((savings / retailPrice) * 100);
+  const savingsPercent = retailPrice > 0 ? Math.round((savings / retailPrice) * 100) : 0;
 
   return (
     <div className="animate-slide-up rounded-2xl border border-health-green/30 bg-gradient-to-br from-teal-50 to-white p-6 shadow-elegant">
@@ -21,11 +22,22 @@ export const PriceComparison = ({ retailPrice, covaPrice, show }: PriceCompariso
 
       <div className="space-y-4">
         {/* Retail Price - Crossed Out */}
-        <div className="flex items-center justify-between rounded-lg bg-destructive/5 p-3">
-          <span className="text-sm text-muted-foreground">Retail Cost</span>
-          <span className="text-lg font-medium text-destructive line-through">
-            KES {retailPrice.toLocaleString()}
-          </span>
+        <div className="rounded-lg bg-destructive/5 p-3 space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Retail Cost</span>
+            <span className="text-lg font-medium text-destructive line-through">
+              KES {retailPrice.toLocaleString()}
+            </span>
+          </div>
+          {consultationCost > 0 && (
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Stethoscope className="h-3 w-3" />
+                Incl. consultation fee
+              </span>
+              <span>KES {consultationCost.toLocaleString()}</span>
+            </div>
+          )}
         </div>
 
         {/* COVA Price - Highlighted */}
