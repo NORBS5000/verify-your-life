@@ -433,10 +433,10 @@ export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUp
                       <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
                           Predicted Conditions
-                          {allMedItems.some((m: any) => m.isChronic) && (
+                          {allMedItems.some((m: any) => m.isChronic === true) && (
                             <Badge variant="destructive" className="text-xs">Chronic</Badge>
                           )}
-                          {allMedItems.some((m: any) => m.isChronic === false) && (
+                          {allMedItems.length > 0 && !allMedItems.some((m: any) => m.isChronic === true) && allMedItems.some((m: any) => m.isChronic !== undefined && m.isChronic !== null) && (
                             <Badge variant="secondary" className="text-xs">Acute</Badge>
                           )}
                         </CardTitle>
