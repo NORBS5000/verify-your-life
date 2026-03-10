@@ -254,7 +254,7 @@ export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUp
             </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="flex-1 mt-4">
+          <div className="mt-4">
             {/* Profile Tab */}
             <TabsContent value="profile" className="m-0 space-y-4">
               <Card>
