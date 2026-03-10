@@ -18,12 +18,20 @@ export interface MedicationItem {
   imageUrl?: string;
 }
 
+export interface PrescriptionMetadata {
+  patientName: string;
+  prescriptionDate: string;
+  hospitalName: string;
+  doctorName: string;
+}
+
 interface MedicationListProps {
   medications: MedicationItem[];
   show: boolean;
+  prescriptionMetadata?: PrescriptionMetadata | null;
 }
 
-export const MedicationList = ({ medications, show }: MedicationListProps) => {
+export const MedicationList = ({ medications, show, prescriptionMetadata }: MedicationListProps) => {
   const [previewImage, setPreviewImage] = useState<{ url: string; name: string } | null>(null);
   if (!show || medications.length === 0) return null;
 
@@ -52,6 +60,39 @@ export const MedicationList = ({ medications, show }: MedicationListProps) => {
           )}
         </div>
       </div>
+
+      {/* Prescription Details */}
+      {prescriptionMetadata && (
+        <div className="mb-4 rounded-lg border border-border bg-muted/30 p-4">
+          <h4 className="mb-2 text-sm font-semibold text-secondary">Prescription Details</h4>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            {prescriptionMetadata.patientName && (
+              <div>
+                <span className="text-muted-foreground">Patient: </span>
+                <span className="font-medium text-foreground">{prescriptionMetadata.patientName}</span>
+              </div>
+            )}
+            {prescriptionMetadata.prescriptionDate && (
+              <div>
+                <span className="text-muted-foreground">Date: </span>
+                <span className="font-medium text-foreground">{prescriptionMetadata.prescriptionDate}</span>
+              </div>
+            )}
+            {prescriptionMetadata.hospitalName && (
+              <div>
+                <span className="text-muted-foreground">Hospital/Pharmacy: </span>
+                <span className="font-medium text-foreground">{prescriptionMetadata.hospitalName}</span>
+              </div>
+            )}
+            {prescriptionMetadata.doctorName && (
+              <div>
+                <span className="text-muted-foreground">Doctor/Nurse: </span>
+                <span className="font-medium text-foreground">{prescriptionMetadata.doctorName}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Medications Section */}
       {medicationItems.length > 0 && (
