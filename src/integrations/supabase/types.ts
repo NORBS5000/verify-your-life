@@ -17,6 +17,7 @@ export type Database = {
       loan_applications: {
         Row: {
           age: number | null
+          asset_analysis_data: Json | null
           asset_pictures_urls: string[] | null
           asset_valuation_score: number | null
           bank_statement_url: string | null
@@ -38,6 +39,7 @@ export type Database = {
           id: string
           id_number: string | null
           logbook_url: string | null
+          medical_analysis_data: Json | null
           medical_needs_score: number | null
           medical_prescription_url: string | null
           mpesa_statement_url: string | null
@@ -54,6 +56,7 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          asset_analysis_data?: Json | null
           asset_pictures_urls?: string[] | null
           asset_valuation_score?: number | null
           bank_statement_url?: string | null
@@ -75,6 +78,7 @@ export type Database = {
           id?: string
           id_number?: string | null
           logbook_url?: string | null
+          medical_analysis_data?: Json | null
           medical_needs_score?: number | null
           medical_prescription_url?: string | null
           mpesa_statement_url?: string | null
@@ -91,6 +95,7 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          asset_analysis_data?: Json | null
           asset_pictures_urls?: string[] | null
           asset_valuation_score?: number | null
           bank_statement_url?: string | null
@@ -112,6 +117,7 @@ export type Database = {
           id?: string
           id_number?: string | null
           logbook_url?: string | null
+          medical_analysis_data?: Json | null
           medical_needs_score?: number | null
           medical_prescription_url?: string | null
           mpesa_statement_url?: string | null
