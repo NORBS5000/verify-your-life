@@ -87,7 +87,9 @@ interface PricingAnalysisResponse {
 const fetchPricingForMedications = async (
   medications: MedicationItem[],
   tests: string[] = []
-): Promise<MedicationItem[]> => {
+): Promise<{ items: MedicationItem[]; totalConsultationCost: number }> => {
+  let totalConsultationCost = 0;
+
   const pricedItems = await Promise.all(
     medications.map(async (item) => {
       if (item.type === "test") return item; // tests priced via drug calls
@@ -106,9 +108,15 @@ const fetchPricingForMedications = async (
         if (!response.ok) throw new Error("Pricing API failed");
         const data: PricingAnalysisResponse = await response.json();
 
-        // Use total_cost from the API as the authoritative total for this drug
-        const apiTotalCost = data.pricing_ksh.total_cost || 0;
-        const unitPrice = item.quantity > 0 ? Math.round(apiTotalCost / item.quantity) : apiTotalCost;
+        // Use only medication price for unitPrice (exclude consultation)
+        const medicationPrices = data.pricing_ksh.medications || {};
+        const medPrice = Object.values(medicationPrices)[0] || 0;
+        const unitPrice = item.quantity > 0 ? Math.round(medPrice / item.quantity) : medPrice;
+
+        // Track consultation cost separately
+        if (data.consultation_needed && data.pricing_ksh.consultation_cost) {
+          totalConsultationCost += data.pricing_ksh.consultation_cost;
+        }
 
         // Update test prices if any
         const testPrices = data.pricing_ksh.tests;
@@ -138,7 +146,7 @@ const fetchPricingForMedications = async (
     }
   });
 
-  return pricedItems.map((item) => {
+  const cleanedItems = pricedItems.map((item) => {
     const cleaned = { ...item } as any;
     delete cleaned.testPrices;
     if (item.type === "test" && allTestPrices[item.name]) {
@@ -146,6 +154,8 @@ const fetchPricingForMedications = async (
     }
     return cleaned;
   });
+
+  return { items: cleanedItems, totalConsultationCost };
 };
 
 // Helper to generate medicine images in background
