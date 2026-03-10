@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: "user",
-            content: `Generate a clean, realistic product photo of the medicine "${drugName}" — show the pill, tablet, capsule, or bottle packaging on a solid white background. Simple, clinical, pharmacy-style product shot. No text overlays.`,
+            content: `Generate a hyper-realistic, high-resolution pharmacy product photo of the real medication "${drugName}". Show the actual branded commercial packaging — the box, blister pack, bottle, or tube — exactly as it would appear on a pharmacy shelf. Include the real manufacturer's branding, logo, dosage info, and packaging colors. The image should look like a professional product photograph taken for an online pharmacy catalog. Solid white background, studio lighting, no watermarks or text overlays.`,
           },
         ],
         modalities: ["image", "text"],
