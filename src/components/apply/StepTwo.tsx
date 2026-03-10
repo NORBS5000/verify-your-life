@@ -224,6 +224,9 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
   const [medicationsAnalyzed, setMedicationsAnalyzed] = useState(
     () => formData.medicationsAnalyzed || false
   );
+  const [consultationCost, setConsultationCost] = useState<number>(
+    () => (formData as any).consultationCost || 0
+  );
 
   // Combined extracted items from both sources
   const extractedItems = [...prescriptionItems, ...medicationItems];
