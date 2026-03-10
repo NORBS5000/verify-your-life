@@ -17,6 +17,7 @@ export interface MedicationItem {
   quantity: number;
   unitPrice: number;
   type: "medication" | "test";
+  imageUrl?: string;
 }
 
 interface MedicationListProps {
