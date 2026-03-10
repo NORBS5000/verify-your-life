@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { 
   User, 
   FileText, 
@@ -16,7 +20,10 @@ import {
   Building2,
   Users,
   ExternalLink,
-  Download
+  CheckCircle,
+  XCircle,
+  Loader2,
+  Image as ImageIcon,
 } from "lucide-react";
 import { format } from "date-fns";
 import { GradientCircularProgress } from "@/components/GradientCircularProgress";
@@ -35,15 +42,12 @@ interface ApplicationData {
   status: string | null;
   created_at: string;
   updated_at: string;
-  // Scores
   composite_score: number | null;
   medical_needs_score: number | null;
   asset_valuation_score: number | null;
   behavior_risk_score: number | null;
-  // Costs
   retail_cost: number | null;
   cova_cost: number | null;
-  // Documents
   medical_prescription_url: string | null;
   drug_image_url: string | null;
   bank_statement_url: string | null;
@@ -54,12 +58,10 @@ interface ApplicationData {
   logbook_url: string | null;
   title_deed_url: string | null;
   asset_pictures_urls: string[] | null;
-  // Guarantors
   guarantor1_phone: string | null;
   guarantor1_id_url: string | null;
   guarantor2_phone: string | null;
   guarantor2_id_url: string | null;
-  // Collateral
   selected_collateral: string[] | null;
 }
 
@@ -67,21 +69,35 @@ interface ApplicationDetailsModalProps {
   application: ApplicationData | null;
   open: boolean;
   onClose: () => void;
+  onStatusUpdate?: () => void;
 }
 
 const DocumentLink = ({ url, label }: { url: string | null; label: string }) => {
   if (!url) return null;
+  
+  const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)(\?|$)/i.test(url);
   
   return (
     <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-2 p-3 rounded-lg border border-border hover:bg-accent transition-colors group"
+      className="flex flex-col gap-2 p-3 rounded-lg border border-border hover:bg-accent transition-colors group"
     >
-      <FileText className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-      <span className="flex-1 text-sm">{label}</span>
-      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+      {isImage && (
+        <div className="w-full aspect-video rounded overflow-hidden bg-muted">
+          <img src={url} alt={label} className="w-full h-full object-cover" />
+        </div>
+      )}
+      <div className="flex items-center gap-2">
+        {isImage ? (
+          <ImageIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+        ) : (
+          <FileText className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+        )}
+        <span className="flex-1 text-sm">{label}</span>
+        <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+      </div>
     </a>
   );
 };
@@ -120,7 +136,9 @@ const ScoreCard = ({ title, score, id }: { title: string; score: number | null; 
   );
 };
 
-export const ApplicationDetailsModal = ({ application, open, onClose }: ApplicationDetailsModalProps) => {
+export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUpdate }: ApplicationDetailsModalProps) => {
+  const [updating, setUpdating] = useState(false);
+
   if (!application) return null;
 
   const getStatusColor = (status: string | null) => {
@@ -129,6 +147,26 @@ export const ApplicationDetailsModal = ({ application, open, onClose }: Applicat
       case "rejected": return "destructive";
       case "pending": return "secondary";
       default: return "outline";
+    }
+  };
+
+  const handleStatusUpdate = async (newStatus: "approved" | "rejected") => {
+    setUpdating(true);
+    try {
+      const { error } = await supabase
+        .from("loan_applications")
+        .update({ status: newStatus })
+        .eq("id", application.id);
+
+      if (error) throw error;
+
+      toast.success(`Application ${newStatus} successfully`);
+      onStatusUpdate?.();
+      onClose();
+    } catch (error: any) {
+      toast.error(`Failed to update status: ${error.message}`);
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -147,17 +185,43 @@ export const ApplicationDetailsModal = ({ application, open, onClose }: Applicat
   ].filter(doc => doc.url);
 
   const assetPhotos = application.asset_pictures_urls || [];
+  const isPending = application.status === "pending" || !application.status;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <span>Application Details</span>
-            <Badge variant={getStatusColor(application.status)}>
-              {application.status || "pending"}
-            </Badge>
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-3">
+              <span>Application Details</span>
+              <Badge variant={getStatusColor(application.status)}>
+                {application.status || "pending"}
+              </Badge>
+            </DialogTitle>
+            {isPending && (
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                  disabled={updating}
+                  onClick={() => handleStatusUpdate("rejected")}
+                >
+                  {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+                  Reject
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  disabled={updating}
+                  onClick={() => handleStatusUpdate("approved")}
+                >
+                  {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+                  Approve
+                </Button>
+              </div>
+            )}
+          </div>
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="flex-1 overflow-hidden flex flex-col">
@@ -168,7 +232,7 @@ export const ApplicationDetailsModal = ({ application, open, onClose }: Applicat
             </TabsTrigger>
             <TabsTrigger value="documents" className="gap-2">
               <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Documents</span>
+              <span className="hidden sm:inline">Documents ({documents.length + assetPhotos.length})</span>
             </TabsTrigger>
             <TabsTrigger value="analysis" className="gap-2">
               <BarChart3 className="h-4 w-4" />
@@ -289,7 +353,7 @@ export const ApplicationDetailsModal = ({ application, open, onClose }: Applicat
                 </CardHeader>
                 <CardContent>
                   {documents.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {documents.map((doc, idx) => (
                         <DocumentLink key={idx} url={doc.url} label={doc.label} />
                       ))}
@@ -303,7 +367,7 @@ export const ApplicationDetailsModal = ({ application, open, onClose }: Applicat
               {assetPhotos.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Asset Photos</CardTitle>
+                    <CardTitle className="text-lg">Asset Photos ({assetPhotos.length})</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -335,7 +399,7 @@ export const ApplicationDetailsModal = ({ application, open, onClose }: Applicat
                   <CardTitle className="text-lg">Credit Scores</CardTitle>
                 </CardHeader>
                 <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <ScoreCard title="Composite Score" score={application.composite_score} id="composite" />
                     <ScoreCard title="Medical Needs" score={application.medical_needs_score} id="medical" />
                     <ScoreCard title="Asset Valuation" score={application.asset_valuation_score} id="asset" />
