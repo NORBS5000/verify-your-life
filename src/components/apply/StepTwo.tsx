@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import type { FormData } from "@/pages/Apply";
 import { ArrowLeft, ArrowRight, Pill, Loader2, Stethoscope, Save, FileText, CheckCircle } from "lucide-react";
 import { FileUploadCard } from "./FileUploadCard";
@@ -576,21 +577,34 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       </Card>
 
       {/* Predicted Conditions */}
-      {predictedConditions.length > 0 && showPricing && (
-        <Card className="animate-slide-up border-0 bg-gradient-to-r from-teal-50 to-cyan-50 p-4 shadow-elegant">
-          <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100">
-              <Stethoscope className="h-4 w-4 text-teal-600" />
+      {predictedConditions.length > 0 && showPricing && (() => {
+        const allItems = [...prescriptionItems, ...medicationItems];
+        const hasChronic = allItems.some(item => item.isChronic === true);
+        const hasAcute = allItems.some(item => item.isChronic === false);
+        const chronicLabel = hasChronic ? "Chronic" : hasAcute ? "Acute" : null;
+        return (
+          <Card className="animate-slide-up border-0 bg-gradient-to-r from-teal-50 to-cyan-50 p-4 shadow-elegant">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100">
+                <Stethoscope className="h-4 w-4 text-teal-600" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h4 className="font-semibold text-secondary">Predicted Conditions</h4>
+                  {chronicLabel && (
+                    <Badge variant={chronicLabel === "Chronic" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0 h-4">
+                      {chronicLabel}
+                    </Badge>
+                  )}
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {predictedConditions.join(", ")}
+                </p>
+              </div>
             </div>
-            <div>
-              <h4 className="font-semibold text-secondary">Predicted Conditions</h4>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {predictedConditions.join(", ")}
-              </p>
-            </div>
-          </div>
-        </Card>
-      )}
+          </Card>
+        );
+      })()}
 
       {/* Analyzing State */}
       {isAnalyzing && (
