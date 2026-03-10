@@ -68,6 +68,88 @@ interface MedicalNeedsResponse {
   medicines_info: MedicineInfo[];
 }
 
+// Response type for the pricing/analyze API
+interface PricingAnalysisResponse {
+  medical_conditions: string[];
+  refill_frequency: string;
+  treatment_duration: string;
+  is_chronic: boolean;
+  consultation_needed: boolean;
+  pricing_ksh: {
+    medications: Record<string, number>;
+    tests: Record<string, number>;
+    consultation_cost: number;
+    total_cost: number;
+  };
+}
+
+// Fetch pricing from Railway API for each medication
+const fetchPricingForMedications = async (
+  medications: MedicationItem[],
+  tests: string[] = []
+): Promise<MedicationItem[]> => {
+  const pricedItems = await Promise.all(
+    medications.map(async (item) => {
+      if (item.type === "test") return item; // tests priced via drug calls
+      try {
+        const response = await fetch("https://web-production-4382.up.railway.app/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            drug_name: item.name,
+            manufacturer: "",
+            quantity: item.dosage || "1",
+            tests: tests,
+            additional_info: "",
+          }),
+        });
+        if (!response.ok) throw new Error("Pricing API failed");
+        const data: PricingAnalysisResponse = await response.json();
+
+        // Get the medication price from the response
+        const medPrices = data.pricing_ksh.medications;
+        const priceKey = Object.keys(medPrices)[0];
+        const totalMedPrice = priceKey ? medPrices[priceKey] : item.unitPrice * item.quantity;
+        const unitPrice = item.quantity > 0 ? Math.round(totalMedPrice / item.quantity) : totalMedPrice;
+
+        // Update test prices if any
+        const testPrices = data.pricing_ksh.tests;
+
+        return {
+          ...item,
+          unitPrice,
+          medicalConditions: data.medical_conditions,
+          isChronic: data.is_chronic,
+          treatmentDuration: data.treatment_duration,
+          consultationNeeded: data.consultation_needed,
+          consultationCost: data.pricing_ksh.consultation_cost,
+          testPrices,
+        } as MedicationItem & { testPrices?: Record<string, number> };
+      } catch (err) {
+        console.error(`Pricing API error for ${item.name}:`, err);
+        return item;
+      }
+    })
+  );
+
+  // Now update test items with prices from the pricing API
+  const allTestPrices: Record<string, number> = {};
+  pricedItems.forEach((item: any) => {
+    if (item.testPrices) {
+      Object.assign(allTestPrices, item.testPrices);
+    }
+  });
+
+  return pricedItems.map((item) => {
+    const cleaned = { ...item } as any;
+    delete cleaned.testPrices;
+    if (item.type === "test" && allTestPrices[item.name]) {
+      return { ...cleaned, unitPrice: allTestPrices[item.name] };
+    }
+    return cleaned;
+  });
+};
+
 // Helper to generate medicine images in background
 const generateMedicineImages = async (
   medications: MedicationItem[],
@@ -193,24 +275,32 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         doctorName: data.files[0].doctor_or_nurse_name,
       } : null;
 
-      setPrescriptionItems(medications);
       setPrescriptionMetadata(prescriptionMeta);
       setPrescriptionAnalyzed(true);
 
       // Generate images for medications in background
       generateMedicineImages(medications, setPrescriptionItems);
 
-      // Calculate totals
-      const prescriptionTotal = data.total_estimated_price_all_files;
+      // Fetch real pricing from the pricing API
+      toast.info("Fetching medication pricing...");
+      const testNames = medications.filter(m => m.type === "test").map(m => m.name);
+      const pricedMedications = await fetchPricingForMedications(medications, testNames);
+
+      setPrescriptionItems(pricedMedications);
+
+      // Calculate totals from priced items
       const existingMedicationTotal = medicationItems.reduce(
         (sum, item) => sum + (item.unitPrice * item.quantity),
         0
       );
+      const prescriptionTotal = pricedMedications.reduce(
+        (sum, item) => sum + (item.unitPrice * item.quantity),
+        0
+      );
       const totalRetail = prescriptionTotal + existingMedicationTotal;
-      const covaCost = Math.round(totalRetail * 0.8); // 20% savings
+      const covaCost = Math.round(totalRetail * 0.8);
 
-      // Calculate medical needs score
-      const totalDrugs = data.files.reduce((sum, f) => sum + f.drugs.length, 0) + medicationItems.length;
+      const totalDrugs = pricedMedications.filter(m => m.type === "medication").length + medicationItems.length;
       const medicalNeedsScore = Math.min(100, Math.round(
         (totalDrugs * 15) + 
         Math.min(50, totalRetail / 100)
@@ -221,12 +311,12 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         retailCost: totalRetail,
         covaCost: covaCost,
         medicalNeedsScore: medicalNeedsScore,
-        prescriptionItems: medications,
+        prescriptionItems: pricedMedications,
         prescriptionAnalyzed: true,
       });
       
       setShowPricing(true);
-      toast.success("Prescription analyzed successfully!");
+      toast.success("Prescription analyzed and priced successfully!");
     } catch (err) {
       console.error("Prescription analysis error:", err);
       toast.error("Failed to analyze prescription. Please try again.");
@@ -273,16 +363,21 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         type: "medication" as const,
       }));
 
-      setMedicationItems(medications);
       setMedicationsAnalyzed(true);
 
       // Generate images for medications in background
       generateMedicineImages(medications, setMedicationItems);
       setPredictedConditions(data.predicted_conditions);
 
-      // Calculate totals - add to existing prescription costs if any
-      const medicationTotal = data.medicines_info.reduce(
-        (sum, item) => sum + item.total_cost,
+      // Fetch real pricing from the pricing API
+      toast.info("Fetching medication pricing...");
+      const pricedMedications = await fetchPricingForMedications(medications);
+
+      setMedicationItems(pricedMedications);
+
+      // Calculate totals with priced data
+      const medicationTotal = pricedMedications.reduce(
+        (sum, item) => sum + (item.unitPrice * item.quantity),
         0
       );
       const existingPrescriptionTotal = prescriptionItems.reduce(
@@ -290,11 +385,11 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         0
       );
       const totalRetail = medicationTotal + existingPrescriptionTotal;
-      const covaCost = Math.round(totalRetail * 0.8); // 20% savings
+      const covaCost = Math.round(totalRetail * 0.8);
 
       const medicalNeedsScore = Math.min(100, Math.round(
         (data.predicted_conditions.length * 15) + 
-        (data.medicines_info.length * 10) + 
+        (pricedMedications.length * 10) + 
         (prescriptionItems.length * 10) +
         Math.min(40, totalRetail / 100)
       ));
@@ -303,7 +398,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         retailCost: totalRetail,
         covaCost: covaCost,
         medicalNeedsScore: medicalNeedsScore,
-        medicationItems: medications,
+        medicationItems: pricedMedications,
         medicationsAnalyzed: true,
         predictedConditions: data.predicted_conditions,
       });
