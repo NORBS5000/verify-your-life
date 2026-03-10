@@ -66,17 +66,23 @@ export const MedicationList = ({ medications, show }: MedicationListProps) => {
             className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2"
           >
             <div className="flex items-center gap-3">
-              <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                item.type === "medication" 
-                  ? "bg-primary/10 text-primary" 
-                  : "bg-teal-100 text-teal-600"
-              }`}>
-                {item.type === "medication" ? (
-                  <Pill className="h-4 w-4" />
-                ) : (
-                  <FlaskConical className="h-4 w-4" />
-                )}
-              </div>
+              {item.type === "medication" && item.imageUrl ? (
+                <div className="h-8 w-8 overflow-hidden rounded-full bg-muted">
+                  <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+                </div>
+              ) : (
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                  item.type === "medication" 
+                    ? "bg-primary/10 text-primary" 
+                    : "bg-teal-100 text-teal-600"
+                }`}>
+                  {item.type === "medication" ? (
+                    <Pill className="h-4 w-4" />
+                  ) : (
+                    <FlaskConical className="h-4 w-4" />
+                  )}
+                </div>
+              )}
               <div>
                 <p className="text-sm font-medium text-secondary">{item.name}</p>
                 <p className="text-xs text-muted-foreground">
