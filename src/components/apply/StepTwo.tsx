@@ -163,6 +163,8 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         retailCost: totalRetail,
         covaCost: covaCost,
         medicalNeedsScore: medicalNeedsScore,
+        prescriptionItems: medications,
+        prescriptionAnalyzed: true,
       });
       
       setShowPricing(true);
