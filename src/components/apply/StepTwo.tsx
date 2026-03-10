@@ -242,6 +242,9 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         retailCost: totalRetail,
         covaCost: covaCost,
         medicalNeedsScore: medicalNeedsScore,
+        medicationItems: medications,
+        medicationsAnalyzed: true,
+        predictedConditions: data.predicted_conditions,
       });
       setShowPricing(true);
       toast.success("Medication analyzed successfully!");
