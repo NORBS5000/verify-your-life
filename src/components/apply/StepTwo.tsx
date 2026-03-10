@@ -109,10 +109,20 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         fileData.drugs.forEach((drug) => {
           medications.push({
             name: drug.drug_name,
-            dosage: drug.manufacturer !== "N/A" ? drug.manufacturer : "",
-            quantity: 1,
-            unitPrice: drug.estimated_price,
+            dosage: drug.dosage_instruction || drug.manufacturer,
+            quantity: drug.total_tablets || 1,
+            unitPrice: drug.estimated_price_per_tablet_ksh,
             type: "medication" as const,
+          });
+        });
+
+        fileData.tests.forEach((test) => {
+          medications.push({
+            name: test.test_name,
+            dosage: "",
+            quantity: 1,
+            unitPrice: test.estimated_price,
+            type: "test" as const,
           });
         });
       });
@@ -120,7 +130,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       setPrescriptionItems(medications);
       setPrescriptionAnalyzed(true);
 
-      // Calculate totals - add to existing medication costs if any
+      // Calculate totals
       const prescriptionTotal = data.total_estimated_price_all_files;
       const existingMedicationTotal = medicationItems.reduce(
         (sum, item) => sum + (item.unitPrice * item.quantity),
