@@ -19,7 +19,7 @@ export const useLoanApplication = () => {
     // Normalize phone number - strip spaces, dashes, parentheses, plus sign
     const normalizedPhone = phoneNumber?.replace(/[\s\-\(\)\+]/g, '') || '';
     
-    if (!normalizedPhone || normalizedPhone.length < 6) {
+    if (!normalizedPhone || normalizedPhone.length < 3) {
       console.log('useLoanApplication: Phone number too short:', normalizedPhone.length);
       setError("Valid phone number is required");
       return null;
