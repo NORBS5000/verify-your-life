@@ -176,7 +176,7 @@ const Apply = () => {
       trackStepEnter(next);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       if (healingMessages[next]) {
-        toast.info(healingMessages[next], { duration: 4000 });
+        toast.info(healingMessages[next], { duration: 4000, position: "top-center" });
       }
     }
   };
