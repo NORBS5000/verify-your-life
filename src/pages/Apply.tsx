@@ -15,6 +15,7 @@ import { useSubmitApplication } from "@/hooks/useSubmitApplication";
 import { useLoanApplication } from "@/hooks/useLoanApplication";
 import SecurityFooter from "@/components/SecurityFooter";
 import { toast } from "sonner";
+import { useFormTracking } from "@/hooks/useFormTracking";
 
 export interface FormData {
   // Profile data
@@ -80,6 +81,7 @@ const Apply = () => {
   const { submitApplication, isSubmitting, error: submitError } = useSubmitApplication();
   const { loanId, isCreating, createLoanApplication } = useLoanApplication();
   const [currentStep, setCurrentStep] = useState(1);
+  
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   
@@ -129,8 +131,15 @@ const Apply = () => {
     consultationCost: 0,
   });
 
+  const { trackStepEnter, trackFormComplete } = useFormTracking(formData.phoneNumber);
+
   const updateFormData = useCallback((data: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
+  }, []);
+
+  // Track step 1 on mount
+  useEffect(() => {
+    trackStepEnter(1);
   }, []);
 
   // Auto-create loan application when phone number is available
@@ -140,7 +149,6 @@ const Apply = () => {
     
     console.log('Apply useEffect check - cleanPhone:', cleanPhone, 'loanId:', loanId, 'isCreating:', isCreating);
     
-    // Only create if we have a valid phone (6+ digits), no loanId yet, and not already creating
     if (cleanPhone.length >= 3 && !loanId && !isCreating) {
       console.log('Apply useEffect: Triggering loan creation for phone:', cleanPhone);
       createLoanApplication(phoneNumber);
@@ -165,6 +173,7 @@ const Apply = () => {
     if (currentStep < 6) {
       const next = currentStep + 1;
       setCurrentStep(next);
+      trackStepEnter(next);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       if (healingMessages[next]) {
         toast.info(healingMessages[next], { duration: 4000 });
@@ -174,7 +183,9 @@ const Apply = () => {
 
   const prevStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      const prev = currentStep - 1;
+      setCurrentStep(prev);
+      trackStepEnter(prev);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -183,6 +194,7 @@ const Apply = () => {
     const success = await submitApplication(formData);
     
     if (success) {
+      trackFormComplete();
       triggerNotification("🎉 Application submitted successfully!");
       // Redirect to dashboard with phone number to show scores
       const cleanPhone = formData.phoneNumber?.replace(/[\s\-\(\)\+]/g, '') || '';
@@ -251,6 +263,7 @@ const Apply = () => {
         {/* Progress Bar */}
         <ProgressBar currentStep={currentStep} totalSteps={6} steps={steps} />
 
+  
 
         {/* Step Content */}
         <div className="animate-fade-in">

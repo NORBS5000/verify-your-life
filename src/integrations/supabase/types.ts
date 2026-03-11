@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      form_tracking: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          entered_at: string
+          event_type: string
+          id: string
+          left_at: string | null
+          phone_number: string | null
+          session_id: string
+          step_name: string
+          step_number: number
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          entered_at?: string
+          event_type?: string
+          id?: string
+          left_at?: string | null
+          phone_number?: string | null
+          session_id: string
+          step_name: string
+          step_number: number
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          entered_at?: string
+          event_type?: string
+          id?: string
+          left_at?: string | null
+          phone_number?: string | null
+          session_id?: string
+          step_name?: string
+          step_number?: number
+        }
+        Relationships: []
+      }
       loan_applications: {
         Row: {
           age: number | null
