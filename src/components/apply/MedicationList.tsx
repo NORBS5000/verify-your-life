@@ -308,7 +308,7 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
           className="mt-3 w-full gap-1.5 border-dashed text-muted-foreground hover:text-foreground"
           onClick={() => setShowAddForm(true)}
         >
-          <Plus className="h-4 w-4" /> Add Medicine Manually
+          <Plus className="h-4 w-4" /> Add Medicine / Test Manually
         </Button>
       )}
 
