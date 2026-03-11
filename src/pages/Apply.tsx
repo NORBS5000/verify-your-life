@@ -15,6 +15,7 @@ import { useSubmitApplication } from "@/hooks/useSubmitApplication";
 import { useLoanApplication } from "@/hooks/useLoanApplication";
 import SecurityFooter from "@/components/SecurityFooter";
 import { toast } from "sonner";
+import { useFormTracking } from "@/hooks/useFormTracking";
 
 export interface FormData {
   // Profile data
