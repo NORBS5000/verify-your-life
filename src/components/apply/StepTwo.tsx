@@ -683,7 +683,11 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
               unitPrice: allTestPrices[t.name] || t.unitPrice,
             }));
 
-            const allPriced = [...pricedMedications.map(({ testPrices, ...rest }: any) => rest), ...finalTests];
+            // Filter out placeholder medication if we used one for test-only pricing
+            const realMedications = medicationsToPrice.length > 0 
+              ? pricedMedications.map(({ testPrices, ...rest }: any) => rest)
+              : [];
+            const allPriced = [...realMedications, ...finalTests];
 
             // Re-split into prescription and medication buckets
             const rePrescription = allPriced.slice(0, newPrescriptionItems.length);
