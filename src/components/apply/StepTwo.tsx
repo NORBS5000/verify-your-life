@@ -660,7 +660,14 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             toast.info("Re-analyzing medications with updated list...");
             const testNames = updated.filter(m => m.type === "test").map(m => m.name);
             const medicationsToPrice = updated.filter(m => m.type === "medication");
-            const { items: pricedMedications, totalConsultationCost } = await fetchPricingForMedications(medicationsToPrice, testNames);
+            
+            // If no medications but we have tests, create a placeholder call to price the tests
+            const itemsToPrice = medicationsToPrice.length > 0 
+              ? medicationsToPrice 
+              : testNames.length > 0 
+                ? [{ name: "General Health Check", dosage: "", quantity: 1, unitPrice: 0, type: "medication" as const }] 
+                : [];
+            const { items: pricedMedications, totalConsultationCost } = await fetchPricingForMedications(itemsToPrice, testNames);
 
             // Merge priced medications back with test items (now also priced)
             const pricedTests = updated.filter(m => m.type === "test");
