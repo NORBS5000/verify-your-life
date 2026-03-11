@@ -253,6 +253,7 @@ const Apply = () => {
         {/* Progress Bar */}
         <ProgressBar currentStep={currentStep} totalSteps={6} steps={steps} />
 
+  const { trackStepEnter, trackFormComplete } = useFormTracking(formData.phoneNumber);
 
         {/* Step Content */}
         <div className="animate-fade-in">
