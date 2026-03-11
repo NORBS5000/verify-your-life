@@ -266,7 +266,7 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
             <Input
               value={newItem.name}
               onChange={(e) => setNewItem((v) => ({ ...v, name: e.target.value }))}
-              placeholder="Medicine name"
+              placeholder={newItem.type === "test" ? "Test name" : "Medicine name"}
               className="text-sm"
             />
             <Input
