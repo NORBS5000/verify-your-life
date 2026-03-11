@@ -100,6 +100,7 @@ const Admin = () => {
       const { data, error } = await supabase
         .from("loan_applications")
         .select("*")
+        .not("composite_score", "is", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
