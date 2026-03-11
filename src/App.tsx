@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import Apply from "./pages/Apply";
 import Admin from "./pages/Admin";
 import UserDashboard from "./pages/UserDashboard";
+import Tracker from "./pages/Tracker";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
