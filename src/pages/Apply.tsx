@@ -183,7 +183,9 @@ const Apply = () => {
 
   const prevStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      const prev = currentStep - 1;
+      setCurrentStep(prev);
+      trackStepEnter(prev);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
