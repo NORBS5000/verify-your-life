@@ -660,7 +660,14 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             toast.info("Re-analyzing medications with updated list...");
             const testNames = updated.filter(m => m.type === "test").map(m => m.name);
             const medicationsToPrice = updated.filter(m => m.type === "medication");
-            const { items: pricedMedications, totalConsultationCost } = await fetchPricingForMedications(medicationsToPrice, testNames);
+            
+            // If no medications but we have tests, create a placeholder call to price the tests
+            const itemsToPrice = medicationsToPrice.length > 0 
+              ? medicationsToPrice 
+              : testNames.length > 0 
+                ? [{ name: "General Health Check", dosage: "", quantity: 1, unitPrice: 0, type: "medication" as const }] 
+                : [];
+            const { items: pricedMedications, totalConsultationCost } = await fetchPricingForMedications(itemsToPrice, testNames);
 
             // Merge priced medications back with test items (now also priced)
             const pricedTests = updated.filter(m => m.type === "test");
@@ -676,7 +683,11 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
               unitPrice: allTestPrices[t.name] || t.unitPrice,
             }));
 
-            const allPriced = [...pricedMedications.map(({ testPrices, ...rest }: any) => rest), ...finalTests];
+            // Filter out placeholder medication if we used one for test-only pricing
+            const realMedications = medicationsToPrice.length > 0 
+              ? pricedMedications.map(({ testPrices, ...rest }: any) => rest)
+              : [];
+            const allPriced = [...realMedications, ...finalTests];
 
             // Re-split into prescription and medication buckets
             const rePrescription = allPriced.slice(0, newPrescriptionItems.length);
@@ -688,6 +699,19 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             const newItemsTotal = allPriced.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
             const newTotalRetail = newItemsTotal + totalConsultationCost;
             const newCovaCost = Math.round(newTotalRetail * 0.9);
+
+            // Aggregate predicted conditions from all priced medication items
+            const newConditions = new Set<string>();
+            allPriced.forEach(item => {
+              if (item.medicalConditions) {
+                item.medicalConditions.forEach(c => newConditions.add(c));
+              }
+            });
+            // Also keep any existing predicted conditions from photo analysis
+            predictedConditions.forEach(c => newConditions.add(c));
+            const updatedConditions = Array.from(newConditions);
+            setPredictedConditions(updatedConditions);
+
             const newScore = Math.min(100, Math.round(
               (allPriced.filter(i => i.type === "medication").length * 15) +
               Math.min(50, newTotalRetail / 100)
@@ -700,6 +724,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
               prescriptionItems: rePrescription,
               medicationItems: reMedication,
               consultationCost: totalConsultationCost,
+              predictedConditions: updatedConditions,
             });
 
             toast.success("Medications re-analyzed successfully!");
