@@ -194,6 +194,7 @@ const Apply = () => {
     const success = await submitApplication(formData);
     
     if (success) {
+      trackFormComplete();
       triggerNotification("🎉 Application submitted successfully!");
       // Redirect to dashboard with phone number to show scores
       const cleanPhone = formData.phoneNumber?.replace(/[\s\-\(\)\+]/g, '') || '';
