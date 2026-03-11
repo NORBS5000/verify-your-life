@@ -262,19 +262,21 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
               <FlaskConical className="h-3 w-3 mr-1" /> Test
             </Button>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className={newItem.type === "test" ? "" : "grid grid-cols-2 gap-2"}>
             <Input
               value={newItem.name}
               onChange={(e) => setNewItem((v) => ({ ...v, name: e.target.value }))}
               placeholder={newItem.type === "test" ? "Test name" : "Medicine name"}
               className="text-sm"
             />
-            <Input
-              value={newItem.dosage}
-              onChange={(e) => setNewItem((v) => ({ ...v, dosage: e.target.value }))}
-              placeholder="Dosage"
-              className="text-sm"
-            />
+            {newItem.type === "medication" && (
+              <Input
+                value={newItem.dosage}
+                onChange={(e) => setNewItem((v) => ({ ...v, dosage: e.target.value }))}
+                placeholder="Dosage"
+                className="text-sm"
+              />
+            )}
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Input
