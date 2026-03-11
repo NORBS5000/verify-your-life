@@ -14,6 +14,7 @@ import { WhatsAppNotification } from "@/components/apply/WhatsAppNotification";
 import { useSubmitApplication } from "@/hooks/useSubmitApplication";
 import { useLoanApplication } from "@/hooks/useLoanApplication";
 import SecurityFooter from "@/components/SecurityFooter";
+import { toast } from "sonner";
 
 export interface FormData {
   // Profile data
@@ -152,10 +153,22 @@ const Apply = () => {
     setTimeout(() => setShowNotification(false), 5000);
   };
 
+  const healingMessages: Record<number, string> = {
+    2: "💊 We're with you — let's understand your medical needs together.",
+    3: "🏠 You're doing great! Your assets help us serve you better.",
+    4: "📋 Almost there — just a few more details to verify.",
+    5: "🤝 One more step! Your guarantors help strengthen your application.",
+    6: "🌟 Amazing progress! Let's review everything together.",
+  };
+
   const nextStep = () => {
     if (currentStep < 6) {
-      setCurrentStep(currentStep + 1);
+      const next = currentStep + 1;
+      setCurrentStep(next);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (healingMessages[next]) {
+        toast.info(healingMessages[next], { duration: 4000 });
+      }
     }
   };
 
