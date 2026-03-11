@@ -630,14 +630,14 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         show={showPricing}
         prescriptionMetadata={prescriptionMetadata}
         consultationCost={consultationCost}
-        onMedicationsChange={(updated) => {
+      onMedicationsChange={async (updated) => {
           // Split back into prescription and medication items
           const newPrescriptionItems = updated.slice(0, prescriptionItems.length);
           const newMedicationItems = updated.slice(prescriptionItems.length);
           setPrescriptionItems(newPrescriptionItems);
           setMedicationItems(newMedicationItems);
 
-          // Recalculate totals
+          // Immediately update local totals
           const itemsTotal = updated.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
           const totalRetail = itemsTotal + consultationCost;
           const covaCost = Math.round(totalRetail * 0.9);
@@ -653,6 +653,62 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             prescriptionItems: newPrescriptionItems,
             medicationItems: newMedicationItems,
           });
+
+          // Re-run Railway pricing API for all medications
+          try {
+            setIsAnalyzing(true);
+            toast.info("Re-analyzing medications with updated list...");
+            const testNames = updated.filter(m => m.type === "test").map(m => m.name);
+            const medicationsToPrice = updated.filter(m => m.type === "medication");
+            const { items: pricedMedications, totalConsultationCost } = await fetchPricingForMedications(medicationsToPrice, testNames);
+
+            // Merge priced medications back with test items (now also priced)
+            const pricedTests = updated.filter(m => m.type === "test");
+            // Update test prices from the pricing response
+            const allTestPrices: Record<string, number> = {};
+            pricedMedications.forEach((item: any) => {
+              if (item.testPrices) {
+                Object.assign(allTestPrices, item.testPrices);
+              }
+            });
+            const finalTests = pricedTests.map(t => ({
+              ...t,
+              unitPrice: allTestPrices[t.name] || t.unitPrice,
+            }));
+
+            const allPriced = [...pricedMedications.map(({ testPrices, ...rest }: any) => rest), ...finalTests];
+
+            // Re-split into prescription and medication buckets
+            const rePrescription = allPriced.slice(0, newPrescriptionItems.length);
+            const reMedication = allPriced.slice(newPrescriptionItems.length);
+            setPrescriptionItems(rePrescription);
+            setMedicationItems(reMedication);
+            setConsultationCost(totalConsultationCost);
+
+            const newItemsTotal = allPriced.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+            const newTotalRetail = newItemsTotal + totalConsultationCost;
+            const newCovaCost = Math.round(newTotalRetail * 0.9);
+            const newScore = Math.min(100, Math.round(
+              (allPriced.filter(i => i.type === "medication").length * 15) +
+              Math.min(50, newTotalRetail / 100)
+            ));
+
+            updateFormData({
+              retailCost: newTotalRetail,
+              covaCost: newCovaCost,
+              medicalNeedsScore: newScore,
+              prescriptionItems: rePrescription,
+              medicationItems: reMedication,
+              consultationCost: totalConsultationCost,
+            });
+
+            toast.success("Medications re-analyzed successfully!");
+          } catch (err) {
+            console.error("Re-analysis error:", err);
+            toast.error("Failed to re-analyze. Prices may be approximate.");
+          } finally {
+            setIsAnalyzing(false);
+          }
         }}
       />
 
