@@ -81,6 +81,7 @@ const Apply = () => {
   const { submitApplication, isSubmitting, error: submitError } = useSubmitApplication();
   const { loanId, isCreating, createLoanApplication } = useLoanApplication();
   const [currentStep, setCurrentStep] = useState(1);
+  const { trackStepEnter, trackFormComplete } = useFormTracking(formData?.phoneNumber);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   
