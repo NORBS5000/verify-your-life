@@ -688,6 +688,19 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             const newItemsTotal = allPriced.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
             const newTotalRetail = newItemsTotal + totalConsultationCost;
             const newCovaCost = Math.round(newTotalRetail * 0.9);
+
+            // Aggregate predicted conditions from all priced medication items
+            const newConditions = new Set<string>();
+            allPriced.forEach(item => {
+              if (item.medicalConditions) {
+                item.medicalConditions.forEach(c => newConditions.add(c));
+              }
+            });
+            // Also keep any existing predicted conditions from photo analysis
+            predictedConditions.forEach(c => newConditions.add(c));
+            const updatedConditions = Array.from(newConditions);
+            setPredictedConditions(updatedConditions);
+
             const newScore = Math.min(100, Math.round(
               (allPriced.filter(i => i.type === "medication").length * 15) +
               Math.min(50, newTotalRetail / 100)
@@ -700,6 +713,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
               prescriptionItems: rePrescription,
               medicationItems: reMedication,
               consultationCost: totalConsultationCost,
+              predictedConditions: updatedConditions,
             });
 
             toast.success("Medications re-analyzed successfully!");
