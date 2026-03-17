@@ -97,6 +97,7 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
 
   const renderItem = (item: MedicationItem, index: number, globalIndex: number) => {
     const isEditing = editingIndex === globalIndex;
+    const isDuplicate = duplicateIndices.has(globalIndex);
 
     if (isEditing) {
       return (
