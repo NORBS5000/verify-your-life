@@ -339,11 +339,18 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
 
       {/* Total Summary */}
       <div className="mt-4 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 p-4 space-y-2">
+        {duplicateIndices.size > 0 && (
+          <div className="flex items-center gap-2 text-xs text-destructive mb-1">
+            <AlertCircle className="h-3.5 w-3.5" />
+            <span>{duplicateIndices.size} duplicate item(s) excluded from total</span>
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Medications & Tests</span>
           <span className="text-sm font-medium text-secondary">
             KES{" "}
             {medications
+              .filter((_, i) => !duplicateIndices.has(i))
               .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
               .toLocaleString()}
           </span>
@@ -361,6 +368,7 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
           <span className="text-lg font-bold text-secondary">
             KES{" "}
             {(medications
+              .filter((_, i) => !duplicateIndices.has(i))
               .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0) + consultationCost)
               .toLocaleString()}
           </span>
