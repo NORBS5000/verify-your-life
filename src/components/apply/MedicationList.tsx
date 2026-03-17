@@ -178,11 +178,14 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
         </div>
         <div className="flex items-center gap-2">
           <div className="text-right">
-            <p className="text-sm font-semibold text-secondary">
+            <p className={`text-sm font-semibold ${isDuplicate ? 'text-destructive line-through' : 'text-secondary'}`}>
               KES {(item.unitPrice * item.quantity).toLocaleString()}
             </p>
             {item.type === "medication" && (
-              <p className="text-xs text-muted-foreground">@ KES {item.unitPrice.toLocaleString()} each</p>
+              <p className={`text-xs ${isDuplicate ? 'text-destructive/60 line-through' : 'text-muted-foreground'}`}>@ KES {item.unitPrice.toLocaleString()} each</p>
+            )}
+            {isDuplicate && (
+              <p className="text-[10px] text-destructive">Not counted</p>
             )}
           </div>
           {editable && (
