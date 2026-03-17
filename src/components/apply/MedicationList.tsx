@@ -55,6 +55,18 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
   const medicationItems = medications.filter((m) => m.type === "medication");
   const testItems = medications.filter((m) => m.type === "test");
 
+  // Detect duplicates: mark all but the first occurrence of each name (case-insensitive)
+  const duplicateIndices = new Set<number>();
+  const seenNames = new Map<string, number>();
+  medications.forEach((item, index) => {
+    const key = item.name.trim().toLowerCase();
+    if (seenNames.has(key)) {
+      duplicateIndices.add(index);
+    } else {
+      seenNames.set(key, index);
+    }
+  });
+
   const startEdit = (index: number) => {
     const item = medications[index];
     setEditValues({ name: item.name, dosage: item.dosage, quantity: item.quantity, unitPrice: item.unitPrice });
@@ -85,6 +97,7 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
 
   const renderItem = (item: MedicationItem, index: number, globalIndex: number) => {
     const isEditing = editingIndex === globalIndex;
+    const isDuplicate = duplicateIndices.has(globalIndex);
 
     if (isEditing) {
       return (
@@ -129,7 +142,7 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
     }
 
     return (
-      <div key={globalIndex} className="group flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
+      <div key={globalIndex} className={`group flex items-center justify-between rounded-lg border p-3 ${isDuplicate ? 'border-destructive/50 bg-destructive/10' : 'border-border bg-muted/30'}`}>
         <div className="flex items-center gap-3">
           {item.imageUrl ? (
             <div
@@ -139,12 +152,19 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
               <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
             </div>
           ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              {item.type === "test" ? <FlaskConical className="h-5 w-5 text-accent" /> : <Pill className="h-5 w-5 text-primary" />}
+            <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isDuplicate ? 'bg-destructive/10' : 'bg-primary/10'}`}>
+              {item.type === "test" ? <FlaskConical className={`h-5 w-5 ${isDuplicate ? 'text-destructive' : 'text-accent'}`} /> : <Pill className={`h-5 w-5 ${isDuplicate ? 'text-destructive' : 'text-primary'}`} />}
             </div>
           )}
           <div>
-            <p className="text-sm font-medium text-secondary">{item.name}</p>
+            <div className="flex items-center gap-2">
+              <p className={`text-sm font-medium ${isDuplicate ? 'text-destructive' : 'text-secondary'}`}>{item.name}</p>
+              {isDuplicate && (
+                <Badge variant="destructive" className="text-[10px] px-1.5 py-0 h-4">
+                  <AlertCircle className="h-2.5 w-2.5 mr-0.5" /> Duplicate
+                </Badge>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">
               {item.dosage}{item.type === "medication" && ` • Qty: ${item.quantity}`}
               {item.treatmentDuration && ` • ${item.treatmentDuration}`}
@@ -158,11 +178,14 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
         </div>
         <div className="flex items-center gap-2">
           <div className="text-right">
-            <p className="text-sm font-semibold text-secondary">
+            <p className={`text-sm font-semibold ${isDuplicate ? 'text-destructive line-through' : 'text-secondary'}`}>
               KES {(item.unitPrice * item.quantity).toLocaleString()}
             </p>
             {item.type === "medication" && (
-              <p className="text-xs text-muted-foreground">@ KES {item.unitPrice.toLocaleString()} each</p>
+              <p className={`text-xs ${isDuplicate ? 'text-destructive/60 line-through' : 'text-muted-foreground'}`}>@ KES {item.unitPrice.toLocaleString()} each</p>
+            )}
+            {isDuplicate && (
+              <p className="text-[10px] text-destructive">Not counted</p>
             )}
           </div>
           {editable && (
@@ -316,11 +339,18 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
 
       {/* Total Summary */}
       <div className="mt-4 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 p-4 space-y-2">
+        {duplicateIndices.size > 0 && (
+          <div className="flex items-center gap-2 text-xs text-destructive mb-1">
+            <AlertCircle className="h-3.5 w-3.5" />
+            <span>{duplicateIndices.size} duplicate item(s) excluded from total</span>
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Medications & Tests</span>
           <span className="text-sm font-medium text-secondary">
             KES{" "}
             {medications
+              .filter((_, i) => !duplicateIndices.has(i))
               .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
               .toLocaleString()}
           </span>
@@ -338,6 +368,7 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
           <span className="text-lg font-bold text-secondary">
             KES{" "}
             {(medications
+              .filter((_, i) => !duplicateIndices.has(i))
               .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0) + consultationCost)
               .toLocaleString()}
           </span>
