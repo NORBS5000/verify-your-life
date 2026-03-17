@@ -55,6 +55,18 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
   const medicationItems = medications.filter((m) => m.type === "medication");
   const testItems = medications.filter((m) => m.type === "test");
 
+  // Detect duplicates: mark all but the first occurrence of each name (case-insensitive)
+  const duplicateIndices = new Set<number>();
+  const seenNames = new Map<string, number>();
+  medications.forEach((item, index) => {
+    const key = item.name.trim().toLowerCase();
+    if (seenNames.has(key)) {
+      duplicateIndices.add(index);
+    } else {
+      seenNames.set(key, index);
+    }
+  });
+
   const startEdit = (index: number) => {
     const item = medications[index];
     setEditValues({ name: item.name, dosage: item.dosage, quantity: item.quantity, unitPrice: item.unitPrice });
