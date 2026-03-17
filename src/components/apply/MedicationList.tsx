@@ -142,7 +142,7 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
     }
 
     return (
-      <div key={globalIndex} className="group flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
+      <div key={globalIndex} className={`group flex items-center justify-between rounded-lg border p-3 ${isDuplicate ? 'border-destructive/50 bg-destructive/10' : 'border-border bg-muted/30'}`}>
         <div className="flex items-center gap-3">
           {item.imageUrl ? (
             <div
@@ -152,12 +152,19 @@ export const MedicationList = ({ medications, show, prescriptionMetadata, consul
               <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
             </div>
           ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              {item.type === "test" ? <FlaskConical className="h-5 w-5 text-accent" /> : <Pill className="h-5 w-5 text-primary" />}
+            <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isDuplicate ? 'bg-destructive/10' : 'bg-primary/10'}`}>
+              {item.type === "test" ? <FlaskConical className={`h-5 w-5 ${isDuplicate ? 'text-destructive' : 'text-accent'}`} /> : <Pill className={`h-5 w-5 ${isDuplicate ? 'text-destructive' : 'text-primary'}`} />}
             </div>
           )}
           <div>
-            <p className="text-sm font-medium text-secondary">{item.name}</p>
+            <div className="flex items-center gap-2">
+              <p className={`text-sm font-medium ${isDuplicate ? 'text-destructive' : 'text-secondary'}`}>{item.name}</p>
+              {isDuplicate && (
+                <Badge variant="destructive" className="text-[10px] px-1.5 py-0 h-4">
+                  <AlertCircle className="h-2.5 w-2.5 mr-0.5" /> Duplicate
+                </Badge>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">
               {item.dosage}{item.type === "medication" && ` • Qty: ${item.quantity}`}
               {item.treatmentDuration && ` • ${item.treatmentDuration}`}
