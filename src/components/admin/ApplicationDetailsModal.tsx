@@ -201,23 +201,24 @@ export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUp
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-3">
-              <span>Application Details</span>
-              <Badge variant={getStatusColor(application.status)}>
-                {application.status || "pending"}
-              </Badge>
-            </DialogTitle>
-            {isPending && (
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-                  disabled={updating}
-                  onClick={() => handleStatusUpdate("rejected")}
-                >
-                  {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+          <DialogTitle className="flex items-center gap-3">
+            <span>Application Details</span>
+            <Badge variant={getStatusColor(application.status)}>
+              {application.status || "pending"}
+            </Badge>
+          </DialogTitle>
+        </DialogHeader>
+
+        {isPending && (
+          <div className="flex gap-2 justify-end">
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+              disabled={updating}
+              onClick={() => handleStatusUpdate("rejected")}
+            >
+              {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
                   Reject
                 </Button>
                 <Button
