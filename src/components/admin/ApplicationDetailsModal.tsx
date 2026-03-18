@@ -230,10 +230,8 @@ export const ApplicationDetailsModal = ({ application, open, onClose, onStatusUp
                   {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
                   Approve
                 </Button>
-              </div>
-            )}
           </div>
-        </DialogHeader>
+        )}
 
         <Tabs defaultValue="profile">
           <TabsList className="grid grid-cols-4 w-full">
