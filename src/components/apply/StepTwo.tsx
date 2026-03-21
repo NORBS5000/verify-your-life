@@ -163,7 +163,7 @@ const fetchPricingForMedications = async (
     return cleaned;
   });
 
-  return { items: cleanedItems, totalConsultationCost };
+  return { items: cleanedItems, totalConsultationCost: maxConsultationCost };
 };
 
 // Helper to generate medicine images in background
