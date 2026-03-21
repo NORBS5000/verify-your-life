@@ -168,41 +168,11 @@ const fetchPricingForMedications = async (
 
 // Helper to generate medicine images in background
 const generateMedicineImages = async (
-  medications: MedicationItem[],
-  setItems: React.Dispatch<React.SetStateAction<MedicationItem[]>>
+  _medications: MedicationItem[],
+  _setItems: React.Dispatch<React.SetStateAction<MedicationItem[]>>
 ) => {
-  const drugItems = medications.filter((m) => m.type === "medication");
-  
-  // Generate images in parallel (max 3 at a time)
-  const results = await Promise.allSettled(
-    drugItems.map(async (item) => {
-      try {
-        const { data, error } = await supabase.functions.invoke("generate-medicine-image", {
-          body: { drugName: item.name },
-        });
-        if (error || !data?.imageUrl) return null;
-        return { name: item.name, imageUrl: data.imageUrl };
-      } catch {
-        return null;
-      }
-    })
-  );
-
-  const imageMap = new Map<string, string>();
-  results.forEach((r) => {
-    if (r.status === "fulfilled" && r.value) {
-      imageMap.set(r.value.name, r.value.imageUrl);
-    }
-  });
-
-  if (imageMap.size > 0) {
-    setItems((prev) =>
-      prev.map((item) => ({
-        ...item,
-        imageUrl: imageMap.get(item.name) || item.imageUrl,
-      }))
-    );
-  }
+  // Image generation disabled
+  return;
 };
 
 // Fetch medical credit score from the Railway /score API
