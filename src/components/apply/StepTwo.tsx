@@ -173,11 +173,6 @@ const generateMedicineImages = async (
 ) => {
   // Image generation disabled
   return;
-        ...item,
-        imageUrl: imageMap.get(item.name) || item.imageUrl,
-      }))
-    );
-  }
 };
 
 // Fetch medical credit score from the Railway /score API
