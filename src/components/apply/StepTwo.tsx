@@ -333,7 +333,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         medicalNeedsScore: medicalNeedsScore,
         prescriptionItems: pricedMedications,
         prescriptionAnalyzed: true,
-        consultationCost: consultationCost + totalConsultationCost,
+        consultationCost: totalConsultationCost,
       });
       
       setShowPricing(true);
