@@ -11,58 +11,56 @@ interface StepHeaderProps {
 
 // Calculate progressive credit score
 // Total max: 100 points — each of the 4 scoring domains = 25%
-// Medical (25%), Collateral (25%), Verify (25%), Guarantors (25%)
-// Each domain: form completion contributes up to 10 pts, API score up to 15 pts
+// Steps 2-4: form filling = 5 pts, API scores = 20 pts
+// Step 5 (Guarantors): form-only = 25 pts
 
 const calculateProgressiveScore = (formData: FormData): number => {
   let total = 0;
 
-  // ===== MEDICAL - 25% (Step 2) =====
+  // ===== MEDICAL - 25% (Step 2) — 5 form + 20 API =====
   let medicalForm = 0;
-  if (formData.medicalPrescription) medicalForm += 5;
-  if (formData.drugImages?.length > 0) medicalForm += 5;
-  const medicalFormPts = Math.min(medicalForm, 10);
+  if (formData.medicalPrescription) medicalForm += 2.5;
+  if (formData.drugImages?.length > 0) medicalForm += 2.5;
+  const medicalFormPts = Math.min(medicalForm, 5);
   const medicalApiPts = formData.medicalNeedsScore !== null
-    ? Math.round((formData.medicalNeedsScore / 100) * 15) : 0;
+    ? Math.round((formData.medicalNeedsScore / 100) * 20) : 0;
   total += Math.min(medicalFormPts + medicalApiPts, 25);
 
-  // ===== COLLATERAL - 25% (Step 3) =====
+  // ===== COLLATERAL - 25% (Step 3) — 5 form + 20 API =====
   let collateralForm = 0;
   const hasAssets = formData.indoorAssetPictures?.length > 0 || formData.outdoorAssetPictures?.length > 0;
-  if (hasAssets) collateralForm += 4;
-  if (formData.logbook || formData.titleDeed) collateralForm += 3;
-  if (formData.homePhoto || formData.businessPhoto) collateralForm += 3;
-  const collateralFormPts = Math.min(collateralForm, 10);
+  if (hasAssets) collateralForm += 2;
+  if (formData.logbook || formData.titleDeed) collateralForm += 1.5;
+  if (formData.homePhoto || formData.businessPhoto) collateralForm += 1.5;
+  const collateralFormPts = Math.min(collateralForm, 5);
   const collateralApiPts = formData.assetValuationScore !== null
-    ? Math.round((formData.assetValuationScore / 100) * 15) : 0;
+    ? Math.round((formData.assetValuationScore / 100) * 20) : 0;
   total += Math.min(collateralFormPts + collateralApiPts, 25);
 
-  // ===== VERIFY - 25% (Step 4) =====
+  // ===== VERIFY - 25% (Step 4) — 5 form + 20 API =====
   let verifyForm = 0;
-  if (formData.mpesaStatement) verifyForm += 4;
-  if (formData.bankStatement) verifyForm += 3;
-  if (formData.callLogHistory) verifyForm += 3;
-  const verifyFormPts = Math.min(verifyForm, 10);
-  // Combines behavior risk + bank statement scores (split 7.5 each)
+  if (formData.mpesaStatement) verifyForm += 2;
+  if (formData.bankStatement) verifyForm += 1.5;
+  if (formData.callLogHistory) verifyForm += 1.5;
+  const verifyFormPts = Math.min(verifyForm, 5);
   let verifyApiPts = 0;
   if (formData.behaviorRiskScore !== null) {
-    verifyApiPts += Math.round((formData.behaviorRiskScore / 100) * 7.5);
+    verifyApiPts += Math.round((formData.behaviorRiskScore / 100) * 10);
   }
   if (formData.bankStatementCreditScore !== null) {
-    verifyApiPts += Math.round((formData.bankStatementCreditScore / 100) * 7.5);
+    verifyApiPts += Math.round((formData.bankStatementCreditScore / 100) * 10);
   }
   total += Math.min(verifyFormPts + verifyApiPts, 25);
 
-  // ===== GUARANTORS - 25% (Step 5) =====
+  // ===== GUARANTORS - 25% (Step 5) — 25 form (no API) =====
   let guarantorForm = 0;
-  if (formData.guarantor1Phone) guarantorForm += 3;
-  if (formData.guarantor1Id) guarantorForm += 4;
-  if (formData.guarantor2Phone) guarantorForm += 3;
-  if (formData.guarantor2Id) guarantorForm += 4;
-  // Guarantors are form-only (no API score), so full 25 pts from form
+  if (formData.guarantor1Phone) guarantorForm += 5;
+  if (formData.guarantor1Id) guarantorForm += 7.5;
+  if (formData.guarantor2Phone) guarantorForm += 5;
+  if (formData.guarantor2Id) guarantorForm += 7.5;
   total += Math.min(guarantorForm, 25);
 
-  return Math.min(total, 100);
+  return Math.min(Math.round(total), 100);
 };
 
 const getScoreColor = (score: number): string => {
