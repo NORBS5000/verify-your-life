@@ -89,7 +89,8 @@ const fetchPricingForMedications = async (
   medications: MedicationItem[],
   tests: string[] = []
 ): Promise<{ items: MedicationItem[]; totalConsultationCost: number }> => {
-  let totalConsultationCost = 0;
+  // Consultation is a one-time cost, so take the MAX across all API responses (not sum)
+  let maxConsultationCost = 0;
 
   const pricedItems = await Promise.all(
     medications.map(async (item) => {
