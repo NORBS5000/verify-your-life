@@ -9,77 +9,60 @@ interface StepHeaderProps {
   formData: FormData;
 }
 
-// Calculate progressive credit score that increases as user completes each step
-// Total max: 100 points
-// - Form completion: max 40 points (fills as user progresses through steps)
-// - API scores: max 60 points (15 points each from 4 API analyses)
+// Calculate progressive credit score
+// Total max: 100 points — each of the 4 scoring domains = 25%
+// Medical (25%), Collateral (25%), Verify (25%), Guarantors (25%)
+// Each domain: form completion contributes up to 10 pts, API score up to 15 pts
 
 const calculateProgressiveScore = (formData: FormData): number => {
-  let score = 0;
+  let total = 0;
 
-  // ===== FORM COMPLETION SECTION (max 40 points) =====
-  
-  // Step 1 - Profile section (max 10 points)
-  if (formData.fullName) score += 2;
-  if (formData.idNumber) score += 2;
-  if (formData.phoneNumber) score += 2;
-  if (formData.occupation) score += 2;
-  if (formData.sex && formData.age) score += 2;
+  // ===== MEDICAL - 25% (Step 2) =====
+  let medicalForm = 0;
+  if (formData.medicalPrescription) medicalForm += 5;
+  if (formData.drugImages?.length > 0) medicalForm += 5;
+  const medicalFormPts = Math.min(medicalForm, 10);
+  const medicalApiPts = formData.medicalNeedsScore !== null
+    ? Math.round((formData.medicalNeedsScore / 100) * 15) : 0;
+  total += Math.min(medicalFormPts + medicalApiPts, 25);
 
-  // Step 2 - Medical section (max 6 points for uploads)
-  if (formData.medicalPrescription) score += 3;
-  if (formData.drugImages?.length > 0) score += 3;
-
-  // Step 3 - Collateral section (max 8 points for uploads)
+  // ===== COLLATERAL - 25% (Step 3) =====
+  let collateralForm = 0;
   const hasAssets = formData.indoorAssetPictures?.length > 0 || formData.outdoorAssetPictures?.length > 0;
-  if (hasAssets) score += 4;
-  if (formData.logbook || formData.titleDeed) score += 2;
-  if (formData.homePhoto || formData.businessPhoto) score += 2;
+  if (hasAssets) collateralForm += 4;
+  if (formData.logbook || formData.titleDeed) collateralForm += 3;
+  if (formData.homePhoto || formData.businessPhoto) collateralForm += 3;
+  const collateralFormPts = Math.min(collateralForm, 10);
+  const collateralApiPts = formData.assetValuationScore !== null
+    ? Math.round((formData.assetValuationScore / 100) * 15) : 0;
+  total += Math.min(collateralFormPts + collateralApiPts, 25);
 
-  // Step 4 - Verification section (max 8 points for uploads)
-  if (formData.mpesaStatement) score += 4;
-  if (formData.bankStatement) score += 2;
-  if (formData.callLogHistory) score += 2;
-
-  // Step 5 - Guarantors section (max 8 points)
-  if (formData.guarantor1Phone) score += 2;
-  if (formData.guarantor1Id) score += 2;
-  if (formData.guarantor2Phone) score += 2;
-  if (formData.guarantor2Id) score += 2;
-
-  // Cap form completion at 40 points
-  const formScore = Math.min(score, 40);
-
-  // ===== API SCORE SECTION (max 60 points) =====
-  // Each API analysis contributes up to 15 points (scaled from 0-100 API score)
-  
-  let apiScore = 0;
-  
-  // Medical needs score (from Step 2 prescription/medication analysis)
-  if (formData.medicalNeedsScore !== null) {
-    apiScore += Math.round((formData.medicalNeedsScore / 100) * 15);
-  }
-  
-  // Asset valuation score (from Step 3 asset credit scoring API)
-  if (formData.assetValuationScore !== null) {
-    apiScore += Math.round((formData.assetValuationScore / 100) * 15);
-  }
-  
-  // Behavior risk score (from Step 4 M-Pesa/call logs analysis)
+  // ===== VERIFY - 25% (Step 4) =====
+  let verifyForm = 0;
+  if (formData.mpesaStatement) verifyForm += 4;
+  if (formData.bankStatement) verifyForm += 3;
+  if (formData.callLogHistory) verifyForm += 3;
+  const verifyFormPts = Math.min(verifyForm, 10);
+  // Combines behavior risk + bank statement scores (split 7.5 each)
+  let verifyApiPts = 0;
   if (formData.behaviorRiskScore !== null) {
-    apiScore += Math.round((formData.behaviorRiskScore / 100) * 15);
+    verifyApiPts += Math.round((formData.behaviorRiskScore / 100) * 7.5);
   }
-  
-  // Bank statement credit score (from Step 4 bank statement analysis)
   if (formData.bankStatementCreditScore !== null) {
-    apiScore += Math.round((formData.bankStatementCreditScore / 100) * 15);
+    verifyApiPts += Math.round((formData.bankStatementCreditScore / 100) * 7.5);
   }
+  total += Math.min(verifyFormPts + verifyApiPts, 25);
 
-  // Cap API score at 60 points
-  const cappedApiScore = Math.min(apiScore, 60);
+  // ===== GUARANTORS - 25% (Step 5) =====
+  let guarantorForm = 0;
+  if (formData.guarantor1Phone) guarantorForm += 3;
+  if (formData.guarantor1Id) guarantorForm += 4;
+  if (formData.guarantor2Phone) guarantorForm += 3;
+  if (formData.guarantor2Id) guarantorForm += 4;
+  // Guarantors are form-only (no API score), so full 25 pts from form
+  total += Math.min(guarantorForm, 25);
 
-  // Total progressive score
-  return Math.min(formScore + cappedApiScore, 100);
+  return Math.min(total, 100);
 };
 
 const getScoreColor = (score: number): string => {
