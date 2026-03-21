@@ -674,10 +674,14 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
           const itemsTotal = updated.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
           const totalRetail = itemsTotal + consultationCost;
           const covaCost = Math.round(totalRetail * 0.9);
-          const medicalNeedsScore = Math.min(100, Math.round(
-            (updated.filter(i => i.type === "medication").length * 15) +
-            Math.min(50, totalRetail / 100)
-          ));
+          // Gather conditions for score API
+          const localConditions = new Set<string>();
+          updated.forEach(item => {
+            if (item.medicalConditions) item.medicalConditions.forEach(c => localConditions.add(c));
+          });
+          predictedConditions.forEach(c => localConditions.add(c));
+          const userAge = parseInt(formData.age) || 0;
+          const medicalNeedsScore = await fetchMedicalCreditScore(userAge, Array.from(localConditions));
 
           updateFormData({
             retailCost: totalRetail,
