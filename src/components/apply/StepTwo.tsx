@@ -395,7 +395,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       const { items: pricedMedications, totalConsultationCost } = await fetchPricingForMedications(medications);
 
       setMedicationItems(pricedMedications);
-      setConsultationCost(prev => prev + totalConsultationCost);
+      setConsultationCost(totalConsultationCost);
 
       // Calculate totals with priced data
       const medicationTotal = pricedMedications.reduce(
