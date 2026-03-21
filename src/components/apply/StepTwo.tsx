@@ -406,7 +406,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         (sum, item) => sum + (item.unitPrice * item.quantity),
         0
       );
-      const totalRetail = medicationTotal + existingPrescriptionTotal + totalConsultationCost + consultationCost;
+      const totalRetail = medicationTotal + existingPrescriptionTotal + totalConsultationCost;
       const covaCost = Math.round(totalRetail * 0.9);
 
       const medicalNeedsScore = Math.min(100, Math.round(
