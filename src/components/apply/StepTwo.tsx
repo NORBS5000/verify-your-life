@@ -423,7 +423,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         medicationItems: pricedMedications,
         medicationsAnalyzed: true,
         predictedConditions: data.predicted_conditions,
-        consultationCost: consultationCost + totalConsultationCost,
+        consultationCost: totalConsultationCost,
       });
       setShowPricing(true);
       toast.success("Medication analyzed successfully!");
