@@ -749,10 +749,8 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             const updatedConditions = Array.from(newConditions);
             setPredictedConditions(updatedConditions);
 
-            const newScore = Math.min(100, Math.round(
-              (allPriced.filter(i => i.type === "medication").length * 15) +
-              Math.min(50, newTotalRetail / 100)
-            ));
+            const scoreAge = parseInt(formData.age) || 0;
+            const newScore = await fetchMedicalCreditScore(scoreAge, updatedConditions);
 
             updateFormData({
               retailCost: newTotalRetail,
