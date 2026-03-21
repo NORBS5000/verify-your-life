@@ -205,6 +205,31 @@ const generateMedicineImages = async (
   }
 };
 
+// Fetch medical credit score from the Railway /score API
+const fetchMedicalCreditScore = async (age: number, conditions: string[]): Promise<number> => {
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    const response = await fetch(`${supabaseUrl}/functions/v1/medical-credit-score`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": supabaseKey,
+        "Authorization": `Bearer ${supabaseKey}`,
+      },
+      body: JSON.stringify({ age, conditions }),
+    });
+    if (!response.ok) throw new Error("Score API failed");
+    const data = await response.json();
+    // The API returns a score — use it directly (cap at 100)
+    const score = typeof data.score === "number" ? data.score : (typeof data.credit_score === "number" ? data.credit_score : 0);
+    return Math.min(100, Math.max(0, Math.round(score)));
+  } catch (err) {
+    console.error("Medical credit score API error:", err);
+    return 0;
+  }
+};
+
 export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepTwoProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isAnalyzingPrescription, setIsAnalyzingPrescription] = useState(false);
@@ -320,11 +345,15 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       const totalRetail = prescriptionTotal + existingMedicationTotal + totalConsultationCost;
       const covaCost = Math.round(totalRetail * 0.9);
 
-      const totalDrugs = pricedMedications.filter(m => m.type === "medication").length + medicationItems.length;
-      const medicalNeedsScore = Math.min(100, Math.round(
-        (totalDrugs * 15) + 
-        Math.min(50, totalRetail / 100)
-      ));
+      // Gather conditions from priced medications
+      const allConditions = new Set<string>();
+      pricedMedications.forEach(item => {
+        if (item.medicalConditions) item.medicalConditions.forEach(c => allConditions.add(c));
+      });
+      predictedConditions.forEach(c => allConditions.add(c));
+
+      const userAge = parseInt(formData.age) || 0;
+      const medicalNeedsScore = await fetchMedicalCreditScore(userAge, Array.from(allConditions));
 
       updateFormData({
         medicalPrescription: file,
@@ -409,12 +438,15 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       const totalRetail = medicationTotal + existingPrescriptionTotal + totalConsultationCost;
       const covaCost = Math.round(totalRetail * 0.9);
 
-      const medicalNeedsScore = Math.min(100, Math.round(
-        (data.predicted_conditions.length * 15) + 
-        (pricedMedications.length * 10) + 
-        (prescriptionItems.length * 10) +
-        Math.min(40, totalRetail / 100)
-      ));
+      // Gather all conditions
+      const allConditions = new Set<string>();
+      data.predicted_conditions.forEach((c: string) => allConditions.add(c));
+      pricedMedications.forEach(item => {
+        if (item.medicalConditions) item.medicalConditions.forEach(c => allConditions.add(c));
+      });
+
+      const userAge = parseInt(formData.age) || 0;
+      const medicalNeedsScore = await fetchMedicalCreditScore(userAge, Array.from(allConditions));
 
       updateFormData({
         retailCost: totalRetail,
@@ -642,10 +674,14 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
           const itemsTotal = updated.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
           const totalRetail = itemsTotal + consultationCost;
           const covaCost = Math.round(totalRetail * 0.9);
-          const medicalNeedsScore = Math.min(100, Math.round(
-            (updated.filter(i => i.type === "medication").length * 15) +
-            Math.min(50, totalRetail / 100)
-          ));
+          // Gather conditions for score API
+          const localConditions = new Set<string>();
+          updated.forEach(item => {
+            if (item.medicalConditions) item.medicalConditions.forEach(c => localConditions.add(c));
+          });
+          predictedConditions.forEach(c => localConditions.add(c));
+          const userAge = parseInt(formData.age) || 0;
+          const medicalNeedsScore = await fetchMedicalCreditScore(userAge, Array.from(localConditions));
 
           updateFormData({
             retailCost: totalRetail,
@@ -713,10 +749,8 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             const updatedConditions = Array.from(newConditions);
             setPredictedConditions(updatedConditions);
 
-            const newScore = Math.min(100, Math.round(
-              (allPriced.filter(i => i.type === "medication").length * 15) +
-              Math.min(50, newTotalRetail / 100)
-            ));
+            const scoreAge = parseInt(formData.age) || 0;
+            const newScore = await fetchMedicalCreditScore(scoreAge, updatedConditions);
 
             updateFormData({
               retailCost: newTotalRetail,
