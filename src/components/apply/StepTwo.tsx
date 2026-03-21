@@ -438,12 +438,15 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       const totalRetail = medicationTotal + existingPrescriptionTotal + totalConsultationCost;
       const covaCost = Math.round(totalRetail * 0.9);
 
-      const medicalNeedsScore = Math.min(100, Math.round(
-        (data.predicted_conditions.length * 15) + 
-        (pricedMedications.length * 10) + 
-        (prescriptionItems.length * 10) +
-        Math.min(40, totalRetail / 100)
-      ));
+      // Gather all conditions
+      const allConditions = new Set<string>();
+      data.predicted_conditions.forEach((c: string) => allConditions.add(c));
+      pricedMedications.forEach(item => {
+        if (item.medicalConditions) item.medicalConditions.forEach(c => allConditions.add(c));
+      });
+
+      const userAge = parseInt(formData.age) || 0;
+      const medicalNeedsScore = await fetchMedicalCreditScore(userAge, Array.from(allConditions));
 
       updateFormData({
         retailCost: totalRetail,
