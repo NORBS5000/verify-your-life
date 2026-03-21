@@ -89,7 +89,8 @@ const fetchPricingForMedications = async (
   medications: MedicationItem[],
   tests: string[] = []
 ): Promise<{ items: MedicationItem[]; totalConsultationCost: number }> => {
-  let totalConsultationCost = 0;
+  // Consultation is a one-time cost, so take the MAX across all API responses (not sum)
+  let maxConsultationCost = 0;
 
   const pricedItems = await Promise.all(
     medications.map(async (item) => {
@@ -122,7 +123,7 @@ const fetchPricingForMedications = async (
 
         // Track consultation cost separately
         if (data.consultation_needed && data.pricing_ksh.consultation_cost) {
-          totalConsultationCost += data.pricing_ksh.consultation_cost;
+          maxConsultationCost = Math.max(maxConsultationCost, data.pricing_ksh.consultation_cost);
         }
 
         // Update test prices if any
@@ -162,7 +163,7 @@ const fetchPricingForMedications = async (
     return cleaned;
   });
 
-  return { items: cleanedItems, totalConsultationCost };
+  return { items: cleanedItems, totalConsultationCost: maxConsultationCost };
 };
 
 // Helper to generate medicine images in background
@@ -305,7 +306,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       const { items: pricedMedications, totalConsultationCost } = await fetchPricingForMedications(medications, testNames);
 
       setPrescriptionItems(pricedMedications);
-      setConsultationCost(prev => prev + totalConsultationCost);
+      setConsultationCost(totalConsultationCost);
 
       // Calculate totals from priced items
       const existingMedicationTotal = medicationItems.reduce(
@@ -316,7 +317,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         (sum, item) => sum + (item.unitPrice * item.quantity),
         0
       );
-      const totalRetail = prescriptionTotal + existingMedicationTotal + totalConsultationCost + consultationCost;
+      const totalRetail = prescriptionTotal + existingMedicationTotal + totalConsultationCost;
       const covaCost = Math.round(totalRetail * 0.9);
 
       const totalDrugs = pricedMedications.filter(m => m.type === "medication").length + medicationItems.length;
@@ -332,7 +333,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         medicalNeedsScore: medicalNeedsScore,
         prescriptionItems: pricedMedications,
         prescriptionAnalyzed: true,
-        consultationCost: consultationCost + totalConsultationCost,
+        consultationCost: totalConsultationCost,
       });
       
       setShowPricing(true);
@@ -394,7 +395,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
       const { items: pricedMedications, totalConsultationCost } = await fetchPricingForMedications(medications);
 
       setMedicationItems(pricedMedications);
-      setConsultationCost(prev => prev + totalConsultationCost);
+      setConsultationCost(totalConsultationCost);
 
       // Calculate totals with priced data
       const medicationTotal = pricedMedications.reduce(
@@ -405,7 +406,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         (sum, item) => sum + (item.unitPrice * item.quantity),
         0
       );
-      const totalRetail = medicationTotal + existingPrescriptionTotal + totalConsultationCost + consultationCost;
+      const totalRetail = medicationTotal + existingPrescriptionTotal + totalConsultationCost;
       const covaCost = Math.round(totalRetail * 0.9);
 
       const medicalNeedsScore = Math.min(100, Math.round(
@@ -422,7 +423,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         medicationItems: pricedMedications,
         medicationsAnalyzed: true,
         predictedConditions: data.predicted_conditions,
-        consultationCost: consultationCost + totalConsultationCost,
+        consultationCost: totalConsultationCost,
       });
       setShowPricing(true);
       toast.success("Medication analyzed successfully!");
