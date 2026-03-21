@@ -123,7 +123,7 @@ const fetchPricingForMedications = async (
 
         // Track consultation cost separately
         if (data.consultation_needed && data.pricing_ksh.consultation_cost) {
-          totalConsultationCost += data.pricing_ksh.consultation_cost;
+          maxConsultationCost = Math.max(maxConsultationCost, data.pricing_ksh.consultation_cost);
         }
 
         // Update test prices if any
