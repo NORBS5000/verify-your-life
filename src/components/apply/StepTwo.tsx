@@ -205,6 +205,31 @@ const generateMedicineImages = async (
   }
 };
 
+// Fetch medical credit score from the Railway /score API
+const fetchMedicalCreditScore = async (age: number, conditions: string[]): Promise<number> => {
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    const response = await fetch(`${supabaseUrl}/functions/v1/medical-credit-score`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": supabaseKey,
+        "Authorization": `Bearer ${supabaseKey}`,
+      },
+      body: JSON.stringify({ age, conditions }),
+    });
+    if (!response.ok) throw new Error("Score API failed");
+    const data = await response.json();
+    // The API returns a score — use it directly (cap at 100)
+    const score = typeof data.score === "number" ? data.score : (typeof data.credit_score === "number" ? data.credit_score : 0);
+    return Math.min(100, Math.max(0, Math.round(score)));
+  } catch (err) {
+    console.error("Medical credit score API error:", err);
+    return 0;
+  }
+};
+
 export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDraft }: StepTwoProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isAnalyzingPrescription, setIsAnalyzingPrescription] = useState(false);
