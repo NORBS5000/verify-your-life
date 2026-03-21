@@ -317,7 +317,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         (sum, item) => sum + (item.unitPrice * item.quantity),
         0
       );
-      const totalRetail = prescriptionTotal + existingMedicationTotal + totalConsultationCost + consultationCost;
+      const totalRetail = prescriptionTotal + existingMedicationTotal + totalConsultationCost;
       const covaCost = Math.round(totalRetail * 0.9);
 
       const totalDrugs = pricedMedications.filter(m => m.type === "medication").length + medicationItems.length;
