@@ -271,10 +271,9 @@ export const StepThree = ({ formData, updateFormData, nextStep, prevStep, onSave
       return;
     }
 
-    // Check if all required proof documents are uploaded
+    // Warn but allow proceeding if proof documents are missing
     if (assetsRequiringProof.length > 0 && !allProofsUploaded) {
-      toast.error("Please upload all required ownership documents");
-      return;
+      toast.warning("Some ownership documents are missing — you can still proceed, but uploading them improves your score.");
     }
 
     // Save total asset value (don't overwrite assetValuationScore - it comes from the API)
