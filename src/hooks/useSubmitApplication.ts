@@ -3,28 +3,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { FormData } from "@/pages/Apply";
 
 // Calculate composite score from individual scores (0-100 scale)
+// Each of the 4 domain scores contributes exactly 25% of the total
 const calculateCompositeScore = (
   medicalNeedsScore: number | null,
   assetValuationScore: number | null,
   behaviorRiskScore: number | null,
   bankStatementCreditScore: number | null
 ): number | null => {
-  const scores: number[] = [];
+  // Medical (Step 2) = 25%, Collateral/Asset (Step 3) = 25%,
+  // Behavior Risk (Step 4 - M-Pesa/call logs) = 25%, Bank Statement (Step 4 - Guarantors context) = 25%
+  const medical = medicalNeedsScore !== null ? (medicalNeedsScore / 100) * 25 : 0;
+  const asset = assetValuationScore !== null ? (assetValuationScore / 100) * 25 : 0;
+  const behavior = behaviorRiskScore !== null ? (behaviorRiskScore / 100) * 25 : 0;
+  const bank = bankStatementCreditScore !== null ? (bankStatementCreditScore / 100) * 25 : 0;
+
+  const total = medical + asset + behavior + bank;
   
-  // Medical needs (lower is better for credit, but we want high need = funded)
-  if (medicalNeedsScore !== null) scores.push(medicalNeedsScore);
-  // Asset valuation (higher is better)
-  if (assetValuationScore !== null) scores.push(assetValuationScore);
-  // Behavior risk (higher is better - less risky)
-  if (behaviorRiskScore !== null) scores.push(behaviorRiskScore);
-  // Bank statement credit score (typically 0-100 from API)
-  if (bankStatementCreditScore !== null) scores.push(bankStatementCreditScore);
+  // Only return null if no scores at all
+  if (medicalNeedsScore === null && assetValuationScore === null && 
+      behaviorRiskScore === null && bankStatementCreditScore === null) return null;
   
-  if (scores.length === 0) return null;
-  
-  // Average of available scores (0-100 scale)
-  const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
-  return Math.round(avgScore);
+  return Math.round(total);
 };
 
 export function useSubmitApplication() {
