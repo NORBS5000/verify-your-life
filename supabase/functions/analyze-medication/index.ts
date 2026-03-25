@@ -21,26 +21,26 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    console.log("Proxying to Railway /analyze:", JSON.stringify(body));
+    console.log("Proxying to Render /analyze:", JSON.stringify(body));
 
     // First attempt
-    let response = await callRailwayAPI(body);
+    let response = await callAnalyzeAPI(body);
 
     // If 500, retry once after a short delay
     if (response.status === 500) {
       const errorBody = await response.text();
-      console.error("Railway API first attempt failed:", response.status, errorBody);
+      console.error("Render API first attempt failed:", response.status, errorBody);
       
       // Wait 2 seconds and retry
       await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log("Retrying Railway API call...");
-      response = await callRailwayAPI(body);
+      console.log("Retrying Render API call...");
+      response = await callAnalyzeAPI(body);
     }
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Railway API error:", response.status, errorText);
-      return new Response(JSON.stringify({ error: `Railway API error: ${response.status}`, details: errorText }), {
+      console.error("Render API error:", response.status, errorText);
+      return new Response(JSON.stringify({ error: `Render API error: ${response.status}`, details: errorText }), {
         status: response.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
