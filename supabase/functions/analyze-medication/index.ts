@@ -5,8 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-async function callRailwayAPI(body: Record<string, unknown>): Promise<Response> {
-  const response = await fetch("https://web-production-4382.up.railway.app/analyze", {
+async function callAnalyzeAPI(body: Record<string, unknown>): Promise<Response> {
+  const response = await fetch("https://medical-scoring-api-2.onrender.com/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
