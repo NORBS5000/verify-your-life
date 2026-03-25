@@ -12,9 +12,9 @@ serve(async (req) => {
 
   try {
     const { age, conditions } = await req.json();
-    console.log("Calling Railway /score with:", JSON.stringify({ age, conditions }));
+    console.log("Calling Render /score with:", JSON.stringify({ age, conditions }));
 
-    const response = await fetch("https://web-production-587b9.up.railway.app/score", {
+    const response = await fetch("https://medical-scoring-api-2.onrender.com/score", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ age: age || 0, conditions: conditions || [] }),
@@ -22,7 +22,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Railway /score error:", response.status, errorText);
+      console.error("Render /score error:", response.status, errorText);
       return new Response(JSON.stringify({ error: `Score API error: ${response.status}`, details: errorText }), {
         status: response.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -30,7 +30,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log("Railway /score response:", JSON.stringify(data));
+    console.log("Render /score response:", JSON.stringify(data));
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
