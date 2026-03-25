@@ -321,9 +321,11 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         if (item.medicalConditions) item.medicalConditions.forEach(c => allConditions.add(c));
       });
       predictedConditions.forEach(c => allConditions.add(c));
+      const conditionsArray = Array.from(allConditions);
+      setPredictedConditions(conditionsArray);
 
       const userAge = parseInt(formData.age) || 0;
-      const medicalNeedsScore = await fetchMedicalCreditScore(userAge, Array.from(allConditions));
+      const medicalNeedsScore = await fetchMedicalCreditScore(userAge, conditionsArray);
 
       updateFormData({
         medicalPrescription: file,
@@ -333,6 +335,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         prescriptionItems: pricedMedications,
         prescriptionAnalyzed: true,
         consultationCost: totalConsultationCost,
+        predictedConditions: conditionsArray,
       });
       
       setShowPricing(true);
