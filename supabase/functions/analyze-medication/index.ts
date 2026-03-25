@@ -47,7 +47,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log("Railway API response:", JSON.stringify(data));
+    console.log("Render API response:", JSON.stringify(data));
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

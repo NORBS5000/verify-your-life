@@ -30,7 +30,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log("Railway /score response:", JSON.stringify(data));
+    console.log("Render /score response:", JSON.stringify(data));
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
