@@ -22,7 +22,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Railway /score error:", response.status, errorText);
+      console.error("Render /score error:", response.status, errorText);
       return new Response(JSON.stringify({ error: `Score API error: ${response.status}`, details: errorText }), {
         status: response.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
