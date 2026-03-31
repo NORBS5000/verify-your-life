@@ -74,21 +74,25 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
     }
   };
 
-  // Auto-analyze M-Pesa statement when file is uploaded
+  // Handle M-Pesa file upload - don't auto-analyze PDFs (may need password)
   const handleMpesaUpload = async (file: File | null) => {
     updateFormData({ mpesaStatement: file });
     clearMpesaResult();
     setHasAnalyzedMpesa(false);
     
     if (file && userId && loanId) {
-      toast.info("Analyzing M-Pesa statement...", { duration: 3000 });
-      const result = await analyzeMpesaStatement(userId, loanId, file, formData.mpesaStatementPassword || undefined);
-      setHasAnalyzedMpesa(true);
-      
-      if (result) {
-        toast.success("M-Pesa statement analyzed successfully!");
+      const isPdf = file.name.toLowerCase().endsWith('.pdf');
+      if (isPdf) {
+        toast.info("PDF uploaded. Enter password if protected, then click Analyze.", { duration: 5000 });
       } else {
-        toast.error("Failed to analyze M-Pesa statement. Please try again.");
+        toast.info("Analyzing M-Pesa statement...", { duration: 3000 });
+        const result = await analyzeMpesaStatement(userId, loanId, file);
+        setHasAnalyzedMpesa(true);
+        if (result) {
+          toast.success("M-Pesa statement analyzed successfully!");
+        } else {
+          toast.error("Failed to analyze M-Pesa statement. Please try again.");
+        }
       }
     }
   };
