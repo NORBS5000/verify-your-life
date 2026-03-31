@@ -69,9 +69,9 @@ interface MedicalNeedsResponse {
   medicines_info: MedicineInfo[];
 }
 
-// Response type for the pricing/analyze API
-interface PricingAnalysisResponse {
-  medical_conditions: string[];
+// Response type for the Railway /analyze API (single batch call)
+interface RailwayAnalyzeResponse {
+  predicted_disease: string[];
   refill_frequency: string;
   treatment_duration: string;
   is_chronic: boolean;
