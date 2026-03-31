@@ -104,7 +104,7 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
 
   const handleAnalyzeMpesaWithPassword = async () => {
     if (formData.mpesaStatement && userId && loanId) {
-      toast.info("Re-analyzing M-Pesa with password...", { duration: 3000 });
+      toast.info("Analyzing M-Pesa statement...", { duration: 3000 });
       const result = await analyzeMpesaStatement(userId, loanId, formData.mpesaStatement, formData.mpesaStatementPassword || undefined);
       setHasAnalyzedMpesa(true);
       
