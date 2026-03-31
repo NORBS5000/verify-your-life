@@ -235,7 +235,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
 
   // Warm up Render API on component mount to reduce cold start delays
   useEffect(() => {
-    fetch("https://medical-scoring-api-2.onrender.com/docs", { method: "GET" }).catch(() => {});
+    fetch("https://web-production-4382.up.railway.app/docs", { method: "GET" }).catch(() => {});
   }, []);
 
   // Combined extracted items from both sources

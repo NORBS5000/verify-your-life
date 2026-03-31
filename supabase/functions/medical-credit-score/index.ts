@@ -14,7 +14,7 @@ serve(async (req) => {
     const { age, conditions } = await req.json();
     console.log("Calling Render /score with:", JSON.stringify({ age, conditions }));
 
-    const response = await fetch("https://medical-scoring-api-2.onrender.com/score", {
+    const response = await fetch("https://web-production-4382.up.railway.app/score", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ age: age || 0, conditions: conditions || [] }),
