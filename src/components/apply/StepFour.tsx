@@ -116,21 +116,25 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
     }
   };
 
-  // Auto-analyze bank statement when file is uploaded
+  // Handle bank statement upload - don't auto-analyze PDFs (may need password)
   const handleBankStatementUpload = async (file: File | null) => {
     updateFormData({ bankStatement: file });
     clearAnalysisResult();
     setHasAnalyzed(false);
     
     if (file && userId && loanId) {
-      toast.info("Analyzing bank statement...", { duration: 3000 });
-      const result = await analyzeBankStatement(userId, loanId, file, formData.bankStatementPassword || undefined);
-      setHasAnalyzed(true);
-      
-      if (result) {
-        toast.success("Bank statement analyzed successfully!");
+      const isPdf = file.name.toLowerCase().endsWith('.pdf');
+      if (isPdf) {
+        toast.info("PDF uploaded. Enter password if protected, then click Analyze.", { duration: 5000 });
       } else {
-        toast.error("Failed to analyze bank statement. Please try again.");
+        toast.info("Analyzing bank statement...", { duration: 3000 });
+        const result = await analyzeBankStatement(userId, loanId, file);
+        setHasAnalyzed(true);
+        if (result) {
+          toast.success("Bank statement analyzed successfully!");
+        } else {
+          toast.error("Failed to analyze bank statement. Please try again.");
+        }
       }
     }
   };
