@@ -281,7 +281,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             name: test.test_name,
             dosage: "",
             quantity: 1,
-            unitPrice: test.estimated_price,
+            unitPrice: 0, // Price comes from Railway API only
             type: "test" as const,
           });
         });
