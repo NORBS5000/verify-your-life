@@ -230,7 +230,7 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                     onChange={(e) => handleMpesaPasswordChange(e.target.value)}
                     className="flex-1 text-sm"
                   />
-                  {formData.mpesaStatement && formData.mpesaStatementPassword && (
+                  {formData.mpesaStatement && !hasAnalyzedMpesa && (
                     <Button
                       type="button"
                       variant="outline"
@@ -241,8 +241,10 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                     >
                       {isAnalyzingMpesa ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : formData.mpesaStatementPassword ? (
+                        "Unlock & Analyze"
                       ) : (
-                        "Unlock"
+                        "Analyze"
                       )}
                     </Button>
                   )}
