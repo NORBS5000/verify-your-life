@@ -69,9 +69,9 @@ interface MedicalNeedsResponse {
   medicines_info: MedicineInfo[];
 }
 
-// Response type for the pricing/analyze API
-interface PricingAnalysisResponse {
-  medical_conditions: string[];
+// Response type for the Railway /analyze API (single batch call)
+interface RailwayAnalyzeResponse {
+  predicted_disease: string[];
   refill_frequency: string;
   treatment_duration: string;
   is_chronic: boolean;
@@ -84,27 +84,28 @@ interface PricingAnalysisResponse {
   };
 }
 
-// warmUpRenderApi is called inside the component via useEffect
-
-// Fetch pricing from Railway API for ALL medications in a single batch call
+// Fetch pricing from Railway API — single call with all drugs + tests
 const fetchPricingForMedications = async (
   medications: MedicationItem[],
   tests: string[] = []
-): Promise<{ items: MedicationItem[]; totalConsultationCost: number }> => {
-  let maxConsultationCost = 0;
-
+): Promise<{ items: MedicationItem[]; totalConsultationCost: number; predictedConditions: string[]; isChronic: boolean; treatmentDuration: string; refillFrequency: string }> => {
   const drugItems = medications.filter(item => item.type !== "test");
   const testItems = medications.filter(item => item.type === "test");
 
-  if (drugItems.length === 0) {
-    return { items: medications, totalConsultationCost: 0 };
+  if (drugItems.length === 0 && testItems.length === 0) {
+    return { items: medications, totalConsultationCost: 0, predictedConditions: [], isChronic: false, treatmentDuration: "", refillFrequency: "" };
   }
 
   try {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-    // Single batch call with ALL medications
+    // Combine explicit test items + any test names passed in
+    const allTestNames = [
+      ...testItems.map(t => t.name),
+      ...tests.filter(t => !testItems.some(ti => ti.name.toLowerCase() === t.toLowerCase())),
+    ];
+
     const response = await fetch(`${supabaseUrl}/functions/v1/analyze-medication-batch`, {
       method: "POST",
       headers: {
@@ -113,42 +114,32 @@ const fetchPricingForMedications = async (
         "Authorization": `Bearer ${supabaseKey}`,
       },
       body: JSON.stringify({
-        medications: drugItems.map(item => ({
-          drug_name: item.name,
-          manufacturer: "",
+        drugs: drugItems.map(item => ({
+          name: item.name,
           quantity: item.dosage || "1",
-          tests: tests,
-          additional_info: "",
         })),
+        tests: allTestNames,
+        additional_info: "",
       }),
     });
 
     if (!response.ok) throw new Error("Batch pricing API failed");
-    const { results } = await response.json();
+    const data = await response.json() as RailwayAnalyzeResponse;
 
-    // Map results back to medication items
-    const allTestPrices: Record<string, number> = {};
-    const pricedDrugs = drugItems.map((item, index) => {
-      const result = results[index];
-      if (!result?.result) return item;
+    const medPrices = data.pricing_ksh?.medications || {};
+    const testPrices = data.pricing_ksh?.tests || {};
+    const consultationCost = data.consultation_needed ? (data.pricing_ksh?.consultation_cost || 0) : 0;
 
-      const data = result.result as PricingAnalysisResponse;
-      const medicationPrices = data.pricing_ksh?.medications || {};
-      const medPrice = Object.values(medicationPrices)[0] || 0;
-      const unitPrice = item.quantity > 0 ? Math.round(medPrice / item.quantity) : medPrice;
-
-      if (data.consultation_needed && data.pricing_ksh?.consultation_cost) {
-        maxConsultationCost = Math.max(maxConsultationCost, data.pricing_ksh.consultation_cost);
-      }
-
-      if (data.pricing_ksh?.tests) {
-        Object.assign(allTestPrices, data.pricing_ksh.tests);
-      }
+    // Map prices back to drug items
+    const pricedDrugs = drugItems.map(item => {
+      const nameKey = Object.keys(medPrices).find(k => k.toLowerCase() === item.name.toLowerCase());
+      const totalPrice = nameKey ? medPrices[nameKey] : 0;
+      const unitPrice = item.quantity > 0 ? Math.round(totalPrice / item.quantity) : totalPrice;
 
       return {
         ...item,
         unitPrice,
-        medicalConditions: data.medical_conditions,
+        medicalConditions: data.predicted_disease,
         isChronic: data.is_chronic,
         treatmentDuration: data.treatment_duration,
         consultationNeeded: data.consultation_needed,
@@ -156,18 +147,23 @@ const fetchPricingForMedications = async (
       };
     });
 
-    // Update test items with prices from the batch response
+    // Map prices back to test items
     const pricedTests = testItems.map(item => {
-      if (allTestPrices[item.name]) {
-        return { ...item, unitPrice: allTestPrices[item.name] };
-      }
-      return item;
+      const nameKey = Object.keys(testPrices).find(k => k.toLowerCase() === item.name.toLowerCase());
+      return { ...item, unitPrice: nameKey ? testPrices[nameKey] : item.unitPrice };
     });
 
-    return { items: [...pricedDrugs, ...pricedTests], totalConsultationCost: maxConsultationCost };
+    return {
+      items: [...pricedDrugs, ...pricedTests],
+      totalConsultationCost: consultationCost,
+      predictedConditions: data.predicted_disease || [],
+      isChronic: data.is_chronic || false,
+      treatmentDuration: data.treatment_duration || "",
+      refillFrequency: data.refill_frequency || "",
+    };
   } catch (err) {
     console.error("Batch pricing API error:", err);
-    return { items: medications, totalConsultationCost: 0 };
+    return { items: medications, totalConsultationCost: 0, predictedConditions: [], isChronic: false, treatmentDuration: "", refillFrequency: "" };
   }
 };
 
