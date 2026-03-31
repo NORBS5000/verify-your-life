@@ -84,7 +84,12 @@ interface PricingAnalysisResponse {
   };
 }
 
-// Fetch pricing from Railway API for each medication
+// Warm up Render API on component mount to reduce cold start delays
+useEffect(() => {
+  fetch("https://medical-scoring-api-2.onrender.com/docs", { method: "GET" }).catch(() => {});
+}, []);
+
+// Fetch pricing from Render API for each medication
 const fetchPricingForMedications = async (
   medications: MedicationItem[],
   tests: string[] = []
