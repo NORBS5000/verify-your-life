@@ -74,21 +74,25 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
     }
   };
 
-  // Auto-analyze M-Pesa statement when file is uploaded
+  // Handle M-Pesa file upload - don't auto-analyze PDFs (may need password)
   const handleMpesaUpload = async (file: File | null) => {
     updateFormData({ mpesaStatement: file });
     clearMpesaResult();
     setHasAnalyzedMpesa(false);
     
     if (file && userId && loanId) {
-      toast.info("Analyzing M-Pesa statement...", { duration: 3000 });
-      const result = await analyzeMpesaStatement(userId, loanId, file, formData.mpesaStatementPassword || undefined);
-      setHasAnalyzedMpesa(true);
-      
-      if (result) {
-        toast.success("M-Pesa statement analyzed successfully!");
+      const isPdf = file.name.toLowerCase().endsWith('.pdf');
+      if (isPdf) {
+        toast.info("PDF uploaded. Enter password if protected, then click Analyze.", { duration: 5000 });
       } else {
-        toast.error("Failed to analyze M-Pesa statement. Please try again.");
+        toast.info("Analyzing M-Pesa statement...", { duration: 3000 });
+        const result = await analyzeMpesaStatement(userId, loanId, file);
+        setHasAnalyzedMpesa(true);
+        if (result) {
+          toast.success("M-Pesa statement analyzed successfully!");
+        } else {
+          toast.error("Failed to analyze M-Pesa statement. Please try again.");
+        }
       }
     }
   };
@@ -100,7 +104,7 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
 
   const handleAnalyzeMpesaWithPassword = async () => {
     if (formData.mpesaStatement && userId && loanId) {
-      toast.info("Re-analyzing M-Pesa with password...", { duration: 3000 });
+      toast.info("Analyzing M-Pesa statement...", { duration: 3000 });
       const result = await analyzeMpesaStatement(userId, loanId, formData.mpesaStatement, formData.mpesaStatementPassword || undefined);
       setHasAnalyzedMpesa(true);
       
@@ -112,21 +116,25 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
     }
   };
 
-  // Auto-analyze bank statement when file is uploaded
+  // Handle bank statement upload - don't auto-analyze PDFs (may need password)
   const handleBankStatementUpload = async (file: File | null) => {
     updateFormData({ bankStatement: file });
     clearAnalysisResult();
     setHasAnalyzed(false);
     
     if (file && userId && loanId) {
-      toast.info("Analyzing bank statement...", { duration: 3000 });
-      const result = await analyzeBankStatement(userId, loanId, file, formData.bankStatementPassword || undefined);
-      setHasAnalyzed(true);
-      
-      if (result) {
-        toast.success("Bank statement analyzed successfully!");
+      const isPdf = file.name.toLowerCase().endsWith('.pdf');
+      if (isPdf) {
+        toast.info("PDF uploaded. Enter password if protected, then click Analyze.", { duration: 5000 });
       } else {
-        toast.error("Failed to analyze bank statement. Please try again.");
+        toast.info("Analyzing bank statement...", { duration: 3000 });
+        const result = await analyzeBankStatement(userId, loanId, file);
+        setHasAnalyzed(true);
+        if (result) {
+          toast.success("Bank statement analyzed successfully!");
+        } else {
+          toast.error("Failed to analyze bank statement. Please try again.");
+        }
       }
     }
   };
@@ -222,7 +230,7 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                     onChange={(e) => handleMpesaPasswordChange(e.target.value)}
                     className="flex-1 text-sm"
                   />
-                  {formData.mpesaStatement && formData.mpesaStatementPassword && (
+                  {formData.mpesaStatement && !hasAnalyzedMpesa && (
                     <Button
                       type="button"
                       variant="outline"
@@ -233,8 +241,10 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                     >
                       {isAnalyzingMpesa ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : formData.mpesaStatementPassword ? (
+                        "Unlock & Analyze"
                       ) : (
-                        "Unlock"
+                        "Analyze"
                       )}
                     </Button>
                   )}
@@ -334,7 +344,7 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     className="flex-1 text-sm"
                   />
-                  {formData.bankStatement && formData.bankStatementPassword && (
+                  {formData.bankStatement && !hasAnalyzed && (
                     <Button
                       type="button"
                       variant="outline"
@@ -345,8 +355,10 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                     >
                       {isAnalyzing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : formData.bankStatementPassword ? (
+                        "Unlock & Analyze"
                       ) : (
-                        "Unlock"
+                        "Analyze"
                       )}
                     </Button>
                   )}
