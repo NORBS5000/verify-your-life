@@ -31,8 +31,8 @@ serve(async (req) => {
       const errorBody = await response.text();
       console.error("Render API first attempt failed:", response.status, errorBody);
       
-      // Wait 2 seconds and retry
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Wait 5 seconds and retry (Render free-tier cold starts can take 30-90s)
+      await new Promise(resolve => setTimeout(resolve, 5000));
       console.log("Retrying Render API call...");
       response = await callAnalyzeAPI(body);
     }
