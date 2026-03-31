@@ -16,6 +16,26 @@ interface AnalyzeRequest {
   additional_info: string;
 }
 
+async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3): Promise<Response> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const response = await fetch(url, options);
+    
+    if (response.status === 429 || (response.status === 500 && attempt < maxRetries - 1)) {
+      const body = await response.text();
+      // Extract retry delay from error if available
+      const retryMatch = body.match(/retry in (\d+\.?\d*)/i);
+      const waitSeconds = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) + 2 : (attempt + 1) * 20;
+      console.log(`Rate limited (attempt ${attempt + 1}/${maxRetries}). Waiting ${waitSeconds}s...`);
+      await new Promise(resolve => setTimeout(resolve, waitSeconds * 1000));
+      continue;
+    }
+    
+    return response;
+  }
+  // Final attempt
+  return await fetch(url, options);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -33,7 +53,7 @@ serve(async (req) => {
 
     console.log(`Analyzing ${drugs.length} drugs and ${tests?.length || 0} tests in single call`);
 
-    const response = await fetch("https://web-production-4382.up.railway.app/analyze", {
+    const response = await fetchWithRetry("https://web-production-4382.up.railway.app/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
