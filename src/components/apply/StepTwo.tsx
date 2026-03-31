@@ -86,86 +86,89 @@ interface PricingAnalysisResponse {
 
 // warmUpRenderApi is called inside the component via useEffect
 
-// Fetch pricing from Render API for each medication
+// Fetch pricing from Railway API for ALL medications in a single batch call
 const fetchPricingForMedications = async (
   medications: MedicationItem[],
   tests: string[] = []
 ): Promise<{ items: MedicationItem[]; totalConsultationCost: number }> => {
-  // Consultation is a one-time cost, so take the MAX across all API responses (not sum)
   let maxConsultationCost = 0;
 
-  const pricedItems = await Promise.all(
-    medications.map(async (item) => {
-      if (item.type === "test") return item; // tests priced via drug calls
-      try {
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        const response = await fetch(`${supabaseUrl}/functions/v1/analyze-medication`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": supabaseKey,
-            "Authorization": `Bearer ${supabaseKey}`,
-          },
-          body: JSON.stringify({
-            drug_name: item.name,
-            manufacturer: "",
-            quantity: item.dosage || "1",
-            tests: tests,
-            additional_info: "",
-          }),
-        });
-        if (!response.ok) throw new Error("Pricing API failed");
-        const data: PricingAnalysisResponse = await response.json();
+  const drugItems = medications.filter(item => item.type !== "test");
+  const testItems = medications.filter(item => item.type === "test");
 
-        // Use only medication price for unitPrice (exclude consultation)
-        const medicationPrices = data.pricing_ksh.medications || {};
-        const medPrice = Object.values(medicationPrices)[0] || 0;
-        const unitPrice = item.quantity > 0 ? Math.round(medPrice / item.quantity) : medPrice;
+  if (drugItems.length === 0) {
+    return { items: medications, totalConsultationCost: 0 };
+  }
 
-        // Track consultation cost separately
-        if (data.consultation_needed && data.pricing_ksh.consultation_cost) {
-          maxConsultationCost = Math.max(maxConsultationCost, data.pricing_ksh.consultation_cost);
-        }
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-        // Update test prices if any
-        const testPrices = data.pricing_ksh.tests;
+    // Single batch call with ALL medications
+    const response = await fetch(`${supabaseUrl}/functions/v1/analyze-medication-batch`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": supabaseKey,
+        "Authorization": `Bearer ${supabaseKey}`,
+      },
+      body: JSON.stringify({
+        medications: drugItems.map(item => ({
+          drug_name: item.name,
+          manufacturer: "",
+          quantity: item.dosage || "1",
+          tests: tests,
+          additional_info: "",
+        })),
+      }),
+    });
 
-        return {
-          ...item,
-          unitPrice,
-          medicalConditions: data.medical_conditions,
-          isChronic: data.is_chronic,
-          treatmentDuration: data.treatment_duration,
-          consultationNeeded: data.consultation_needed,
-          consultationCost: data.pricing_ksh.consultation_cost,
-          testPrices,
-        } as MedicationItem & { testPrices?: Record<string, number> };
-      } catch (err) {
-        console.error(`Pricing API error for ${item.name}:`, err);
-        return item;
+    if (!response.ok) throw new Error("Batch pricing API failed");
+    const { results } = await response.json();
+
+    // Map results back to medication items
+    const allTestPrices: Record<string, number> = {};
+    const pricedDrugs = drugItems.map((item, index) => {
+      const result = results[index];
+      if (!result?.result) return item;
+
+      const data = result.result as PricingAnalysisResponse;
+      const medicationPrices = data.pricing_ksh?.medications || {};
+      const medPrice = Object.values(medicationPrices)[0] || 0;
+      const unitPrice = item.quantity > 0 ? Math.round(medPrice / item.quantity) : medPrice;
+
+      if (data.consultation_needed && data.pricing_ksh?.consultation_cost) {
+        maxConsultationCost = Math.max(maxConsultationCost, data.pricing_ksh.consultation_cost);
       }
-    })
-  );
 
-  // Now update test items with prices from the pricing API
-  const allTestPrices: Record<string, number> = {};
-  pricedItems.forEach((item: any) => {
-    if (item.testPrices) {
-      Object.assign(allTestPrices, item.testPrices);
-    }
-  });
+      if (data.pricing_ksh?.tests) {
+        Object.assign(allTestPrices, data.pricing_ksh.tests);
+      }
 
-  const cleanedItems = pricedItems.map((item) => {
-    const cleaned = { ...item } as any;
-    delete cleaned.testPrices;
-    if (item.type === "test" && allTestPrices[item.name]) {
-      return { ...cleaned, unitPrice: allTestPrices[item.name] };
-    }
-    return cleaned;
-  });
+      return {
+        ...item,
+        unitPrice,
+        medicalConditions: data.medical_conditions,
+        isChronic: data.is_chronic,
+        treatmentDuration: data.treatment_duration,
+        consultationNeeded: data.consultation_needed,
+        consultationCost: data.pricing_ksh?.consultation_cost,
+      };
+    });
 
-  return { items: cleanedItems, totalConsultationCost: maxConsultationCost };
+    // Update test items with prices from the batch response
+    const pricedTests = testItems.map(item => {
+      if (allTestPrices[item.name]) {
+        return { ...item, unitPrice: allTestPrices[item.name] };
+      }
+      return item;
+    });
+
+    return { items: [...pricedDrugs, ...pricedTests], totalConsultationCost: maxConsultationCost };
+  } catch (err) {
+    console.error("Batch pricing API error:", err);
+    return { items: medications, totalConsultationCost: 0 };
+  }
 };
 
 // Helper to generate medicine images in background
