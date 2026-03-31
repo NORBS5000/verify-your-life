@@ -271,7 +271,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             name: drug.drug_name,
             dosage: drug.dosage_instruction || drug.manufacturer,
             quantity: drug.total_tablets || 1,
-            unitPrice: drug.estimated_price_per_tablet_ksh,
+            unitPrice: 0, // Price comes from Railway API only
             type: "medication" as const,
           });
         });
@@ -281,7 +281,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
             name: test.test_name,
             dosage: "",
             quantity: 1,
-            unitPrice: test.estimated_price,
+            unitPrice: 0, // Price comes from Railway API only
             type: "test" as const,
           });
         });
@@ -388,7 +388,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         name: medicine.name,
         dosage: medicine.amount,
         quantity: medicine.days,
-        unitPrice: medicine.unit_price,
+        unitPrice: 0, // Price comes from Railway API only
         type: "medication" as const,
       }));
 
