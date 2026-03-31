@@ -388,7 +388,7 @@ export const StepTwo = ({ formData, updateFormData, nextStep, prevStep, onSaveDr
         name: medicine.name,
         dosage: medicine.amount,
         quantity: medicine.days,
-        unitPrice: medicine.unit_price,
+        unitPrice: 0, // Price comes from Railway API only
         type: "medication" as const,
       }));
 
