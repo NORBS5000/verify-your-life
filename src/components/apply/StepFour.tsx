@@ -344,7 +344,7 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     className="flex-1 text-sm"
                   />
-                  {formData.bankStatement && formData.bankStatementPassword && (
+                  {formData.bankStatement && !hasAnalyzed && (
                     <Button
                       type="button"
                       variant="outline"
@@ -355,8 +355,10 @@ export const StepFour = ({ formData, updateFormData, nextStep, prevStep, onSaveD
                     >
                       {isAnalyzing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : formData.bankStatementPassword ? (
+                        "Unlock & Analyze"
                       ) : (
-                        "Unlock"
+                        "Analyze"
                       )}
                     </Button>
                   )}
