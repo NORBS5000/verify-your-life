@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 async function callAnalyzeAPI(body: Record<string, unknown>): Promise<Response> {
-  const response = await fetch("https://medical-scoring-api-2.onrender.com/analyze", {
+  const response = await fetch("https://web-production-4382.up.railway.app/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
