@@ -84,10 +84,7 @@ interface PricingAnalysisResponse {
   };
 }
 
-// Warm up Render API on component mount to reduce cold start delays
-useEffect(() => {
-  fetch("https://medical-scoring-api-2.onrender.com/docs", { method: "GET" }).catch(() => {});
-}, []);
+// warmUpRenderApi is called inside the component via useEffect
 
 // Fetch pricing from Render API for each medication
 const fetchPricingForMedications = async (
