@@ -55,8 +55,13 @@ export const useMpesaProcessing = () => {
       formData.append("loan_id", loanId);
       formData.append("password", password || "");
 
-      const response = await fetch(`${API_BASE_URL}/mpesa/extractmpesa`, {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/proxy-mpesa`, {
         method: "POST",
+        headers: {
+          "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          "authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
         body: formData,
       });
 
