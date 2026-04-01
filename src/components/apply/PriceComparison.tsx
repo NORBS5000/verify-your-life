@@ -1,4 +1,4 @@
-import { TrendingDown, Shield, Sparkles, Stethoscope } from "lucide-react";
+import { TrendingDown, Shield, Sparkles } from "lucide-react";
 
 interface PriceComparisonProps {
   retailPrice: number;
