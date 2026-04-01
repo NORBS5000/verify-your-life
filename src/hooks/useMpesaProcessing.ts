@@ -1,6 +1,5 @@
 import { useState } from "react";
-
-const API_BASE_URL = "https://orionapisalpha.onrender.com";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface MpesaTransaction {
   "Receipt No": string;
