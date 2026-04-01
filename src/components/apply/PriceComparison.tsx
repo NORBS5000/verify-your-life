@@ -1,13 +1,12 @@
-import { TrendingDown, Shield, Sparkles, Stethoscope } from "lucide-react";
+import { TrendingDown, Shield, Sparkles } from "lucide-react";
 
 interface PriceComparisonProps {
   retailPrice: number;
   covaPrice: number;
   show: boolean;
-  consultationCost?: number;
 }
 
-export const PriceComparison = ({ retailPrice, covaPrice, show, consultationCost = 0 }: PriceComparisonProps) => {
+export const PriceComparison = ({ retailPrice, covaPrice, show }: PriceComparisonProps) => {
   if (!show) return null;
 
   const savings = retailPrice - covaPrice;
@@ -21,23 +20,14 @@ export const PriceComparison = ({ retailPrice, covaPrice, show, consultationCost
       </div>
 
       <div className="space-y-4">
-        {/* Retail Price - Crossed Out */}
-        <div className="rounded-lg bg-destructive/5 p-3 space-y-1">
+        {/* Total Retail Cost - Crossed Out */}
+        <div className="rounded-lg bg-destructive/5 p-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Retail Cost</span>
+            <span className="text-sm text-muted-foreground">Total Cost</span>
             <span className="text-lg font-medium text-destructive line-through">
               KES {retailPrice.toLocaleString()}
             </span>
           </div>
-          {consultationCost > 0 && (
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Stethoscope className="h-3 w-3" />
-                Incl. consultation fee
-              </span>
-              <span>KES {consultationCost.toLocaleString()}</span>
-            </div>
-          )}
         </div>
 
         {/* COVA Price - Highlighted */}
