@@ -3,7 +3,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const API_BASE_URL = "https://web-production-4382.up.railway.app";
+const API_BASE_URL = "https://orionapisalpha.onrender.com";
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
