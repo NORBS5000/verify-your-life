@@ -1,6 +1,5 @@
 import { useState } from "react";
-
-const API_BASE_URL = "https://orionapisalpha.onrender.com";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface BankStatementFeatures {
   opening_balance: number;
@@ -96,8 +95,13 @@ export const useBankStatementProcessing = () => {
         formData.append("password", password);
       }
 
-      const response = await fetch(`${API_BASE_URL}/bank_statements/analyze`, {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/proxy-bank-statement`, {
         method: "POST",
+        headers: {
+          "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          "authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
         body: formData,
       });
 
