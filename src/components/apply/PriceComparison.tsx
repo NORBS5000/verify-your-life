@@ -4,10 +4,9 @@ interface PriceComparisonProps {
   retailPrice: number;
   covaPrice: number;
   show: boolean;
-  consultationCost?: number;
 }
 
-export const PriceComparison = ({ retailPrice, covaPrice, show, consultationCost = 0 }: PriceComparisonProps) => {
+export const PriceComparison = ({ retailPrice, covaPrice, show }: PriceComparisonProps) => {
   if (!show) return null;
 
   const savings = retailPrice - covaPrice;
